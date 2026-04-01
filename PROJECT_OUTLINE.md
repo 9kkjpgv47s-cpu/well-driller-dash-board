@@ -69,11 +69,12 @@
 | Path | Role |
 |------|------|
 | `PROJECT_OUTLINE.md` | This document. |
+| `apps/hub/` | Next.js **hub MVP**: scheduling + driller optimization UI, mock `/api/optimization` (canonical/analytics wiring later). |
 | `scripts/sync_dnr_data.sh` | Thin wrapper: run DNR fetch + statewide build (see env vars inside). |
 | `scripts/build_canonical_jsonl.py` | Read viewer **gz chunks** → **`data/out/canonical_wells.jsonl.gz`** for hub backends or analytics (provenance envelope). |
 | `data/out/` | Generated artifacts (gitignored). |
 
-The **map viewer** can remain the static Leaflet app in `DNR_Well_Viewer_Full_Demo`; the **hub** grows here as a separate app (framework TBD) consuming canonical exports and future APIs.
+The **map viewer** can remain the static Leaflet app in `DNR_Well_Viewer_Full_Demo`; the **hub** lives in `apps/hub` and will consume canonical exports and future APIs.
 
 ---
 
@@ -91,7 +92,7 @@ Each line in `canonical_wells.jsonl.gz` is one JSON object:
 ## 6. Milestones (suggested)
 
 1. **Data contract:** Stable canonical export + `sync_dnr_data` documented ✓ (in progress).
-2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”).
+2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* `apps/hub` MVP includes scheduling + optimization pages and a cached mock optimization API (small-team testing; scale via CDN + real analytics service).
 3. **Analytics service:** Precompute neighborhood summaries + outlier flags for chosen metrics.
 4. **Trip context tile:** Weather + traffic (keys from operator).
 5. **Notes:** PostGIS or equivalent + moderation hooks.
