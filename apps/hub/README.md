@@ -1,3 +1,19 @@
+# Driller Dashboard — hub (`apps/hub`)
+
+Next.js app for the field hub: scheduling, optimization demos, and job-scoped weather.
+
+## Scheduling + weather
+
+- **Crews:** 1–5 active (default 3), **weekdays only**, **1 or 2 jobs per crew per day** (no clock time slots).
+- **Horizons:** week grid and **month agenda** (far-out jobs).
+- **Emergency jobs:** quick insert; planner heuristics call out conflicts (e.g. emergency + long off-drive access).
+- **Weather:** `/api/weather` blends **Open-Meteo** (GFS + ECMWF runs) and **US NWS** hourly when the point is in the US. Responses are cached ~15 minutes server-side so revisiting morning vs afternoon can show fresher data.
+- **Job panel:** select any job for **hour-by-hour** precip probability, clouds, wind, WMO-style conditions, source list, and **“Things to consider”** driven by distance off the drive (30+ ft threshold), wind, POP, and emergency context.
+
+Timezone defaults to `America/Indiana/Indianapolis`; override via `JobWeatherPanel` later if you add a setting.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
