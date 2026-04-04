@@ -1,51 +1,82 @@
 import Link from "next/link";
 
+const cards = [
+  {
+    href: "/scheduling",
+    title: "Scheduling",
+    desc: "Week grid, demo jobs, and built job packets for the crew.",
+    cta: "Open scheduling",
+    accent: "from-sky-500 to-cyan-500",
+  },
+  {
+    href: "/build-job",
+    title: "Build job",
+    desc: "Drive address, offset, coordinates, notes, and a site photo.",
+    cta: "Create job packet",
+    accent: "from-indigo-500 to-violet-500",
+  },
+  {
+    href: "/optimization",
+    title: "Optimization",
+    desc: "Quick jobsite parameters and mock readiness scores.",
+    cta: "Run optimizer",
+    accent: "from-amber-500 to-orange-500",
+  },
+] as const;
+
 export default function HomePage() {
   return (
-    <div className="space-y-10">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+    <div className="space-y-12">
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-lg backdrop-blur-xl sm:p-10">
+        <div
+          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[var(--accent-soft)] blur-3xl"
+          aria-hidden
+        />
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
           Pre-job hub
-        </h1>
-        <p className="max-w-2xl text-zinc-600 dark:text-zinc-300">
-          Switch between trip scheduling and quick jobsite optimization hints.
-          Built for light concurrent use while testing; deployment can scale
-          reads with caching and a future analytics service.
         </p>
+        <h1 className="mt-3 max-w-xl text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">
+          Everything the crew needs before wheels roll.
+        </h1>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">
+          Schedule the week, build detailed jobsite packets, and skim
+          optimization hints. Built for a small test crew; static pages and
+          cached APIs stay light under load.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/build-job" className="btn-primary">
+            Build job
+          </Link>
+          <Link href="/scheduling" className="btn-secondary">
+            View schedule
+          </Link>
+        </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Link
-          href="/scheduling"
-          className="group rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-zinc-300 hover:shadow dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600"
-        >
-          <h2 className="text-lg font-semibold text-zinc-900 group-hover:text-sky-700 dark:text-zinc-50 dark:group-hover:text-sky-400">
-            Scheduling
-          </h2>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-            Week view and job list for the crew. Local demo data only until
-            connected to your systems.
-          </p>
-          <p className="mt-4 text-sm font-medium text-sky-700 dark:text-sky-400">
-            Open scheduling →
-          </p>
-        </Link>
-
-        <Link
-          href="/optimization"
-          className="group rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-zinc-300 hover:shadow dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600"
-        >
-          <h2 className="text-lg font-semibold text-zinc-900 group-hover:text-amber-700 dark:text-zinc-50 dark:group-hover:text-amber-400">
-            Driller optimization
-          </h2>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-            Jobsite parameters and sample neighborhood hints from the API
-            (mocked logic for now).
-          </p>
-          <p className="mt-4 text-sm font-medium text-amber-700 dark:text-amber-400">
-            Open optimization →
-          </p>
-        </Link>
+      <div className="grid gap-5 md:grid-cols-3">
+        {cards.map((c) => (
+          <Link
+            key={c.href}
+            href={c.href}
+            className="group card relative overflow-hidden p-6 transition hover:-translate-y-0.5"
+          >
+            <div
+              className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${c.accent} shadow-md`}
+              aria-hidden
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
+            </div>
+            <h2 className="text-lg font-semibold text-[var(--foreground)] group-hover:text-[var(--accent)]">
+              {c.title}
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+              {c.desc}
+            </p>
+            <p className="mt-5 text-sm font-semibold text-[var(--accent)]">
+              {c.cta} →
+            </p>
+          </Link>
+        ))}
       </div>
     </div>
   );

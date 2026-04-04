@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const nav = [
   { href: "/", label: "Home" },
   { href: "/scheduling", label: "Scheduling" },
+  { href: "/build-job", label: "Build job" },
   { href: "/optimization", label: "Optimization" },
 ] as const;
 
@@ -13,18 +14,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--background)]">
-      <header className="border-b border-black/10 dark:border-white/10">
+    <div className="app-backdrop flex min-h-screen flex-col">
+      <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          <Link href="/" className="group block shrink-0">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
               Driller Dashboard
             </p>
-            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <p className="mt-0.5 text-lg font-semibold tracking-tight text-[var(--foreground)] transition group-hover:text-[var(--accent)]">
               Field hub
             </p>
-          </div>
-          <nav className="flex flex-wrap gap-2" aria-label="Primary">
+          </Link>
+          <nav
+            className="flex flex-wrap items-center gap-1.5 sm:justify-end"
+            aria-label="Primary"
+          >
             {nav.map(({ href, label }) => {
               const active =
                 href === "/"
@@ -34,11 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={href}
                   href={href}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                      : "bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
-                  }`}
+                  className={`nav-pill ${active ? "nav-pill-active" : "nav-pill-idle"}`}
                 >
                   {label}
                 </Link>
@@ -47,12 +47,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-        {children}
-      </main>
-      <footer className="border-t border-black/10 px-4 py-6 text-center text-xs text-zinc-500 dark:border-white/10 dark:text-zinc-400">
-        MVP for a small crew (about 10 people). Official registry data and
-        community notes stay separate when wired to live sources.
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">{children}</main>
+      <footer className="border-t border-[var(--border)] px-4 py-8">
+        <p className="mx-auto max-w-6xl text-center text-xs leading-relaxed text-[var(--muted)]">
+          MVP for a small crew. Official registry data and community-sourced
+          notes stay on separate surfaces when integrated.
+        </p>
       </footer>
     </div>
   );

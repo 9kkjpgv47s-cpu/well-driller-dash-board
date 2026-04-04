@@ -69,7 +69,7 @@
 | Path | Role |
 |------|------|
 | `PROJECT_OUTLINE.md` | This document. |
-| `apps/hub/` | Next.js **hub MVP**: scheduling + driller optimization UI, mock `/api/optimization` (canonical/analytics wiring later). |
+| `apps/hub/` | Next.js **hub MVP**: scheduling, **Build job** (coords, notes, photo upload), driller **job brief** with mock nearby-well stats, mock `/api/optimization` (DB + canonical analytics later). |
 | `scripts/sync_dnr_data.sh` | Thin wrapper: run DNR fetch + statewide build (see env vars inside). |
 | `scripts/build_canonical_jsonl.py` | Read viewer **gz chunks** → **`data/out/canonical_wells.jsonl.gz`** for hub backends or analytics (provenance envelope). |
 | `data/out/` | Generated artifacts (gitignored). |
@@ -92,7 +92,7 @@ Each line in `canonical_wells.jsonl.gz` is one JSON object:
 ## 6. Milestones (suggested)
 
 1. **Data contract:** Stable canonical export + `sync_dnr_data` documented ✓ (in progress).
-2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* `apps/hub` MVP includes scheduling + optimization pages and a cached mock optimization API (small-team testing; scale via CDN + real analytics service).
+2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* `apps/hub` MVP includes scheduling, job packet capture (`/build-job`), driller brief (`/jobs/[id]`) with mock neighborhood wells, and a cached mock optimization API (in-memory jobs reset on deploy; replace with DB + canonical analytics).
 3. **Analytics service:** Precompute neighborhood summaries + outlier flags for chosen metrics.
 4. **Trip context tile:** Weather + traffic (keys from operator).
 5. **Notes:** PostGIS or equivalent + moderation hooks.
