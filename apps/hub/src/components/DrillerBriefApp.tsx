@@ -5,12 +5,21 @@ import { parseDispatchEmail } from "@/lib/dispatch-parse";
 import type { DispatchParseResult } from "@/lib/dispatch-parse";
 import { JobBriefView } from "@/components/JobBriefView";
 
-const EXAMPLE = `Subject: Dispatch — Smith domestic — Mon 4/7
+const EXAMPLE = `Dispatch
+4/6 8:00 AM
+Megan Despain
+Near 7935 Private Road 435 West, Edinburgh, IN 46124 USA
+Foundation phase as of 3/30
 
-Job site: 4821 Oak Valley Dr, Carmel, IN 46032
-GPS: 39.978421, -86.124883
+39.407951,-85.862947
 
-Enter through side gate; septic on north side of house. Customer requests call 30 min out.`;
+1/2 HP
+180ft off drive
+Back fill is around the flag but we can access it
+
+Use coordinates address for getting to job site
+
+(812) 350-0851`;
 
 export function DrillerBriefApp() {
   const [raw, setRaw] = useState("");
@@ -73,10 +82,21 @@ export function DrillerBriefApp() {
           </summary>
           <ul className="mt-3 list-inside list-disc space-y-2 text-[var(--muted)]">
             <li>
-              Put coordinates as decimals, e.g.{" "}
+              Coordinates can be tight on the comma:{" "}
               <code className="rounded bg-[var(--surface-solid)] px-1 py-0.5 font-mono text-xs">
-                39.978421, -86.124883
+                39.407951,-85.862947
               </code>
+            </li>
+            <li>
+              Addresses can start with{" "}
+              <code className="rounded bg-[var(--surface-solid)] px-1 py-0.5 font-mono text-xs">
+                Near …
+              </code>{" "}
+              or include{" "}
+              <code className="rounded bg-[var(--surface-solid)] px-1 py-0.5 font-mono text-xs">
+                Private Road
+              </code>
+              .
             </li>
             <li>
               Or label them:{" "}

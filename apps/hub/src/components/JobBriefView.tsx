@@ -1,7 +1,10 @@
 "use client";
 
 import type { DispatchParseResult } from "@/lib/dispatch-parse";
-import { mapsUrlForDispatch } from "@/lib/dispatch-parse";
+import {
+  mapsUrlAddressOnly,
+  mapsUrlForDispatch,
+} from "@/lib/dispatch-parse";
 import { mockAreaStats, mockNearbyWells } from "@/lib/nearby-wells-mock";
 
 type Props = {
@@ -25,6 +28,10 @@ export function JobBriefView({ parsed }: Props) {
     lat !== null && lon !== null ? mockNearbyWells(lat, lon, 6) : [];
   const stats = mockAreaStats(wells);
   const mapsUrl = mapsUrlForDispatch(parsed);
+  const mapsAddressUrl =
+    parsed.locationSource === "coordinates" && parsed.address
+      ? mapsUrlAddressOnly(parsed.address)
+      : null;
 
   const heading =
     parsed.title ?? "Job brief";
@@ -50,16 +57,30 @@ export function JobBriefView({ parsed }: Props) {
                   : "No location"}
           </p>
         </div>
-        {mapsUrl ? (
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary shrink-0 self-start"
-          >
-            Open in Maps
-          </a>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {mapsUrl ? (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary shrink-0 self-start"
+            >
+              {parsed.locationSource === "coordinates"
+                ? "Open GPS in Maps"
+                : "Open in Maps"}
+            </a>
+          ) : null}
+          {mapsAddressUrl ? (
+            <a
+              href={mapsAddressUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary shrink-0 self-start"
+            >
+              Open address in Maps
+            </a>
+          ) : null}
+        </div>
       </div>
 
       {parsed.warnings.length > 0 ? (
@@ -73,7 +94,69 @@ export function JobBriefView({ parsed }: Props) {
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-2">
+        <section className="card p-6">
+          <h3 className="text-sm font-semibold text-[var(--foreground)]">
+            Job details
+          </h3>
+          <dl className="mt-4 space-y-3 text-sm">
+            {parsed.scheduleLine ? (
+              <div>
+                <dt className="text-xs font-medium text-[var(--muted)]">
+                  Schedule
+                </dt>
+                <dd className="mt-1 text-[var(--foreground)]">
+                  {parsed.scheduleLine}
+                </dd>
+              </div>
+            ) : null}
+            {parsed.contactName ? (
+              <div>
+                <dt className="text-xs font-medium text-[var(--muted)]">
+                  Contact
+                </dt>
+                <dd className="mt-1 text-[var(--foreground)]">
+                  {parsed.contactName}
+                </dd>
+              </div>
+            ) : null}
+            {parsed.phone ? (
+              <div>
+                <dt className="text-xs font-medium text-[var(--muted)]">
+                  Phone
+                </dt>
+                <dd className="mt-1">
+                  <a
+                    href={`tel:${parsed.phone.replace(/\D/g, "")}`}
+                    className="font-medium text-[var(--accent)] hover:underline"
+                  >
+                    {parsed.phone}
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+            {parsed.pumpHp ? (
+              <div>
+                <dt className="text-xs font-medium text-[var(--muted)]">Pump</dt>
+                <dd className="mt-1 text-[var(--foreground)]">
+                  {parsed.pumpHp}
+                </dd>
+              </div>
+            ) : null}
+            {parsed.distanceOffDrive ? (
+              <div>
+                <dt className="text-xs font-medium text-[var(--muted)]">
+                  Rig path
+                </dt>
+                <dd className="mt-1 text-[var(--foreground)]">
+                  {parsed.distanceOffDrive}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </section>
+
         <section className="card p-6">
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
             Location
@@ -95,8 +178,15 @@ export function JobBriefView({ parsed }: Props) {
                   : "—"}
               </dd>
             </div>
+            {parsed.locationSource === "coordinates" && parsed.address ? (
+              <p className="text-xs text-[var(--muted)]">
+                Dispatch says to use GPS for the jobsite pin; address is shown
+                for context and mail-style navigation if needed.
+              </p>
+            ) : null}
           </dl>
         </section>
+        </div>
 
         <section className="card p-6">
           <h3 className="text-sm font-semibold text-[var(--foreground)]">
