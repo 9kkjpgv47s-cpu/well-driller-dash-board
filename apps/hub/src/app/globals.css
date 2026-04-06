@@ -192,6 +192,23 @@ body {
   color: var(--foreground);
 }
 
+/* Leaflet job pin (divIcon) */
+.jobsite-pin {
+  background: none !important;
+  border: none !important;
+}
+
+.jobsite-pin-inner {
+  width: 24px;
+  height: 24px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: linear-gradient(145deg, #f97316, #ea580c);
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  margin: 0 auto;
+}
+
 .nav-pill {
   border-radius: 9999px;
   padding: 0.5rem 1rem;

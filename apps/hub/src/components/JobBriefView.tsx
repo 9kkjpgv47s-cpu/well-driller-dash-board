@@ -1,11 +1,27 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import type { DispatchParseResult } from "@/lib/dispatch-parse";
 import {
   mapsUrlAddressOnly,
   mapsUrlForDispatch,
 } from "@/lib/dispatch-parse";
 import { mockAreaStats, mockNearbyWells } from "@/lib/nearby-wells-mock";
+import { wellsWithMapPositions } from "@/lib/nearby-wells-map";
+
+const JobsiteMap = dynamic(
+  () =>
+    import("@/components/JobsiteMap").then((m) => ({ default: m.JobsiteMap })),
+  { ssr: false, loading: () => <MapLoading /> },
+);
+
+function MapLoading() {
+  return (
+    <div className="card flex min-h-[320px] items-center justify-center p-8">
+      <p className="text-sm text-[var(--muted)]">Loading map…</p>
+    </div>
+  );
+}
 
 type Props = {
   parsed: DispatchParseResult;
@@ -26,6 +42,8 @@ export function JobBriefView({ parsed }: Props) {
   const lon = parsed.lon;
   const wells =
     lat !== null && lon !== null ? mockNearbyWells(lat, lon, 6) : [];
+  const wellsOnMap =
+    lat !== null && lon !== null ? wellsWithMapPositions(lat, lon, wells) : [];
   const stats = mockAreaStats(wells);
   const mapsUrl = mapsUrlForDispatch(parsed);
   const mapsAddressUrl =
@@ -197,6 +215,8 @@ export function JobBriefView({ parsed }: Props) {
           </pre>
         </section>
       </div>
+
+      <JobsiteMap parsed={parsed} wellsOnMap={wellsOnMap} />
 
       <section className="card p-6 sm:p-8">
         <div>

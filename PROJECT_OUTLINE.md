@@ -69,7 +69,7 @@
 | Path | Role |
 |------|------|
 | `PROJECT_OUTLINE.md` | This document. |
-| `apps/hub/` | Next.js **driller-only MVP**: single page — paste **dispatch email** text; heuristic address/lat-lon extract → on-screen **job brief** + mock nearby-well stats (Google Gmail/Geocoding later; canonical analytics later). |
+| `apps/hub/` | Next.js **driller-only MVP**: paste dispatch → brief + **Leaflet** map with **Search job site** (GPS first, Nominatim geocode for address fallback via `api/geocode`); mock wells on map (Google Gmail later; canonical analytics later). |
 | `scripts/sync_dnr_data.sh` | Thin wrapper: run DNR fetch + statewide build (see env vars inside). |
 | `scripts/build_canonical_jsonl.py` | Read viewer **gz chunks** → **`data/out/canonical_wells.jsonl.gz`** for hub backends or analytics (provenance envelope). |
 | `data/out/` | Generated artifacts (gitignored). |
