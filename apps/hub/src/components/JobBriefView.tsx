@@ -6,6 +6,7 @@ import {
   mapsUrlAddressOnly,
   mapsUrlForDispatch,
 } from "@/lib/dispatch-parse";
+import { directionsLinksForDispatch } from "@/lib/navigation-links";
 import { mockAreaStats, mockNearbyWells } from "@/lib/nearby-wells-mock";
 import { wellsWithMapPositions } from "@/lib/nearby-wells-map";
 
@@ -50,55 +51,96 @@ export function JobBriefView({ parsed }: Props) {
     parsed.locationSource === "coordinates" && parsed.address
       ? mapsUrlAddressOnly(parsed.address)
       : null;
+  const directions = directionsLinksForDispatch(parsed);
 
   const heading =
     parsed.title ?? "Job brief";
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
-            Driller brief
-          </p>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
-            {heading}
-          </h2>
-          <p className="mt-2 text-xs text-[var(--muted)]">
-            From pasted dispatch ·{" "}
-            {parsed.locationSource === "coordinates"
-              ? "GPS from text"
-              : parsed.locationSource === "address_only"
-                ? "Address only (stub coords for mock wells)"
-                : parsed.locationSource === "stub"
-                  ? "Stub location"
-                  : "No location"}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {mapsUrl ? (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary shrink-0 self-start"
-            >
+      <div className="space-y-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
+              Driller brief
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
+              {heading}
+            </h2>
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              From pasted dispatch ·{" "}
               {parsed.locationSource === "coordinates"
-                ? "Open GPS in Maps"
-                : "Open in Maps"}
-            </a>
-          ) : null}
-          {mapsAddressUrl ? (
-            <a
-              href={mapsAddressUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary shrink-0 self-start"
-            >
-              Open address in Maps
-            </a>
-          ) : null}
+                ? "GPS from text"
+                : parsed.locationSource === "address_only"
+                  ? "Address only (stub coords for mock wells)"
+                  : parsed.locationSource === "stub"
+                    ? "Stub location"
+                    : "No location"}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {mapsUrl ? (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary shrink-0 self-start"
+              >
+                {parsed.locationSource === "coordinates"
+                  ? "Open GPS in Maps"
+                  : "Open in Maps"}
+              </a>
+            ) : null}
+            {mapsAddressUrl ? (
+              <a
+                href={mapsAddressUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary shrink-0 self-start"
+              >
+                Open address in Maps
+              </a>
+            ) : null}
+          </div>
         </div>
+        {directions ? (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)]/60 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+              Directions (opens app or browser)
+            </p>
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              Starts navigation to this jobsite in the app you choose. Your
+              phone supplies the starting point. In-app turn-by-step routing
+              inside this page needs a Maps API later.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href={directions.google}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-xs"
+              >
+                Google Maps
+              </a>
+              <a
+                href={directions.apple}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-xs"
+              >
+                Apple Maps
+              </a>
+              <a
+                href={directions.waze}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-xs"
+              >
+                Waze
+              </a>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {parsed.warnings.length > 0 ? (
