@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Driller Dashboard — Hub",
+  title: "Driller brief — Field outline",
   description:
-    "Pre-departure hub: scheduling and jobsite optimization (MVP).",
+    "Paste dispatch text to build a jobsite brief. No API keys required for MVP.",
 };
 
 export default function RootLayout({
@@ -29,7 +28,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <AppShell>{children}</AppShell>
+        <div className="app-backdrop min-h-screen">
+          <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14">{children}</div>
+          <footer className="border-t border-[var(--border)] px-4 py-8">
+            <p className="mx-auto max-w-4xl text-center text-xs leading-relaxed text-[var(--muted)]">
+              MVP: paste-only parsing. Official registry data and community
+              notes stay separate when wired to live sources.
+            </p>
+          </footer>
+        </div>
       </body>
     </html>
   );
