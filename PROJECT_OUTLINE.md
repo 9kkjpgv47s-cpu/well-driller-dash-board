@@ -69,7 +69,7 @@
 | Path | Role |
 |------|------|
 | `PROJECT_OUTLINE.md` | This document. |
-| `apps/hub/` | Next.js **hub MVP**: scheduling + driller optimization UI, mock `/api/optimization` (canonical/analytics wiring later). |
+| `apps/hub/` | Next.js **driller-only MVP**: paste dispatch → brief + **Leaflet** map with **Search job site** (GPS first, Nominatim geocode for address fallback via `api/geocode`); mock wells on map (Google Gmail later; canonical analytics later). |
 | `scripts/sync_dnr_data.sh` | Thin wrapper: run DNR fetch + statewide build (see env vars inside). |
 | `scripts/build_canonical_jsonl.py` | Read viewer **gz chunks** → **`data/out/canonical_wells.jsonl.gz`** for hub backends or analytics (provenance envelope). |
 | `data/out/` | Generated artifacts (gitignored). |
@@ -92,7 +92,7 @@ Each line in `canonical_wells.jsonl.gz` is one JSON object:
 ## 6. Milestones (suggested)
 
 1. **Data contract:** Stable canonical export + `sync_dnr_data` documented ✓ (in progress).
-2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* `apps/hub` MVP includes scheduling + optimization pages and a cached mock optimization API (small-team testing; scale via CDN + real analytics service).
+2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* `apps/hub` is a **single driller page**: paste-only dispatch parsing (`dispatch-parse.ts`), immediate brief with mock neighborhood wells; no office/scheduling routes. Next: optional Google APIs for email ingest + geocoding when keys exist; then real well stats from canonical export.
 3. **Analytics service:** Precompute neighborhood summaries + outlier flags for chosen metrics.
 4. **Trip context tile:** Weather + traffic (keys from operator).
 5. **Notes:** PostGIS or equivalent + moderation hooks.
