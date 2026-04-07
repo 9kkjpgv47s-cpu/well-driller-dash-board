@@ -69,12 +69,12 @@
 | Path | Role |
 |------|------|
 | `PROJECT_OUTLINE.md` | This document. |
-| `apps/hub/` | Next.js **driller-only MVP**: paste dispatch → brief + **Leaflet** map with **Search job site** (GPS first, Nominatim geocode for address fallback via `api/geocode`); mock wells on map (Google Gmail later; canonical analytics later). |
+| Repo root (`package.json`, `src/`) | Next.js **driller-only MVP**: paste dispatch → brief + **Leaflet** map with **Search job site** (GPS first, Nominatim geocode via `api/geocode`); mock wells on map. Deploy from repo root on Vercel (Root Directory `.`). |
 | `scripts/sync_dnr_data.sh` | Thin wrapper: run DNR fetch + statewide build (see env vars inside). |
 | `scripts/build_canonical_jsonl.py` | Read viewer **gz chunks** → **`data/out/canonical_wells.jsonl.gz`** for hub backends or analytics (provenance envelope). |
 | `data/out/` | Generated artifacts (gitignored). |
 
-The **map viewer** can remain the static Leaflet app in `DNR_Well_Viewer_Full_Demo`; the **hub** lives in `apps/hub` and will consume canonical exports and future APIs.
+The **map viewer** can remain the static Leaflet app in `DNR_Well_Viewer_Full_Demo`; the **hub** is the Next.js app at the repo root and will consume canonical exports and future APIs.
 
 ---
 
@@ -92,7 +92,7 @@ Each line in `canonical_wells.jsonl.gz` is one JSON object:
 ## 6. Milestones (suggested)
 
 1. **Data contract:** Stable canonical export + `sync_dnr_data` documented ✓ (in progress).
-2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* `apps/hub` is a **single driller page**: paste-only dispatch parsing (`dispatch-parse.ts`), immediate brief with mock neighborhood wells; no office/scheduling routes. Next: optional Google APIs for email ingest + geocoding when keys exist; then real well stats from canonical export.
+2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* **single driller page** at repo root: paste-only dispatch parsing, brief with mock neighborhood wells + Leaflet. Next: optional Google APIs; then real well stats from canonical export.
 3. **Analytics service:** Precompute neighborhood summaries + outlier flags for chosen metrics.
 4. **Trip context tile:** Weather + traffic (keys from operator).
 5. **Notes:** PostGIS or equivalent + moderation hooks.

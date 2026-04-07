@@ -4,6 +4,19 @@ Pre-departure hub for water-well drillers: location context, nearby well intelli
 
 **Start here:** [`PROJECT_OUTLINE.md`](./PROJECT_OUTLINE.md) — product vision, architecture, data pipeline, and build milestones.
 
-**Hub (MVP UI):** [`apps/hub/`](./apps/hub/) — single driller page: paste dispatch text → brief. Local dev: `cd apps/hub && npm install && npm run dev`.
+## Hub (Next.js — Vercel)
 
-**Vercel:** Set the project **Root Directory** to **`apps/hub`** (required so Next.js is detected). The app includes `apps/hub/vercel.json` with `"framework": "nextjs"`.
+The **driller brief** app lives at the **repository root** (`package.json`, `src/app/`, …) so Vercel’s default **Root Directory** **`.`** installs dependencies and runs `next build` correctly.
+
+**Local dev:**
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+**Vercel:** Leave **Root Directory** empty or **`.`**. Framework: Next.js (or use `vercel.json`). Production branch: **`main`**.
+
+If you previously set Root Directory to `apps/hub`, **clear it** after this layout change.
