@@ -4,11 +4,11 @@ Next.js **single-page driller brief**: paste dispatch text → parsed location, 
 
 ## Vercel
 
-The repo root includes a **`package.json` with `next` in `dependencies`** and a **`vercel.json`** so the default **Root Directory** (`.`) works: install + build run from the repo root and delegate to `apps/hub`.
+1. **Root Directory:** **`apps/hub`** (Settings → General). Vercel only detects Next.js in the folder that contains `package.json` + `app/`.
+2. **Framework preset:** Next.js (or rely on `vercel.json` in this folder).
+3. Production branch: **`main`**.
 
-Optional: you can still set **Root Directory** to `apps/hub` and clear the root `buildCommand` override if you prefer.
-
-Production branch: **`main`**. **Preview** deploys follow the branch you push.
+If you see “No Next.js version detected,” the Root Directory is almost always still **`.`** — change it to **`apps/hub`** and redeploy.
 
 `GET /api/geocode` calls OpenStreetMap Nominatim from the server; ensure outbound HTTPS is allowed (default on Vercel).
 
