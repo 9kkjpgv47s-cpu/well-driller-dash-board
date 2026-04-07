@@ -4,10 +4,11 @@ Next.js **single-page driller brief**: paste dispatch text → parsed location, 
 
 ## Vercel
 
-1. Import this Git repository.
-2. Set **Root Directory** to `apps/hub` (the Next.js app is not at the repo root).
-3. Production branch: **`main`** (merge feature work into `main` so Production deploys pick it up).
-4. **Preview** deploys use the branch you push; **Production** uses the production branch only.
+The repo root includes a **`package.json` with `next` in `dependencies`** and a **`vercel.json`** so the default **Root Directory** (`.`) works: install + build run from the repo root and delegate to `apps/hub`.
+
+Optional: you can still set **Root Directory** to `apps/hub` and clear the root `buildCommand` override if you prefer.
+
+Production branch: **`main`**. **Preview** deploys follow the branch you push.
 
 `GET /api/geocode` calls OpenStreetMap Nominatim from the server; ensure outbound HTTPS is allowed (default on Vercel).
 
