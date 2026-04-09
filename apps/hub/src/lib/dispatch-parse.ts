@@ -22,6 +22,8 @@ export type DispatchParseResult = {
   phone: string | null;
   /** e.g. "1/2 HP" */
   pumpHp: string | null;
+  /** e.g. "5\" well" */
+  wellSize: string | null;
   /** e.g. "180 ft off drive" */
   distanceOffDrive: string | null;
 };
@@ -89,8 +91,9 @@ export function extractCoordinates(text: string): { lat: number; lon: number } |
   return null;
 }
 
+/** Case-insensitive so "Frontage Road", "FRONTAGE RD", etc. match */
 const STREET_HINT =
-  /\d.+\b(?:st|street|rd|road|ave|avenue|dr|drive|ln|lane|hwy|highway|ct|court|blvd|boulevard|way|cir|circle|pkwy|parkway|route|private\s+road)\b/i;
+  /\d.+\b(?:st|street|rd|road|ave|avenue|dr|drive|ln|lane|hwy|highway|ct|court|blvd|boulevard|way|cir|circle|pkwy|parkway|route|private\s+road|frontage)\b/i;
 
 export function extractAddress(text: string): string | null {
   const lines = text
@@ -164,11 +167,20 @@ export function extractPhone(text: string): string | null {
 
 export function extractPumpHp(text: string): string | null {
   const m =
-    /\b(\d+\s*\/\s*\d+\s*HP|\d+\s*\/\s*\d+\s*hp|\d+\s*HP|\d+\s*hp)\b/i.exec(
+    /\b(\d+\s*\/\s*\d+\s*HP?|\d+\s*\/\s*\d+\s*hp|\d+\s*HP|\d+\s*hp)\b/i.exec(
       text,
     );
   if (!m?.[1]) return null;
   return m[1].replace(/\s+/g, " ").trim();
+}
+
+export function extractWellSize(text: string): string | null {
+  const m =
+    /\b(\d+(?:\.\d+)?)\s*(?:\"|″|''|in(?:ch(?:es)?)?)\s*well\b/i.exec(text);
+  if (m?.[1]) return `${m[1]}" well`;
+  const m2 = /\b(\d+(?:\.\d+)?)\s*inch\s+well\b/i.exec(text);
+  if (m2?.[1]) return `${m2[1]}" well`;
+  return null;
 }
 
 export function extractDistanceOffDrive(text: string): string | null {
@@ -222,7 +234,11 @@ export function stubCoordsFromString(seed: string): { lat: number; lon: number }
 }
 
 export function parseDispatchEmail(raw: string): DispatchParseResult {
-  const text = raw.trim();
+  const text = raw
+    .replace(/\u00a0/g, " ")
+    .replace(/\u202f/g, " ")
+    .replace(/\u200b|\u200c|\u200d|\ufeff/g, "")
+    .trim();
   const warnings: string[] = [];
   const lines = text
     .split(/\r?\n/)
@@ -242,6 +258,7 @@ export function parseDispatchEmail(raw: string): DispatchParseResult {
     : null;
   const phone = text ? extractPhone(text) : null;
   const pumpHp = text ? extractPumpHp(text) : null;
+  const wellSize = text ? extractWellSize(text) : null;
   const distanceOffDrive = text ? extractDistanceOffDrive(text) : null;
 
   let lat: number | null = coords?.lat ?? null;
@@ -285,6 +302,7 @@ export function parseDispatchEmail(raw: string): DispatchParseResult {
     contactName,
     phone,
     pumpHp,
+    wellSize,
     distanceOffDrive,
   };
 }

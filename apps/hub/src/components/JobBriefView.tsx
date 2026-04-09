@@ -204,6 +204,14 @@ export function JobBriefView({ parsed }: Props) {
                 </dd>
               </div>
             ) : null}
+            {parsed.wellSize ? (
+              <div>
+                <dt className="text-xs font-medium text-[var(--muted)]">Well</dt>
+                <dd className="mt-1 text-[var(--foreground)]">
+                  {parsed.wellSize}
+                </dd>
+              </div>
+            ) : null}
             {parsed.distanceOffDrive ? (
               <div>
                 <dt className="text-xs font-medium text-[var(--muted)]">
