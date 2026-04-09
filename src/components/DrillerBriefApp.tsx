@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { parseDispatchEmail } from "@/lib/dispatch-parse";
 import type { DispatchParseResult } from "@/lib/dispatch-parse";
 import { JobBriefView } from "@/components/JobBriefView";
@@ -24,20 +24,33 @@ Use coordinates address for getting to job site
 export function DrillerBriefApp() {
   const [raw, setRaw] = useState("");
   const [parsed, setParsed] = useState<DispatchParseResult | null>(null);
+  const [emptyHint, setEmptyHint] = useState(false);
+  const briefAnchorRef = useRef<HTMLDivElement>(null);
 
   const generate = useCallback(() => {
+    setEmptyHint(false);
+    if (!raw.trim()) {
+      setParsed(null);
+      setEmptyHint(true);
+      return;
+    }
     setParsed(parseDispatchEmail(raw));
   }, [raw]);
 
+  useEffect(() => {
+    if (parsed?.notes.trim()) {
+      briefAnchorRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [parsed]);
+
   const fillExample = useCallback(() => {
+    setEmptyHint(false);
     setRaw(EXAMPLE);
     setParsed(parseDispatchEmail(EXAMPLE));
   }, []);
-
-  const brief = useMemo(() => {
-    if (!parsed) return null;
-    return <JobBriefView parsed={parsed} />;
-  }, [parsed]);
 
   return (
     <div className="space-y-10">
@@ -63,7 +76,10 @@ export function DrillerBriefApp() {
           <span className="sr-only">Dispatch text</span>
           <textarea
             value={raw}
-            onChange={(e) => setRaw(e.target.value)}
+            onChange={(e) => {
+              setRaw(e.target.value);
+              setEmptyHint(false);
+            }}
             placeholder="Paste dispatch email here…"
             rows={12}
             className="input-field min-h-[200px] resize-y font-mono text-sm leading-relaxed"
@@ -75,6 +91,16 @@ export function DrillerBriefApp() {
             Generate job brief
           </button>
         </div>
+
+        {emptyHint ? (
+          <p
+            className="mt-3 text-sm text-amber-800 dark:text-amber-200"
+            role="status"
+          >
+            Paste your dispatch text in the box above, then tap{" "}
+            <strong>Generate job brief</strong> again.
+          </p>
+        ) : null}
 
         <details className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-sm">
           <summary className="cursor-pointer font-medium text-[var(--foreground)]">
@@ -94,7 +120,7 @@ export function DrillerBriefApp() {
               </code>{" "}
               or include{" "}
               <code className="rounded bg-[var(--surface-solid)] px-1 py-0.5 font-mono text-xs">
-                Private Road
+                Frontage Road
               </code>
               .
             </li>
@@ -115,7 +141,9 @@ export function DrillerBriefApp() {
         </details>
       </section>
 
-      {brief}
+      <div ref={briefAnchorRef} className="scroll-mt-6">
+        {parsed ? <JobBriefView parsed={parsed} /> : null}
+      </div>
     </div>
   );
 }
