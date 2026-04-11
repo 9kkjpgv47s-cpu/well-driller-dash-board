@@ -60,7 +60,7 @@
 | Per-well HTML | DNR well **report pages** (parsed table) | Optional gap-fill when logs missing; same parsing idea as `api/dnr-report.js`. |
 | Pump enrich | Optional `dnr_pump_rates.csv` | Merge pump rates by ref. |
 
-**Authoritative ETL** today lives in **`DNR_Well_Viewer_Full_Demo`**: `fetch_dnr_wells.py` → `dnr_wells_full.csv` → `build_statewide_data.py` → `dnr_wells_chunk_*.csv.gz`.
+**Authoritative ETL** today lives in a **separate DNR viewer repository** (your checkout; set `DNR_VIEWER_ROOT` / `WELL_VIEWER_ROOT`): `fetch_dnr_wells.py` → `dnr_wells_full.csv` → `build_statewide_data.py` → `dnr_wells_chunk_*.csv.gz`.
 
 ---
 
@@ -69,12 +69,12 @@
 | Path | Role |
 |------|------|
 | `PROJECT_OUTLINE.md` | This document. |
-| Repo root (`package.json`, `src/`) | Next.js **driller-only MVP**: paste dispatch → brief + **Leaflet** map with **Search job site** (GPS first, Nominatim geocode via `api/geocode`); mock wells on map. Deploy from repo root on Vercel (Root Directory `.`). |
+| `apps/hub/` | Next.js **hub MVP**: scheduling + driller optimization UI, mock `/api/optimization` (canonical/analytics wiring later). |
 | `scripts/sync_dnr_data.sh` | Thin wrapper: run DNR fetch + statewide build (see env vars inside). |
 | `scripts/build_canonical_jsonl.py` | Read viewer **gz chunks** → **`data/out/canonical_wells.jsonl.gz`** for hub backends or analytics (provenance envelope). |
 | `data/out/` | Generated artifacts (gitignored). |
 
-The **map viewer** can remain the static Leaflet app in `DNR_Well_Viewer_Full_Demo`; the **hub** is the Next.js app at the repo root and will consume canonical exports and future APIs.
+The **map viewer** is a **static Leaflet app** shipped from the viewer repo; the **hub** (`apps/hub`) **embeds** a copy under `public/well-viewer/` (sync via `scripts/sync-well-viewer-into-hub.sh` with `WELL_VIEWER_ROOT` set) and will consume canonical exports and future APIs.
 
 ---
 
@@ -92,7 +92,7 @@ Each line in `canonical_wells.jsonl.gz` is one JSON object:
 ## 6. Milestones (suggested)
 
 1. **Data contract:** Stable canonical export + `sync_dnr_data` documented ✓ (in progress).
-2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* **single driller page** at repo root: paste-only dispatch parsing, brief with mock neighborhood wells + Leaflet. Next: optional Google APIs; then real well stats from canonical export.
+2. **Hub shell:** App with auth placeholder, empty customizable grid, one real tile (e.g. “wells in radius”). *Progress:* `apps/hub` MVP includes scheduling + optimization pages and a cached mock optimization API (small-team testing; scale via CDN + real analytics service).
 3. **Analytics service:** Precompute neighborhood summaries + outlier flags for chosen metrics.
 4. **Trip context tile:** Weather + traffic (keys from operator).
 5. **Notes:** PostGIS or equivalent + moderation hooks.
@@ -108,4 +108,4 @@ API keys, Vercel/hosting, maps, weather, OAuth — **you** create projects and i
 ## 8. How to re-use this doc in a new chat
 
 Say: **“Read `Driller_Dashboard/PROJECT_OUTLINE.md` and continue from milestone X.”**  
-Also point to **`DNR_Well_Viewer_Full_Demo`** for viewer-specific bugs and chunk format changes.
+Also point to your **DNR viewer repository** (chunk format, `build_statewide_data.py`) for viewer-specific bugs.

@@ -2,21 +2,20 @@ data/out/
 *.jsonl
 *.jsonl.gz
 .DS_Store
+
+# DNR statewide export: plain CSV is ~106 MB (over GitHub’s 100 MB cap).
+# Commit dnr_wells_full.csv.gz at repo root for a self-contained clone (~22 MB; same export as the viewer repo).
+# Optional local .csv from fetch wins at runtime when both exist.
+dnr_wells_full.csv
+dnr_wells_slim.csv
+dnr_wells_slim.csv.gz
 .venv/
 venv/
 __pycache__/
 *.pyc
 
-# Next.js (hub at repo root)
-node_modules/
-.next/
-out/
-build/
-*.tsbuildinfo
-next-env.d.ts
-.env*
-.vercel
+# Next.js (if build artifacts appear at repo root paths)
+apps/hub/.next/
 
-# user-uploaded site photos (dev MVP)
-public/uploads/*
-!public/uploads/.gitkeep
+# Cursor IDE (local only)
+.cursor/

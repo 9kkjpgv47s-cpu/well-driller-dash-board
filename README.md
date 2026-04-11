@@ -2,21 +2,26 @@
 
 Pre-departure hub for water-well drillers: location context, nearby well intelligence, and (later) community notes.
 
-**Start here:** [`PROJECT_OUTLINE.md`](./PROJECT_OUTLINE.md) — product vision, architecture, data pipeline, and build milestones.
+## Easiest hub path after `git clone` (no Homebrew, no Git LFS for DNR data)
 
-## Hub (Next.js — Vercel)
+1. Optional: `./setup.sh` — prints Python version and the two canonical-JSONL commands.
+2. **DNR data in git:** **`dnr_wells_full.csv.gz`** at the **repo root** (~22 MB) and **`dnr_wells_chunk_*.csv.gz`** under **`apps/hub/public/well-viewer/`** (~20 MB total) are committed so a fresh clone can run the map and `build_canonical_jsonl.py --from-full` without copying files from the viewer. Plain **`dnr_wells_full.csv`** stays gitignored (over GitHub’s 100 MB cap); if both `.csv` and `.gz` exist locally, scripts prefer the `.csv`.
+3. Build area-insights / canonical lines: `python3 scripts/build_canonical_jsonl.py --from-full` → `data/out/canonical_wells.jsonl.gz`.
+4. Next app: `cd apps/hub && npm install && npm run dev` — **`/well-viewer`** loads chunks from the same origin. When you change **`index.html`**, **`api/dnr-report.js`**, or rebuild chunks in the standalone viewer, run `export WELL_VIEWER_ROOT=...` and **`./scripts/sync-well-viewer-into-hub.sh`** to refresh those pieces (then commit any updates).
 
-The **driller brief** app lives at the **repository root** (`package.json`, `src/app/`, …) so Vercel’s default **Root Directory** **`.`** installs dependencies and runs `next build` correctly.
+## DNR well viewer (separate repository)
 
-**Local dev:**
+Static map + Python ETL for Indiana DNR chunks live in **another git checkout**. This hub **does not** locate it automatically.
+
+1. Clone or keep your viewer repo anywhere on disk.
+2. Export **`WELL_VIEWER_ROOT`** or **`DNR_VIEWER_ROOT`** to that directory’s **absolute path** whenever you sync or run delegated builds (see `AGENTS.md`).
+
+Optional: add to `apps/hub/.env.local` (gitignored):
 
 ```bash
-npm install
-npm run dev
+WELL_VIEWER_ROOT=/absolute/path/to/your/dnr-viewer-repo
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+**Start here:** [`PROJECT_OUTLINE.md`](./PROJECT_OUTLINE.md) — product vision, architecture, data pipeline, and build milestones.
 
-**Vercel:** Leave **Root Directory** empty or **`.`**. Framework: Next.js (or use `vercel.json`). Production branch: **`main`**.
-
-If you previously set Root Directory to `apps/hub`, **clear it** after this layout change.
+**Hub (MVP UI):** [`apps/hub/`](./apps/hub/) — `npm install && npm run dev` inside that folder. Chunks ship in **`public/well-viewer/`**; use [`scripts/sync-well-viewer-into-hub.sh`](./scripts/sync-well-viewer-into-hub.sh) when you need to pull a newer viewer build or regenerated chunks from the standalone repo (see [`apps/hub/README.md`](./apps/hub/README.md)).

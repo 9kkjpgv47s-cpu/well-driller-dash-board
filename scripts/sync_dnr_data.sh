@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
-# Refresh Indiana DNR well data using the existing viewer ETL (ArcGIS + statewide build).
-# Run from repo root: ./scripts/sync_dnr_data.sh
-# Optional: DNR_VIEWER_ROOT=/path/to/DNR_Well_Viewer_Full_Demo
+# Run the DNR well viewer ETL in its own repository (no path guessing).
+#
+# Required: DNR_VIEWER_ROOT=/path/to/viewer/repo (contains fetch_dnr_wells.py)
+#
+# Run from this repo root: ./scripts/sync_dnr_data.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VIEWER="${DNR_VIEWER_ROOT:-$ROOT/../DNR_Well_Viewer_Full_Demo}"
+if [[ -z "${DNR_VIEWER_ROOT:-}" ]]; then
+  echo "Set DNR_VIEWER_ROOT to your DNR well viewer checkout (folder with fetch_dnr_wells.py)." >&2
+  echo "This script does not search for the viewer." >&2
+  exit 1
+fi
 
-if [[ ! -d "$VIEWER" ]]; then
-  echo "DNR viewer not found at: $VIEWER" >&2
-  echo "Clone or set DNR_VIEWER_ROOT to the folder containing fetch_dnr_wells.py" >&2
+VIEWER="$(cd "${DNR_VIEWER_ROOT}" && pwd)"
+if [[ ! -f "${VIEWER}/fetch_dnr_wells.py" ]]; then
+  echo "DNR_VIEWER_ROOT=${VIEWER} does not look like the viewer repo (missing fetch_dnr_wells.py)." >&2
   exit 1
 fi
 
