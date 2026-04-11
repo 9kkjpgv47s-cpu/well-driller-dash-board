@@ -7,6 +7,13 @@ export type OptimizationInput = {
   priority: OptimizationPriority;
 };
 
+/** Shared crew checklist (also used when the optimization API is offline). */
+export const SITE_PREP_CHECKLIST_ITEMS = [
+  "Confirm loc_type and ground elevation from site walk or survey.",
+  "Pull DNR report links for the closest 3–5 registry wells before spud.",
+  "If static or gravel signals look unusual, plan extra screen options.",
+] as const;
+
 export type OptimizationResult = {
   input: OptimizationInput;
   generatedAt: string;
@@ -79,11 +86,7 @@ export function computeOptimization(input: OptimizationInput): OptimizationResul
         : "Balanced view blends depth and yield heuristics.",
   ];
 
-  const checklist = [
-    "Confirm loc_type and ground elevation from site walk or survey.",
-    "Pull DNR report links for the closest 3–5 registry wells before spud.",
-    "If static or gravel signals look unusual, plan extra screen options.",
-  ];
+  const checklist = [...SITE_PREP_CHECKLIST_ITEMS];
 
   return {
     input,

@@ -14,7 +14,6 @@ import {
   type AreaInsightsReport,
 } from "@/lib/area-well-analytics";
 import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
-import type { OptimizationResult } from "@/lib/optimization";
 
 type Props = {
   lat: number;
@@ -80,9 +79,6 @@ export function AreaInsightsPanel({
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<AreaInsightsReport | null>(null);
   const [loading, setLoading] = useState(false);
-  const [prep, setPrep] = useState<OptimizationResult | null>(null);
-  const [prepErr, setPrepErr] = useState<string | null>(null);
-  const [prepLoading, setPrepLoading] = useState(false);
 
   const run = useCallback(async () => {
     setLoading(true);
@@ -106,37 +102,6 @@ export function AreaInsightsPanel({
     if (!autoRun || !Number.isFinite(lat) || !Number.isFinite(lon)) return;
     void run();
   }, [autoRun, lat, lon, radiusMiles, run]);
-
-  useEffect(() => {
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-    const ctrl = new AbortController();
-    const q = new URLSearchParams({
-      lat: String(lat),
-      lon: String(lon),
-      radiusMiles: String(radiusMiles),
-      priority: "balanced",
-    });
-    setPrepLoading(true);
-    setPrepErr(null);
-    fetch(`/api/optimization?${q}`, { signal: ctrl.signal })
-      .then(async (r) => {
-        const data = (await r.json()) as { error?: string };
-        if (!r.ok) {
-          throw new Error(
-            typeof data.error === "string" ? data.error : r.statusText,
-          );
-        }
-        return data as OptimizationResult;
-      })
-      .then(setPrep)
-      .catch((e: Error) => {
-        if (e.name === "AbortError") return;
-        setPrepErr(e.message);
-        setPrep(null);
-      })
-      .finally(() => setPrepLoading(false));
-    return () => ctrl.abort();
-  }, [lat, lon, radiusMiles]);
 
   const breakdowns = useMemo(() => {
     if (!report) return null;
@@ -225,31 +190,25 @@ export function AreaInsightsPanel({
     };
   }, [report]);
 
-  /** Field prep merged into the narrative (shorter page; same information). */
+  /** Field prep line uses the same registry slice as tables (gz chunks), not the optimization mock API. */
   const narrativeLines = useMemo(() => {
     const lines: string[] = [];
-    if (prepLoading) {
+    if (report) {
+      const fp = report.fieldPrepNeighborhood;
+      const depth =
+        fp.medianCompletedDepthFt != null
+          ? `**${fp.medianCompletedDepthFt} ft**`
+          : "**—**";
       lines.push(
-        "**Field prep (mock):** loading checklist and neighborhood hints…",
+        `**Field prep (registry, ${radiusMiles} mi):** **${report.totalWellsInRadius.toLocaleString()}** wells in radius · median completed depth ${depth} · static water (chunk columns): **${fp.staticWaterBandLabel}** (${fp.wellsWithStaticWater.toLocaleString()} well(s) with a parseable static value).`,
       );
-    }
-    if (prepErr) {
-      lines.push(`**Field prep (mock):** could not load — ${prepErr}`);
-    }
-    if (prep) {
       lines.push(
-        `**Field prep (mock):** illustrative neighborhood — **~${prep.neighborhood.sampleWellsInRadius}** wells in radius, **median depth ${prep.neighborhood.medianDepthFt} ft**, **static water band ${prep.neighborhood.typicalStaticBandFt}**.`,
+        "Prep checklist: confirm loc_type and ground elevation · pull DNR reports for the closest 3–5 registry wells · plan extra screen if static or gravel signals look unusual.",
       );
-      for (const item of prep.checklist) {
-        lines.push(`Prep checklist: ${item}`);
-      }
-      for (const n of prep.neighborhood.notes) {
-        lines.push(`Prep note: ${n}`);
-      }
     }
     if (report?.narratives.length) lines.push(...report.narratives);
     return lines;
-  }, [prep, prepLoading, prepErr, report]);
+  }, [report, radiusMiles]);
 
   return (
     <section
@@ -323,7 +282,7 @@ export function AreaInsightsPanel({
         </div>
       ) : null}
 
-      {(report && breakdowns) || prepLoading || prepErr || prep ? (
+      {report && breakdowns ? (
         <div className="space-y-6">
           {report ? (
             <div className="rounded-lg border border-emerald-800/25 bg-white/80 p-4 dark:border-emerald-700/40 dark:bg-zinc-900/50">

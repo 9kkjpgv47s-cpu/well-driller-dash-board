@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import {
+  computeAreaInsights,
+  type AreaInsightsReport,
+} from "@/lib/area-well-analytics";
+import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
 import { DEFAULT_AREA_RADIUS_MILES } from "@/lib/hub-area-defaults";
-import type { OptimizationResult } from "@/lib/optimization";
+import {
+  SITE_PREP_CHECKLIST_ITEMS,
+  type OptimizationResult,
+} from "@/lib/optimization";
 
 type Props = {
   lat: number;
@@ -18,9 +26,12 @@ export function DrillerFieldPrepPanel({
   radiusMiles = DEFAULT_AREA_RADIUS_MILES,
   headerActions,
 }: Props) {
-  const [result, setResult] = useState<OptimizationResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [insight, setInsight] = useState<AreaInsightsReport | null>(null);
+  const [insightErr, setInsightErr] = useState<string | null>(null);
+  const [insightLoading, setInsightLoading] = useState(false);
+  const [opt, setOpt] = useState<OptimizationResult | null>(null);
+  const [optErr, setOptErr] = useState<string | null>(null);
+  const [optLoading, setOptLoading] = useState(false);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -30,8 +41,26 @@ export function DrillerFieldPrepPanel({
       radiusMiles: String(radiusMiles),
       priority: "balanced",
     });
-    setLoading(true);
-    setError(null);
+
+    setInsightLoading(true);
+    setInsightErr(null);
+    setInsight(null);
+    void getDnrWellsCached()
+      .then((wells) => {
+        if (ctrl.signal.aborted) return;
+        setInsight(computeAreaInsights(wells, lat, lon, radiusMiles));
+      })
+      .catch((e: unknown) => {
+        if (ctrl.signal.aborted) return;
+        setInsightErr(e instanceof Error ? e.message : "Failed to load wells");
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setInsightLoading(false);
+      });
+
+    setOptLoading(true);
+    setOptErr(null);
+    setOpt(null);
     fetch(`/api/optimization?${q}`, { signal: ctrl.signal })
       .then(async (r) => {
         const data = (await r.json()) as { error?: string };
@@ -42,15 +71,24 @@ export function DrillerFieldPrepPanel({
         }
         return data as OptimizationResult;
       })
-      .then(setResult)
-      .catch((e: Error) => {
-        if (e.name === "AbortError") return;
-        setError(e.message);
-        setResult(null);
+      .then((data) => {
+        if (!ctrl.signal.aborted) setOpt(data);
       })
-      .finally(() => setLoading(false));
+      .catch((e: Error) => {
+        if (e.name === "AbortError" || ctrl.signal.aborted) return;
+        setOptErr(e.message);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setOptLoading(false);
+      });
+
     return () => ctrl.abort();
   }, [lat, lon, radiusMiles]);
+
+  const fp = insight?.fieldPrepNeighborhood;
+  const checklist = opt?.checklist ?? [...SITE_PREP_CHECKLIST_ITEMS];
+  const plannerNotes = opt?.neighborhood.notes ?? [];
+  const scores = opt?.scores;
 
   return (
     <section
@@ -66,9 +104,9 @@ export function DrillerFieldPrepPanel({
             Site optimization (auto)
           </h2>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-            Checklist and neighborhood hints load automatically for the active
-            jobsite coordinates (mock API for now). When you add accounts, this
-            will attach to the job your driller opens—no separate run step.
+            Neighborhood counts and depths come from the same DNR gz chunks as
+            the map. Planner scores and the amber notes below are simple
+            heuristics until a full analytics service is wired.
           </p>
         </div>
         {headerActions ? (
@@ -78,42 +116,51 @@ export function DrillerFieldPrepPanel({
         ) : null}
       </div>
 
-      {loading && (
+      {(insightLoading || optLoading) && (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Loading optimization…
+          {insightLoading ? "Loading registry slice…" : null}
+          {insightLoading && optLoading ? " · " : null}
+          {optLoading ? "Loading planner scores…" : null}
         </p>
       )}
-      {error && (
+      {insightErr && (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-          {error}
+          {insightErr}
+        </p>
+      )}
+      {optErr && (
+        <p className="text-sm text-amber-800 dark:text-amber-200" role="status">
+          Planner API: {optErr} (checklist below uses defaults.)
         </p>
       )}
 
-      {result && (
+      {insight && fp && (
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Wells in radius (mock)
+                Wells in radius (registry)
               </p>
               <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                {result.neighborhood.sampleWellsInRadius}
+                {insight.totalWellsInRadius.toLocaleString()}
               </p>
             </div>
             <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Median depth (illustrative)
+                Median completed depth (registry)
               </p>
               <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                {result.neighborhood.medianDepthFt} ft
+                {fp.medianCompletedDepthFt != null
+                  ? `${fp.medianCompletedDepthFt} ft`
+                  : "—"}
               </p>
             </div>
             <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Static band (illustrative)
+                Static water (chunk columns)
               </p>
               <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                {result.neighborhood.typicalStaticBandFt}
+                {fp.staticWaterBandLabel}
               </p>
             </div>
           </div>
@@ -122,22 +169,37 @@ export function DrillerFieldPrepPanel({
               Checklist
             </p>
             <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
-              {result.checklist.map((item) => (
+              {checklist.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
-          <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-            <p className="font-semibold">Mock API notes</p>
-            <ul className="mt-2 list-inside list-disc space-y-1">
-              {result.neighborhood.notes.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
-            </ul>
-          </div>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">
-            Generated {new Date(result.generatedAt).toLocaleString()}
-          </p>
+          {scores && (
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50/80 p-3 text-xs text-zinc-700 dark:border-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-200">
+              <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                Planner scores (illustrative)
+              </p>
+              <p className="mt-1 tabular-nums">
+                Setup {scores.setupReadiness} · Logistics {scores.logisticsFit} ·
+                Data confidence {scores.dataConfidence}
+              </p>
+            </div>
+          )}
+          {plannerNotes.length > 0 && (
+            <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+              <p className="font-semibold">Planner notes</p>
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                {plannerNotes.map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {opt?.generatedAt && (
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              Planner response {new Date(opt.generatedAt).toLocaleString()}
+            </p>
+          )}
         </div>
       )}
     </section>
