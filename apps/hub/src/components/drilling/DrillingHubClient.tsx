@@ -833,14 +833,14 @@ export function DrillingHubClient() {
                         />
                       </div>
                     </div>
-                    <div className="grid gap-6 lg:grid-cols-12">
-                      <div className="card p-4 lg:col-span-4">
+                    <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+                      <div className="card w-full max-w-md justify-self-start p-3 lg:col-span-4">
                         <DrillingViewerMapFilters
                           value={mapFilters}
                           onChange={setMapFilters}
                         />
                       </div>
-                      <div className="space-y-2 lg:col-span-8">
+                      <div className="min-w-0 space-y-2 lg:col-span-8">
                         <p className="text-xs text-[var(--muted)]">
                           {wellsInRadius.length.toLocaleString()} wells in radius ·{" "}
                           {wellsMatchingMapFilters.length.toLocaleString()} match
@@ -980,6 +980,12 @@ export function DrillingHubClient() {
                           filters={mapFilters}
                           onWellOpen={setDetailWell}
                           jobsiteLocation={jobsiteLocation}
+                          jobPinLabel={
+                            selectedScheduleJob?.title ??
+                            (entries.length
+                              ? "Well queue / map center"
+                              : "Map center")
+                          }
                         />
                         <div className="mt-3">
                           <NearestWellsStrip

@@ -32,6 +32,7 @@ export async function GET(req: Request) {
   const anchorDate = searchParams.get("date") ?? "";
   const timezone =
     searchParams.get("timezone") ?? "America/Indiana/Indianapolis";
+  const bypassCache = searchParams.get("noCache") === "1";
 
   if (!Number.isFinite(lat) || !Number.isFinite(lon) || !/^\d{4}-\d{2}-\d{2}$/.test(anchorDate)) {
     return NextResponse.json(
@@ -120,7 +121,9 @@ export async function GET(req: Request) {
 
   return NextResponse.json(body, {
     headers: {
-      "Cache-Control": "public, s-maxage=900, stale-while-revalidate=1800",
+      "Cache-Control": bypassCache
+        ? "private, no-store, must-revalidate"
+        : "public, s-maxage=900, stale-while-revalidate=1800",
     },
   });
 }

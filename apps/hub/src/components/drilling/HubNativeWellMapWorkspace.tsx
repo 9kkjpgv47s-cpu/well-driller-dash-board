@@ -122,14 +122,14 @@ export function HubNativeWellMapWorkspace({
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900 lg:col-span-4">
+      <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+        <div className="w-full max-w-md justify-self-start rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900 lg:col-span-4">
           <DrillingViewerMapFilters
             value={mapFilters}
             onChange={setMapFilters}
           />
         </div>
-        <div className="space-y-2 lg:col-span-8">
+        <div className="min-w-0 space-y-2 lg:col-span-8">
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             {wellsInRadius.length.toLocaleString()} wells in {radiusMiles} mi ·{" "}
             {wellsMatchingMapFilters.length.toLocaleString()} match filters
@@ -146,6 +146,7 @@ export function HubNativeWellMapWorkspace({
             filters={mapFilters}
             onWellOpen={setDetailWell}
             jobsiteLocation={jobsiteLocation}
+            jobPinLabel="Job centroid (queue)"
           />
         </div>
       </div>

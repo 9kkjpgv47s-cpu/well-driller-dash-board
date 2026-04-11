@@ -233,8 +233,8 @@ export function OptimizationPanel() {
           ) : null}
           {registry ? (
             <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
+              <div className="flex flex-wrap gap-2">
+                <div className="w-fit max-w-full rounded-lg bg-zinc-50 px-2.5 py-1.5 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     Wells in radius (registry)
                   </p>
@@ -242,7 +242,7 @@ export function OptimizationPanel() {
                     {registry.totalWellsInRadius.toLocaleString()}
                   </p>
                 </div>
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
+                <div className="w-fit max-w-full rounded-lg bg-zinc-50 px-2.5 py-1.5 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     Median completed depth (registry)
                   </p>
@@ -253,7 +253,7 @@ export function OptimizationPanel() {
                       : "—"}
                   </p>
                 </div>
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
+                <div className="w-fit max-w-full rounded-lg bg-zinc-50 px-2.5 py-1.5 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     Static water (chunk columns)
                   </p>

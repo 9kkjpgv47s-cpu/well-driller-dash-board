@@ -1,6 +1,7 @@
 "use client";
 
 import type { WellRecord } from "@/lib/area-well-analytics";
+import { haversineMiles } from "@/lib/area-well-analytics";
 import {
   buildViewerWellMarker,
   type ViewerMapFilters,
@@ -28,9 +29,13 @@ type Props = {
   onWellOpen: (w: WellRecord) => void;
   /** Jobsite position vs map center and registry wells (coords or geocoded address). */
   jobsiteLocation?: JobsiteLocationFix | null;
+  /** Label for the yellow job / map-center pin (always drawn at `center`). */
+  jobPinLabel?: string | null;
 };
 
 const MAX_MARKERS = 800;
+/** Do not duplicate the yellow pin if jobsite is within this distance of center (miles). */
+const JOBSITE_DEDUP_MI = 0.02;
 
 function escapePopupHtml(s: string): string {
   return s
@@ -47,6 +52,7 @@ export function DrillingMap({
   filters,
   onWellOpen,
   jobsiteLocation = null,
+  jobPinLabel = null,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -61,13 +67,14 @@ export function DrillingMap({
   useEffect(() => {
     if (!containerRef.current) return;
     let cancelled = false;
+    const el = containerRef.current;
+    let resizeObserver: ResizeObserver | null = null;
 
     void import("leaflet").then((L) => {
-      if (cancelled || !containerRef.current) return;
-      const map = L.map(containerRef.current).setView(
-        [center.lat, center.lon],
-        13,
-      );
+      if (cancelled || !el) return;
+      const map = L.map(el, {
+        preferCanvas: false,
+      }).setView([center.lat, center.lon], 13);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
       }).addTo(map);
@@ -84,10 +91,17 @@ export function DrillingMap({
       const onZoom = () => setMapZoom(map.getZoom());
       map.on("zoomend", onZoom);
       setMapReady(true);
+
+      resizeObserver = new ResizeObserver(() => {
+        map.invalidateSize({ animate: false });
+        requestAnimationFrame(() => map.invalidateSize({ animate: false }));
+      });
+      resizeObserver.observe(el);
     });
 
     return () => {
       cancelled = true;
+      resizeObserver?.disconnect();
       setMapReady(false);
       mapRef.current?.remove();
       mapRef.current = null;
@@ -104,8 +118,10 @@ export function DrillingMap({
     map.setView([center.lat, center.lon], Math.max(map.getZoom(), 12));
     circle.setLatLng([center.lat, center.lon]);
     circle.setRadius(radiusMiles * 1609.34);
+    requestAnimationFrame(() => map.invalidateSize({ animate: false }));
   }, [center.lat, center.lon, radiusMiles, mapReady]);
 
+  /** Yellow job-center pin + optional distinct jobsite overlay. */
   useEffect(() => {
     const map = mapRef.current;
     const g = jobsiteGroupRef.current;
@@ -113,61 +129,88 @@ export function DrillingMap({
 
     void import("leaflet").then((L) => {
       g.clearLayers();
-      if (!jobsiteLocation) return;
 
-      const { lat, lon, accuracyM, sourceLabel } = jobsiteLocation;
-      const accOk =
-        accuracyM != null &&
-        Number.isFinite(accuracyM) &&
-        accuracyM >= 5 &&
-        accuracyM <= 8000;
-      const accRounded = accOk ? Math.round(accuracyM as number) : 0;
-
-      if (accOk) {
-        L.circle([lat, lon], {
-          radius: accuracyM as number,
-          color: "#b45309",
-          weight: 1,
-          fillColor: "#f59e0b",
-          fillOpacity: 0.1,
-        })
-          .bindPopup(`Reported accuracy ~${accRounded} m`)
-          .addTo(g);
-      }
-
-      const src = escapePopupHtml(
-        sourceLabel && sourceLabel.trim()
-          ? sourceLabel.trim()
-          : "Jobsite position",
+      const pinLabel = escapePopupHtml(
+        (jobPinLabel && jobPinLabel.trim()) || "Active site (map center)",
       );
-      L.circleMarker([lat, lon], {
-        radius: 9,
-        color: "#9a3412",
-        fillColor: "#fbbf24",
+      const jobRadius = L.Browser.mobile ? 12 : 10;
+      L.circleMarker([center.lat, center.lon], {
+        radius: jobRadius,
+        color: "#854d0e",
+        fillColor: "#facc15",
         fillOpacity: 1,
         weight: 2,
+        pane: "markerPane",
+        className: "vj-job-center-pin",
       })
         .bindPopup(
-          `<strong>Jobsite</strong><br>${src}<br>${lat.toFixed(5)}, ${lon.toFixed(5)}${
-            accOk ? `<br>~${accRounded} m accuracy` : ""
-          }`,
+          `<strong>Job location</strong><br>${pinLabel}<br>${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`,
         )
         .addTo(g);
 
-      const b = L.latLngBounds([center.lat, center.lon], [lat, lon]);
-      const ne = b.getNorthEast();
-      const sw = b.getSouthWest();
-      const span = Math.max(
-        Math.abs(ne.lat - sw.lat),
-        Math.abs(ne.lng - sw.lng),
-      );
-      if (span < 0.002) {
-        map.setView([lat, lon], Math.max(map.getZoom(), 15));
-      } else {
-        map.fitBounds(b, { padding: [48, 48], maxZoom: 16, animate: true });
+      if (!jobsiteLocation) return;
+
+      const { lat, lon, accuracyM, sourceLabel } = jobsiteLocation;
+      const sepMi = haversineMiles(center.lat, center.lon, lat, lon);
+      const sameAsCenter = sepMi < JOBSITE_DEDUP_MI;
+
+      if (!sameAsCenter) {
+        const accOk =
+          accuracyM != null &&
+          Number.isFinite(accuracyM) &&
+          accuracyM >= 5 &&
+          accuracyM <= 8000;
+        const accRounded = accOk ? Math.round(accuracyM as number) : 0;
+
+        if (accOk) {
+          L.circle([lat, lon], {
+            radius: accuracyM as number,
+            color: "#b45309",
+            weight: 1,
+            fillColor: "#f59e0b",
+            fillOpacity: 0.1,
+          })
+            .bindPopup(`Reported accuracy ~${accRounded} m`)
+            .addTo(g);
+        }
+
+        const src = escapePopupHtml(
+          sourceLabel && sourceLabel.trim()
+            ? sourceLabel.trim()
+            : "Jobsite position",
+        );
+        L.circleMarker([lat, lon], {
+          radius: L.Browser.mobile ? 11 : 9,
+          color: "#9a3412",
+          fillColor: "#fde047",
+          fillOpacity: 1,
+          weight: 2,
+          pane: "markerPane",
+        })
+          .bindPopup(
+            `<strong>Resolved jobsite</strong><br>${src}<br>${lat.toFixed(5)}, ${lon.toFixed(5)}${
+              accOk ? `<br>~${accRounded} m accuracy` : ""
+            }`,
+          )
+          .addTo(g);
+
+        const b = L.latLngBounds([center.lat, center.lon], [lat, lon]);
+        const ne = b.getNorthEast();
+        const sw = b.getSouthWest();
+        const span = Math.max(
+          Math.abs(ne.lat - sw.lat),
+          Math.abs(ne.lng - sw.lng),
+        );
+        if (span < 0.002) {
+          map.setView([lat, lon], Math.max(map.getZoom(), 15));
+        } else {
+          map.fitBounds(b, { padding: [48, 48], maxZoom: 16, animate: true });
+        }
       }
+
+      requestAnimationFrame(() => map.invalidateSize({ animate: false }));
     });
-  }, [jobsiteLocation, center.lat, center.lon, mapReady]);
+  }, [jobsiteLocation, center.lat, center.lon, jobPinLabel, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -200,6 +243,7 @@ export function DrillingMap({
             iconSize: [built.iconW, built.iconH],
             iconAnchor: built.iconAnchor,
           }),
+          pane: "markerPane",
         });
         marker.bindPopup(built.popupHtml);
         marker.on("click", () => {
@@ -207,13 +251,14 @@ export function DrillingMap({
         });
         marker.addTo(group);
       }
+      requestAnimationFrame(() => map.invalidateSize({ animate: false }));
     });
   }, [wells, filters, mapReady, mapZoom]);
 
   return (
     <div
       ref={containerRef}
-      className="z-0 h-[min(55vh,520px)] w-full rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900"
+      className="vj-leaflet-host z-0 h-[min(55vh,520px)] w-full rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900"
     />
   );
 }
