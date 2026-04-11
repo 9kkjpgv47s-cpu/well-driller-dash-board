@@ -29,14 +29,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const lat = Number(searchParams.get("lat"));
   const lon = Number(searchParams.get("lon"));
-  const anchorDate = searchParams.get("date") ?? "";
   const timezone =
     searchParams.get("timezone") ?? "America/Indiana/Indianapolis";
+  const rawDate = searchParams.get("date");
+  const today = todayIsoDateInTimeZone(timezone);
+  const anchorDate =
+    rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : today;
   const bypassCache = searchParams.get("noCache") === "1";
 
-  if (!Number.isFinite(lat) || !Number.isFinite(lon) || !/^\d{4}-\d{2}-\d{2}$/.test(anchorDate)) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
     return NextResponse.json(
-      { error: "Provide lat, lon, and date=YYYY-MM-DD" },
+      { error: "Provide lat and lon" },
       { status: 400 },
     );
   }
