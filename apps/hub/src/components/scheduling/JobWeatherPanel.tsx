@@ -52,6 +52,7 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
   const [data, setData] = useState<WeatherApiResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshNonce, setRefreshNonce] = useState(0);
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [activeSourceId, setActiveSourceId] = useState<string | null>(null);
   const [nearMeData, setNearMeData] = useState<WeatherApiResponse | null>(null);
@@ -77,6 +78,10 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
       lon: String(job.lon),
       timezone: tz,
     });
+    if (refreshNonce > 0) {
+      q.set("noCache", "1");
+      q.set("_", String(Date.now()));
+    }
     fetch(`/api/weather?${q}`, { signal: ctrl.signal })
       .then(async (r) => {
         if (!r.ok) {
@@ -93,7 +98,7 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [job, tz]);
+  }, [job, tz, refreshNonce]);
 
   useEffect(() => {
     if (!data || !job) {
@@ -372,6 +377,14 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setRefreshNonce((n) => n + 1)}
+            disabled={loading}
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            {loading ? "Updating…" : "Update weather"}
+          </button>
           <button
             type="button"
             onClick={() => {
