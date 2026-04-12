@@ -693,10 +693,7 @@ export function DrillingHubClient() {
       <FieldDispatchPanel onApplyToFieldMap={applyAdHocCenter} />
 
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">
-          Field workspace
-        </h1>
-        <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
+        <p className="max-w-3xl text-sm text-[var(--muted)]">
           Demo session: you&apos;re signed in as{" "}
           <strong className="text-[var(--foreground)]">
             {DEMO_DRILLER_SESSION_LEAD}
@@ -708,13 +705,7 @@ export function DrillingHubClient() {
         </p>
       </div>
 
-      <section className="card space-y-3 p-5 sm:p-6" aria-labelledby="jobs-drill-h">
-        <h2
-          id="jobs-drill-h"
-          className="text-lg font-semibold text-[var(--foreground)]"
-        >
-          Jobs to be drilled
-        </h2>
+      <section className="card space-y-3 p-5 sm:p-6">
         <p className="text-xs text-[var(--muted)]">
           Upcoming and in-progress work assigned to you (from the same demo
           schedule as{" "}
