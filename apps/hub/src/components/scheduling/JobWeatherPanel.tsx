@@ -9,8 +9,11 @@ import {
 import type { DrillJob } from "@/lib/scheduling-data";
 import { primaryOpenMeteo } from "@/lib/weather/aggregate";
 import { buildJobWeatherAdvice } from "@/lib/weather/job-advice";
-import { formatOpenMeteoWallClock } from "@/lib/weather/open-meteo-display";
-import type { DayWeatherSummary, WeatherApiResponse } from "@/lib/weather/types";
+import {
+  formatOpenMeteoWallClock,
+  hourlyRowsForAnchorDate,
+} from "@/lib/weather/open-meteo-display";
+import type { WeatherApiResponse } from "@/lib/weather/types";
 import { LiveRadarMap } from "@/components/scheduling/LiveRadarMap";
 
 type Props = {
@@ -25,6 +28,7 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
   const [data, setData] = useState<WeatherApiResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [activeDate, setActiveDate] = useState<string | null>(null);
   const [nearMeData, setNearMeData] = useState<WeatherApiResponse | null>(null);
   const [nearMeErr, setNearMeErr] = useState<string | null>(null);
   const [nearMeLoading, setNearMeLoading] = useState(false);
@@ -65,6 +69,23 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
       .finally(() => setLoading(false));
     return () => ctrl.abort();
   }, [job, tz]);
+
+  useEffect(() => {
+    if (!data || !job) {
+      setActiveDate(null);
+      return;
+    }
+    const dates = data.daySummaries.map((d) => d.date);
+    if (!dates.length) {
+      setActiveDate(null);
+      return;
+    }
+    if (dates.includes(job.date)) {
+      setActiveDate(job.date);
+      return;
+    }
+    setActiveDate(dates[0]!);
+  }, [data, job]);
 
   useEffect(() => {
     if (!nearMeOpen || nearMeCoords) return;
@@ -124,13 +145,37 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
     return primaryOpenMeteo(data.sources)?.hourly ?? [];
   }, [data]);
 
-  const adviceByDay = useMemo(() => {
-    if (!job || !data) return [];
-    return data.daySummaries.map((day) => ({
-      date: day.date,
-      advice: buildJobWeatherAdvice({ ...job, date: day.date }, day),
-    }));
-  }, [job, data]);
+  const availableDates = useMemo(
+    () => data?.daySummaries.map((d) => d.date) ?? [],
+    [data],
+  );
+
+  const activeIndex = useMemo(
+    () => (activeDate ? availableDates.indexOf(activeDate) : -1),
+    [activeDate, availableDates],
+  );
+  const canGoNextDay =
+    activeIndex >= 0 && activeIndex < availableDates.length - 1;
+
+  const activeSummary = useMemo(() => {
+    if (!data || !activeDate) return null;
+    return data.daySummaries.find((d) => d.date === activeDate) ?? null;
+  }, [data, activeDate]);
+
+  const hourlyForActiveDay = useMemo(() => {
+    if (!activeDate) return [];
+    return hourlyRowsForAnchorDate(primaryHourly, activeDate);
+  }, [primaryHourly, activeDate]);
+
+  const activeAdvice = useMemo(() => {
+    if (!job || !activeSummary || !activeDate) return null;
+    return buildJobWeatherAdvice({ ...job, date: activeDate }, activeSummary);
+  }, [job, activeSummary, activeDate]);
+
+  const nearMeSummary = useMemo(() => {
+    if (!nearMeData?.daySummaries.length) return null;
+    return nearMeData.daySummaries[0]!;
+  }, [nearMeData]);
 
   if (!job) {
     return (
@@ -163,11 +208,17 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
               </p>
             ) : null}
             {nearMeData ? (
-              <DailyBrief
-                title="Day-by-day near your location"
+              <NearMeSingleDay
                 timezone={tz}
-                summaries={nearMeData.daySummaries}
-                hourly={primaryOpenMeteo(nearMeData.sources)?.hourly ?? []}
+                summary={nearMeSummary}
+                hourly={
+                  nearMeSummary
+                    ? hourlyRowsForAnchorDate(
+                        primaryOpenMeteo(nearMeData.sources)?.hourly ?? [],
+                        nearMeSummary.date,
+                      )
+                    : []
+                }
               />
             ) : null}
           </div>
@@ -181,18 +232,31 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            Daily weather brief
+            Weather for this jobsite
           </h2>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-            {job.title} · {job.county} Co. · day-by-day outlook with full hourly rows
-            for the current model window.
+            {job.title} · {job.county} Co. · single-day view with hour-by-hour
+            breakdown.
           </p>
         </div>
-        {headerActions ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {headerActions}
-          </div>
-        ) : null}
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (!canGoNextDay) return;
+              setActiveDate(availableDates[activeIndex + 1] ?? activeDate);
+            }}
+            disabled={!canGoNextDay}
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            Next day
+          </button>
+          {headerActions ? (
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {headerActions}
+            </div>
+          ) : null}
+        </div>
       </header>
 
       <details
@@ -212,11 +276,17 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
             </p>
           ) : null}
           {nearMeData ? (
-            <DailyBrief
-              title="Day-by-day near your location"
+            <NearMeSingleDay
               timezone={tz}
-              summaries={nearMeData.daySummaries}
-              hourly={primaryOpenMeteo(nearMeData.sources)?.hourly ?? []}
+              summary={nearMeSummary}
+              hourly={
+                nearMeSummary
+                  ? hourlyRowsForAnchorDate(
+                      primaryOpenMeteo(nearMeData.sources)?.hourly ?? [],
+                      nearMeSummary.date,
+                    )
+                  : []
+              }
             />
           ) : null}
         </div>
@@ -245,12 +315,85 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
 
       {data && (
         <>
-          <DailyBrief
-            title="Day-by-day at this jobsite"
-            timezone={tz}
-            summaries={data.daySummaries}
-            hourly={primaryHourly}
-          />
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Selected day
+              </h3>
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                Forecast timezone{" "}
+                <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">{tz}</code>
+                . Using <strong>{activeDate ?? "—"}</strong>.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat
+                label="Peak rain chance"
+                value={
+                  activeSummary?.maxPrecipPop != null
+                    ? `${Math.round(activeSummary.maxPrecipPop)}%`
+                    : "—"
+                }
+              />
+              <Stat
+                label="Peak wind (hourly)"
+                value={
+                  activeSummary?.maxWindMph != null
+                    ? `${Math.round(activeSummary.maxWindMph)} mph`
+                    : "—"
+                }
+              />
+              <Stat
+                label="Temp range"
+                value={
+                  activeSummary?.minTempF != null && activeSummary?.maxTempF != null
+                    ? `${Math.round(activeSummary.minTempF)}–${Math.round(activeSummary.maxTempF)}°F`
+                    : "—"
+                }
+              />
+              <Stat
+                label="Dominant conditions"
+                value={activeSummary?.dominantCondition ?? "—"}
+              />
+            </div>
+            <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
+              <table className="w-full min-w-[620px] text-left text-xs">
+                <thead className="sticky top-0 bg-zinc-50 dark:bg-zinc-800">
+                  <tr>
+                    <th className="px-2 py-2 font-medium">Hour</th>
+                    <th className="px-2 py-2 font-medium">Temp</th>
+                    <th className="px-2 py-2 font-medium">Rain %</th>
+                    <th className="px-2 py-2 font-medium">Cloud</th>
+                    <th className="px-2 py-2 font-medium">Wind</th>
+                    <th className="px-2 py-2 font-medium">Sky / precip</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {hourlyForActiveDay.map((h) => (
+                    <tr key={h.time} className="border-t border-zinc-100 dark:border-zinc-800">
+                      <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
+                        {formatOpenMeteoWallClock(h.time)}
+                      </td>
+                      <td className="px-2 py-1.5">{Math.round(h.tempF)}°F</td>
+                      <td className="px-2 py-1.5">{h.precipPop != null ? `${h.precipPop}%` : "—"}</td>
+                      <td className="px-2 py-1.5">{h.cloudPct != null ? `${h.cloudPct}%` : "—"}</td>
+                      <td className="px-2 py-1.5">
+                        {h.windMph != null ? `${Math.round(h.windMph)} mph` : "—"}
+                      </td>
+                      <td className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300">{h.conditionLabel}</td>
+                    </tr>
+                  ))}
+                  {hourlyForActiveDay.length === 0 ? (
+                    <tr className="border-t border-zinc-100 dark:border-zinc-800">
+                      <td className="px-2 py-2 text-zinc-500 dark:text-zinc-400" colSpan={6}>
+                        No hourly rows available for this day.
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           <div className="rounded-lg border border-zinc-200 px-3 py-3 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">
             <p className="font-medium text-zinc-800 dark:text-zinc-100">
@@ -282,114 +425,109 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
             </ul>
           </div>
 
-          {adviceByDay.map((entry) => (
+          {activeAdvice ? (
             <div
-              key={entry.date}
               className={`rounded-lg border p-4 ${
-                entry.advice.severity === "critical"
+                activeAdvice.severity === "critical"
                   ? "border-red-300 bg-red-50 dark:border-red-900 dark:bg-red-950/30"
-                  : entry.advice.severity === "caution"
+                  : activeAdvice.severity === "caution"
                     ? "border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20"
                     : "border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50"
               }`}
             >
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                Field considerations for {entry.date}
+                Field considerations for {activeDate}
               </h3>
               <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-zinc-800 dark:text-zinc-100">
-                {entry.advice.bullets.map((b, i) => (
-                  <li key={`${entry.date}-${i}`}>{b}</li>
+                {activeAdvice.bullets.map((b, i) => (
+                  <li key={`${activeDate}-${i}`}>{b}</li>
                 ))}
               </ul>
             </div>
-          ))}
+          ) : null}
         </>
       )}
     </section>
   );
 }
 
-function DailyBrief({
-  title,
+function NearMeSingleDay({
   timezone,
-  summaries,
+  summary,
   hourly,
 }: {
-  title: string;
   timezone: string;
-  summaries: DayWeatherSummary[];
+  summary: WeatherApiResponse["daySummaries"][number] | null;
   hourly: WeatherApiResponse["primaryHourlyForDay"];
 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          {title}
+          Near me (single day)
         </h3>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
           Forecast timezone{" "}
           <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">{timezone}</code>.
-          Day summaries are paired with full hourly rows from the primary model.
         </p>
       </div>
-      {summaries.map((day) => (
-        <div key={day.date} className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{day.date}</p>
+      {summary ? (
+        <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Stat
               label="Peak rain chance"
-              value={day.maxPrecipPop != null ? `${Math.round(day.maxPrecipPop)}%` : "—"}
+              value={summary.maxPrecipPop != null ? `${Math.round(summary.maxPrecipPop)}%` : "—"}
             />
             <Stat
               label="Peak wind (hourly)"
-              value={day.maxWindMph != null ? `${Math.round(day.maxWindMph)} mph` : "—"}
+              value={summary.maxWindMph != null ? `${Math.round(summary.maxWindMph)} mph` : "—"}
             />
             <Stat
               label="Temp range"
               value={
-                day.minTempF != null && day.maxTempF != null
-                  ? `${Math.round(day.minTempF)}–${Math.round(day.maxTempF)}°F`
+                summary.minTempF != null && summary.maxTempF != null
+                  ? `${Math.round(summary.minTempF)}–${Math.round(summary.maxTempF)}°F`
                   : "—"
               }
             />
-            <Stat label="Dominant conditions" value={day.dominantCondition ?? "—"} />
+            <Stat label="Dominant conditions" value={summary.dominantCondition ?? "—"} />
           </div>
-        </div>
-      ))}
-      <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
-        <table className="w-full min-w-[620px] text-left text-xs">
-          <thead className="sticky top-0 bg-zinc-50 dark:bg-zinc-800">
-            <tr>
-              <th className="px-2 py-2 font-medium">Date</th>
-              <th className="px-2 py-2 font-medium">Hour</th>
-              <th className="px-2 py-2 font-medium">Temp</th>
-              <th className="px-2 py-2 font-medium">Rain %</th>
-              <th className="px-2 py-2 font-medium">Cloud</th>
-              <th className="px-2 py-2 font-medium">Wind</th>
-              <th className="px-2 py-2 font-medium">Sky / precip</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hourly.map((h) => (
-              <tr key={h.time} className="border-t border-zinc-100 dark:border-zinc-800">
-                <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
-                  {h.time.slice(0, 10)}
-                </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
-                  {formatOpenMeteoWallClock(h.time)}
-                </td>
-                <td className="px-2 py-1.5">{Math.round(h.tempF)}°F</td>
-                <td className="px-2 py-1.5">{h.precipPop != null ? `${h.precipPop}%` : "—"}</td>
-                <td className="px-2 py-1.5">{h.cloudPct != null ? `${h.cloudPct}%` : "—"}</td>
-                <td className="px-2 py-1.5">
-                  {h.windMph != null ? `${Math.round(h.windMph)} mph` : "—"}
-                </td>
-                <td className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300">{h.conditionLabel}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
+            <table className="w-full min-w-[620px] text-left text-xs">
+              <thead className="sticky top-0 bg-zinc-50 dark:bg-zinc-800">
+                <tr>
+                  <th className="px-2 py-2 font-medium">Hour</th>
+                  <th className="px-2 py-2 font-medium">Temp</th>
+                  <th className="px-2 py-2 font-medium">Rain %</th>
+                  <th className="px-2 py-2 font-medium">Cloud</th>
+                  <th className="px-2 py-2 font-medium">Wind</th>
+                  <th className="px-2 py-2 font-medium">Sky / precip</th>
+                </tr>
+              </thead>
+              <tbody>
+                {hourly.map((h) => (
+                  <tr key={h.time} className="border-t border-zinc-100 dark:border-zinc-800">
+                    <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
+                      {formatOpenMeteoWallClock(h.time)}
+                    </td>
+                    <td className="px-2 py-1.5">{Math.round(h.tempF)}°F</td>
+                    <td className="px-2 py-1.5">{h.precipPop != null ? `${h.precipPop}%` : "—"}</td>
+                    <td className="px-2 py-1.5">{h.cloudPct != null ? `${h.cloudPct}%` : "—"}</td>
+                    <td className="px-2 py-1.5">
+                      {h.windMph != null ? `${Math.round(h.windMph)} mph` : "—"}
+                    </td>
+                    <td className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300">{h.conditionLabel}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          No nearby daily weather is available yet.
+        </p>
+      )}
     </div>
   );
 }
