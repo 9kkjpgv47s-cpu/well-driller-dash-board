@@ -27,7 +27,7 @@ import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
 import { wellRecordToDrillerEntry } from "@/lib/drilling-well-entry";
 import { DEFAULT_AREA_RADIUS_MILES } from "@/lib/hub-area-defaults";
 import { countiesLabel, deriveDrillerSite } from "@/lib/driller-job-site";
-import { formatShortDate, type DrillJob } from "@/lib/scheduling-data";
+import type { DrillJob } from "@/lib/scheduling-data";
 import { syntheticDrillJobForWeather } from "@/lib/synthetic-drill-job";
 import {
   DEFAULT_VIEWER_MAP_FILTERS,
@@ -57,21 +57,6 @@ function snapSummary(s: CjDrillerJobEntry["snap"]): string {
   if (s.depth != null) parts.push(`${s.depth} ft`);
   if (s.owner) parts.push(String(s.owner).slice(0, 48));
   return parts.length ? parts.join(" · ") : "Registry snapshot";
-}
-
-function statusLabel(s: DrillJob["status"]): string {
-  switch (s) {
-    case "planned":
-      return "Planned";
-    case "en_route":
-      return "En route";
-    case "on_site":
-      return "On site";
-    case "complete":
-      return "Complete";
-    default:
-      return s;
-  }
 }
 
 function wellDemKey(w: WellRecord): string {
@@ -573,13 +558,6 @@ export function DrillingHubClient() {
     });
   }, [selectedScheduleJob, center, siteFromQueue, entries]);
 
-  const selectScheduleJob = (job: DrillJob) => {
-    setSelectedScheduleJob(job);
-    setCenter({ lat: job.lat, lon: job.lon });
-    setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
-    replaceDrillingUrl(job.lat, job.lon, job.id);
-  };
-
   const applyAdHocCenter = useCallback(
     (lat: number, lon: number) => {
       setSelectedScheduleJob(null);
@@ -704,67 +682,6 @@ export function DrillingHubClient() {
           each panel to reorder; your radius and layout persist on this device.
         </p>
       </div>
-
-      <section className="card space-y-3 p-5 sm:p-6">
-        <p className="text-xs text-[var(--muted)]">
-          Upcoming and in-progress work assigned to you (from the same demo
-          schedule as{" "}
-          <Link href="/scheduling" className="text-[var(--accent)] underline">
-            Office
-          </Link>
-          ). Select one to open the full workspace.
-        </p>
-        {myUpcomingJobs.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">
-            No upcoming demo jobs for this lead. Add jobs from{" "}
-            <Link href="/scheduling" className="text-[var(--accent)] underline">
-              Office
-            </Link>{" "}
-            demo seeds, or use <strong>Center map</strong> on a queued well when
-            you have coordinates saved.
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {myUpcomingJobs.map((job) => {
-              const active = selectedScheduleJob?.id === job.id;
-              return (
-                <li key={job.id}>
-                  <button
-                    type="button"
-                    onClick={() => selectScheduleJob(job)}
-                    className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
-                      active
-                        ? "border-[var(--accent)] bg-[var(--surface-solid)] shadow-sm"
-                        : "border-[var(--border)] bg-[var(--surface-muted)]/80 hover:border-[var(--accent)]/40 hover:bg-[var(--surface-solid)]"
-                    }`}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-semibold text-[var(--foreground)]">
-                        {job.title}
-                      </span>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          job.status === "en_route"
-                            ? "bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-100"
-                            : job.status === "on_site"
-                              ? "bg-violet-100 text-violet-900 dark:bg-violet-950/80 dark:text-violet-100"
-                              : "bg-[var(--surface-muted)] text-[var(--foreground)]"
-                        }`}
-                      >
-                        {statusLabel(job.status)}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-[var(--muted)]">
-                      {formatShortDate(job.date)} · {job.county} · {job.rig} ·{" "}
-                      {job.lead}
-                    </p>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
 
       {wellsStatus ? (
         <p className="text-sm text-[var(--muted)]">{wellsStatus}</p>
