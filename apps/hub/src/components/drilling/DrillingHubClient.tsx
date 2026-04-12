@@ -18,7 +18,6 @@ import {
   type CjDrillerJobEntry,
 } from "@/lib/cj-driller-job";
 import {
-  DEMO_DRILLER_SESSION_LEAD,
   findDemoJobById,
   getDemoDrillerUpcomingJobs,
 } from "@/lib/driller-demo-session";
@@ -663,19 +662,6 @@ export function DrillingHubClient() {
   return (
     <div className="field-hub-scope space-y-8">
       <FieldDispatchPanel onApplyToFieldMap={applyAdHocCenter} />
-
-      <div>
-        <p className="max-w-3xl text-sm text-[var(--muted)]">
-          Demo session: you&apos;re signed in as{" "}
-          <strong className="text-[var(--foreground)]">
-            {DEMO_DRILLER_SESSION_LEAD}
-          </strong>
-          . Open a scheduled job to load the map, weather, registry-backed area
-          analysis (with mock prep hints), and your well queue—same flow we&apos;ll
-          tie to accounts later. Use <strong>Up</strong> / <strong>Down</strong> on
-          each panel to reorder; your radius and layout persist on this device.
-        </p>
-      </div>
 
       {wellsStatus ? (
         <p className="text-sm text-[var(--muted)]">{wellsStatus}</p>
