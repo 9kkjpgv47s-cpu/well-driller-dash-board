@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AreaInsightsPanel } from "@/components/AreaInsightsPanel";
@@ -602,12 +601,7 @@ export function DrillingHubClient() {
 
   const queueListBody = useMemo(() => {
     if (!entries.length) {
-      return (
-        <p className="mt-3 rounded-xl border border-dashed border-[var(--border)] p-6 text-sm text-[var(--muted)]">
-          No wells in the queue yet. Click map markers to add registry wells
-          for note-taking.
-        </p>
-      );
+      return null;
     }
     return (
       <ul className="mt-3 space-y-4">
@@ -942,20 +936,7 @@ export function DrillingHubClient() {
                 );
               case "queue":
                 return (
-                  <section key="queue" aria-labelledby="drill-queue-h">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <h2
-                        id="drill-queue-h"
-                        className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]"
-                      >
-                        Well queue (local)
-                      </h2>
-                      <SectionMoveControls
-                        id="queue"
-                        order={sectionOrder}
-                        onMove={moveFieldSection}
-                      />
-                    </div>
+                  <section key="queue">
                     {queueListBody}
                   </section>
                 );
@@ -989,22 +970,10 @@ export function DrillingHubClient() {
       ) : null}
 
       {!center ? (
-        <section aria-labelledby="drill-queue-h">
-          <h2
-            id="drill-queue-h"
-            className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]"
-          >
-            Well queue (local)
-          </h2>
+        <section>
           {queueListBody}
         </section>
       ) : null}
-
-      <p className="text-xs text-[var(--muted)]">
-        <Link href="/scheduling" className="text-[var(--accent)] underline">
-          ← Office
-        </Link>
-      </p>
     </div>
   );
 }
