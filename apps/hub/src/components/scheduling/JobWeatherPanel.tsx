@@ -261,7 +261,8 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
       const d = h.time.slice(0, 10);
       const hNum = Number(h.time.slice(11, 13));
       if (d === today) return Number.isFinite(hNum) && hNum >= nowKey.hour;
-      if (d === tomorrow) return Number.isFinite(hNum) && hNum <= 12;
+      // Always carry overnight planning through next-day 6 PM.
+      if (d === tomorrow) return Number.isFinite(hNum) && hNum <= 18;
       return false;
     });
   }, [activeSourceDay, activeDate, tz]);
