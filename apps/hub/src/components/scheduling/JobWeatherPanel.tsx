@@ -14,7 +14,6 @@ import {
   hourlyRowsForAnchorDate,
 } from "@/lib/weather/open-meteo-display";
 import type { WeatherApiResponse } from "@/lib/weather/types";
-import { LiveRadarMap } from "@/components/scheduling/LiveRadarMap";
 
 type Props = {
   job: DrillJob | null;
@@ -172,6 +171,81 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
     return buildJobWeatherAdvice({ ...job, date: activeDate }, activeSummary);
   }, [job, activeSummary, activeDate]);
 
+  const sourceDayViews = useMemo(() => {
+    if (!data || !activeDate) return [];
+    return data.sources.map((s) => {
+      const rows = hourlyRowsForAnchorDate(s.hourly, activeDate);
+      let maxPrecipPop: number | null = null;
+      let maxWindMph: number | null = null;
+      let minTempF: number | null = null;
+      let maxTempF: number | null = null;
+      const labels = new Map<string, number>();
+      for (const h of rows) {
+        if (h.precipPop != null) {
+          maxPrecipPop =
+            maxPrecipPop == null ? h.precipPop : Math.max(maxPrecipPop, h.precipPop);
+        }
+        if (h.windMph != null) {
+          maxWindMph =
+            maxWindMph == null ? h.windMph : Math.max(maxWindMph, h.windMph);
+        }
+        minTempF = minTempF == null ? h.tempF : Math.min(minTempF, h.tempF);
+        maxTempF = maxTempF == null ? h.tempF : Math.max(maxTempF, h.tempF);
+        labels.set(h.conditionLabel, (labels.get(h.conditionLabel) ?? 0) + 1);
+      }
+      const dominantCondition =
+        [...labels.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+      return {
+        id: s.id,
+        label: s.label,
+        provider: s.provider,
+        updatedAt: s.fetchedAt,
+        maxPrecipPop,
+        maxWindMph,
+        minTempF,
+        maxTempF,
+        dominantCondition,
+      };
+    });
+  }, [data, activeDate]);
+
+  const stormWatch = useMemo(() => {
+    if (!activeSummary) return null;
+    const pop = activeSummary.maxPrecipPop ?? 0;
+    const wind = activeSummary.maxWindMph ?? 0;
+    const condition = activeSummary.dominantCondition ?? "";
+    const severeCondition = /thunder|storm|hail|sleet|snow/i.test(condition);
+    const sourcePops = sourceDayViews
+      .map((s) => s.maxPrecipPop)
+      .filter((v): v is number => v != null);
+    const sourceWinds = sourceDayViews
+      .map((s) => s.maxWindMph)
+      .filter((v): v is number => v != null);
+    const popSpread =
+      sourcePops.length > 1 ? Math.max(...sourcePops) - Math.min(...sourcePops) : 0;
+    const windSpread =
+      sourceWinds.length > 1 ? Math.max(...sourceWinds) - Math.min(...sourceWinds) : 0;
+
+    const hasAbnormal =
+      pop >= 60 || wind >= 28 || severeCondition || popSpread >= 20 || windSpread >= 10;
+    if (!hasAbnormal) return null;
+
+    const severity = pop >= 80 || wind >= 35 || severeCondition ? "critical" : "caution";
+    const lines = [
+      pop >= 60 ? `Precipitation risk peaks around ${Math.round(pop)}%.` : null,
+      wind >= 28 ? `Wind could peak near ${Math.round(wind)} mph.` : null,
+      severeCondition ? `Primary condition includes ${condition.toLowerCase()}.` : null,
+      popSpread >= 20
+        ? `Model disagreement on rain chance is high (${Math.round(popSpread)}-point spread).`
+        : null,
+      windSpread >= 10
+        ? `Model disagreement on wind is notable (${Math.round(windSpread)} mph spread).`
+        : null,
+    ].filter((v): v is string => Boolean(v));
+    const textMessage = `Storm watch for ${activeDate}: ${lines.join(" ")}`;
+    return { severity, lines, textMessage };
+  }, [activeSummary, sourceDayViews, activeDate]);
+
   const nearMeSummary = useMemo(() => {
     if (!nearMeData?.daySummaries.length) return null;
     return nearMeData.daySummaries[0]!;
@@ -292,18 +366,6 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
         </div>
       </details>
 
-      <div>
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Live radar (jobsite)
-        </h3>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Composite reflectivity at the selected jobsite coordinates.
-        </p>
-        <div className="mt-2">
-          <LiveRadarMap lat={job.lat} lon={job.lon} />
-        </div>
-      </div>
-
       {loading && (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading outlook…</p>
       )}
@@ -315,6 +377,28 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
 
       {data && (
         <>
+          {stormWatch ? (
+            <div
+              className={`rounded-lg border p-4 ${
+                stormWatch.severity === "critical"
+                  ? "border-red-300 bg-red-50 dark:border-red-900 dark:bg-red-950/30"
+                  : "border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20"
+              }`}
+            >
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                Storm watch notification
+              </h3>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-800 dark:text-zinc-100">
+                {stormWatch.lines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+              <p className="mt-2 rounded-md bg-white/60 px-2 py-1 text-xs text-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-200">
+                Text-ready: {stormWatch.textMessage}
+              </p>
+            </div>
+          ) : null}
+
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
@@ -392,6 +476,38 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
                   ) : null}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Source comparison ({sourceDayViews.length})
+            </h3>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Side-by-side model/provider perspective for <strong>{activeDate ?? "—"}</strong>.
+            </p>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {sourceDayViews.map((s) => (
+                <div key={s.id} className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    {s.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                    {s.provider} · updated {new Date(s.updatedAt).toLocaleTimeString()}
+                  </p>
+                  <ul className="mt-2 space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
+                    <li>Rain chance peak: {s.maxPrecipPop != null ? `${Math.round(s.maxPrecipPop)}%` : "—"}</li>
+                    <li>Wind peak: {s.maxWindMph != null ? `${Math.round(s.maxWindMph)} mph` : "—"}</li>
+                    <li>
+                      Temp range:{" "}
+                      {s.minTempF != null && s.maxTempF != null
+                        ? `${Math.round(s.minTempF)}–${Math.round(s.maxTempF)}°F`
+                        : "—"}
+                    </li>
+                    <li>Dominant: {s.dominantCondition}</li>
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
 
