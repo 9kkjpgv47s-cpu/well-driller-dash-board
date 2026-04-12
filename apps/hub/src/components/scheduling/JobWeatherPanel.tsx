@@ -15,6 +15,31 @@ import {
 } from "@/lib/weather/open-meteo-display";
 import type { WeatherApiResponse } from "@/lib/weather/types";
 
+function nowDateHourInTimeZone(timezone: string): { date: string; hour: number } {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+
+  const byType = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const year = byType.year;
+  const month = byType.month;
+  const day = byType.day;
+  const hour = Number(byType.hour);
+  const date = year && month && day ? `${year}-${month}-${day}` : "";
+  return { date, hour: Number.isFinite(hour) ? hour : 0 };
+}
+
+function addDaysIso(dateIso: string, days: number): string {
+  const t = new Date(`${dateIso}T12:00:00Z`).getTime() + days * 86400000;
+  return new Date(t).toISOString().slice(0, 10);
+}
+
 type Props = {
   job: DrillJob | null;
   timezone?: string;
@@ -28,6 +53,7 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeDate, setActiveDate] = useState<string | null>(null);
+  const [activeSourceId, setActiveSourceId] = useState<string | null>(null);
   const [nearMeData, setNearMeData] = useState<WeatherApiResponse | null>(null);
   const [nearMeErr, setNearMeErr] = useState<string | null>(null);
   const [nearMeLoading, setNearMeLoading] = useState(false);
@@ -139,11 +165,6 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
     return () => ctrl.abort();
   }, [nearMeCoords, tz]);
 
-  const primaryHourly = useMemo(() => {
-    if (!data) return [];
-    return primaryOpenMeteo(data.sources)?.hourly ?? [];
-  }, [data]);
-
   const availableDates = useMemo(
     () => data?.daySummaries.map((d) => d.date) ?? [],
     [data],
@@ -160,11 +181,6 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
     if (!data || !activeDate) return null;
     return data.daySummaries.find((d) => d.date === activeDate) ?? null;
   }, [data, activeDate]);
-
-  const hourlyForActiveDay = useMemo(() => {
-    if (!activeDate) return [];
-    return hourlyRowsForAnchorDate(primaryHourly, activeDate);
-  }, [primaryHourly, activeDate]);
 
   const activeAdvice = useMemo(() => {
     if (!job || !activeSummary || !activeDate) return null;
@@ -200,6 +216,8 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
         label: s.label,
         provider: s.provider,
         updatedAt: s.fetchedAt,
+        allHourly: s.hourly,
+        hourlyRows: rows,
         maxPrecipPop,
         maxWindMph,
         minTempF,
@@ -208,6 +226,45 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
       };
     });
   }, [data, activeDate]);
+
+  useEffect(() => {
+    if (!sourceDayViews.length) {
+      setActiveSourceId(null);
+      return;
+    }
+    if (activeSourceId && sourceDayViews.some((s) => s.id === activeSourceId)) {
+      return;
+    }
+    setActiveSourceId(sourceDayViews[0]!.id);
+  }, [sourceDayViews, activeSourceId]);
+
+  const activeSourceDay = useMemo(() => {
+    if (!sourceDayViews.length) return null;
+    return (
+      sourceDayViews.find((s) => s.id === activeSourceId) ?? sourceDayViews[0]!
+    );
+  }, [sourceDayViews, activeSourceId]);
+
+  const hourlyRowsForTable = useMemo(() => {
+    if (!activeSourceDay || !activeDate) return [];
+    const all = activeSourceDay.allHourly ?? [];
+    if (!all.length) return [];
+
+    const nowKey = nowDateHourInTimeZone(tz);
+    const today = nowKey.date;
+    const tomorrow = addDaysIso(today, 1);
+    const activeIsToday = activeDate === today;
+
+    if (!activeIsToday) return activeSourceDay.hourlyRows;
+
+    return all.filter((h) => {
+      const d = h.time.slice(0, 10);
+      const hNum = Number(h.time.slice(11, 13));
+      if (d === today) return Number.isFinite(hNum) && hNum >= nowKey.hour;
+      if (d === tomorrow) return Number.isFinite(hNum) && hNum <= 12;
+      return false;
+    });
+  }, [activeSourceDay, activeDate, tz]);
 
   const stormWatch = useMemo(() => {
     if (!activeSummary) return null;
@@ -399,6 +456,57 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
             </div>
           ) : null}
 
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Source comparison ({sourceDayViews.length})
+            </h3>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Click a source to load hourly weather for that model on{" "}
+              <strong>{activeDate ?? "—"}</strong>.
+            </p>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {sourceDayViews.map((s) => {
+                const selected = s.id === activeSourceDay?.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setActiveSourceId(s.id)}
+                    className={`rounded-lg border p-3 text-left ${
+                      selected
+                        ? "border-zinc-900 bg-zinc-50 dark:border-zinc-200 dark:bg-zinc-800/60"
+                        : "border-zinc-200 dark:border-zinc-700"
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      {s.label}
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                      {s.provider} · updated {new Date(s.updatedAt).toLocaleTimeString()}
+                    </p>
+                    <ul className="mt-2 space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
+                      <li>
+                        Rain chance peak:{" "}
+                        {s.maxPrecipPop != null ? `${Math.round(s.maxPrecipPop)}%` : "—"}
+                      </li>
+                      <li>
+                        Wind peak:{" "}
+                        {s.maxWindMph != null ? `${Math.round(s.maxWindMph)} mph` : "—"}
+                      </li>
+                      <li>
+                        Temp range:{" "}
+                        {s.minTempF != null && s.maxTempF != null
+                          ? `${Math.round(s.minTempF)}–${Math.round(s.maxTempF)}°F`
+                          : "—"}
+                      </li>
+                      <li>Dominant: {s.dominantCondition}</li>
+                    </ul>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
@@ -407,43 +515,58 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
               <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                 Forecast timezone{" "}
                 <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">{tz}</code>
-                . Using <strong>{activeDate ?? "—"}</strong>.
+                . Using <strong>{activeDate ?? "—"}</strong>
+                {activeSourceDay ? (
+                  <>
+                    {" "}
+                    · source <strong>{activeSourceDay.label}</strong>.
+                  </>
+                ) : (
+                  "."
+                )}
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Stat
                 label="Peak rain chance"
                 value={
-                  activeSummary?.maxPrecipPop != null
-                    ? `${Math.round(activeSummary.maxPrecipPop)}%`
+                  activeSourceDay?.maxPrecipPop != null
+                    ? `${Math.round(activeSourceDay.maxPrecipPop)}%`
                     : "—"
                 }
               />
               <Stat
                 label="Peak wind (hourly)"
                 value={
-                  activeSummary?.maxWindMph != null
-                    ? `${Math.round(activeSummary.maxWindMph)} mph`
+                  activeSourceDay?.maxWindMph != null
+                    ? `${Math.round(activeSourceDay.maxWindMph)} mph`
                     : "—"
                 }
               />
               <Stat
                 label="Temp range"
                 value={
-                  activeSummary?.minTempF != null && activeSummary?.maxTempF != null
-                    ? `${Math.round(activeSummary.minTempF)}–${Math.round(activeSummary.maxTempF)}°F`
+                  activeSourceDay?.minTempF != null && activeSourceDay?.maxTempF != null
+                    ? `${Math.round(activeSourceDay.minTempF)}–${Math.round(activeSourceDay.maxTempF)}°F`
                     : "—"
                 }
               />
               <Stat
                 label="Dominant conditions"
-                value={activeSummary?.dominantCondition ?? "—"}
+                value={activeSourceDay?.dominantCondition ?? "—"}
               />
             </div>
+            {activeSourceDay && activeSourceDay.hourlyRows.length === 0 ? (
+              <p className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+                No hourly weather available from <strong>{activeSourceDay.label}</strong>{" "}
+                for <strong>{activeDate}</strong>.
+              </p>
+            ) : null}
             <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
               <table className="w-full min-w-[620px] text-left text-xs">
                 <thead className="sticky top-0 bg-zinc-50 dark:bg-zinc-800">
                   <tr>
+                    <th className="px-2 py-2 font-medium">Date</th>
                     <th className="px-2 py-2 font-medium">Hour</th>
                     <th className="px-2 py-2 font-medium">Temp</th>
                     <th className="px-2 py-2 font-medium">Rain %</th>
@@ -453,8 +576,11 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {hourlyForActiveDay.map((h) => (
+                  {hourlyRowsForTable.map((h) => (
                     <tr key={h.time} className="border-t border-zinc-100 dark:border-zinc-800">
+                      <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
+                        {h.time.slice(0, 10)}
+                      </td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
                         {formatOpenMeteoWallClock(h.time)}
                       </td>
@@ -467,47 +593,15 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
                       <td className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300">{h.conditionLabel}</td>
                     </tr>
                   ))}
-                  {hourlyForActiveDay.length === 0 ? (
+                  {hourlyRowsForTable.length === 0 ? (
                     <tr className="border-t border-zinc-100 dark:border-zinc-800">
-                      <td className="px-2 py-2 text-zinc-500 dark:text-zinc-400" colSpan={6}>
-                        No hourly rows available for this day.
+                      <td className="px-2 py-2 text-zinc-500 dark:text-zinc-400" colSpan={7}>
+                        No hourly weather available.
                       </td>
                     </tr>
                   ) : null}
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Source comparison ({sourceDayViews.length})
-            </h3>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              Side-by-side model/provider perspective for <strong>{activeDate ?? "—"}</strong>.
-            </p>
-            <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {sourceDayViews.map((s) => (
-                <div key={s.id} className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                    {s.label}
-                  </p>
-                  <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                    {s.provider} · updated {new Date(s.updatedAt).toLocaleTimeString()}
-                  </p>
-                  <ul className="mt-2 space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
-                    <li>Rain chance peak: {s.maxPrecipPop != null ? `${Math.round(s.maxPrecipPop)}%` : "—"}</li>
-                    <li>Wind peak: {s.maxWindMph != null ? `${Math.round(s.maxWindMph)} mph` : "—"}</li>
-                    <li>
-                      Temp range:{" "}
-                      {s.minTempF != null && s.maxTempF != null
-                        ? `${Math.round(s.minTempF)}–${Math.round(s.maxTempF)}°F`
-                        : "—"}
-                    </li>
-                    <li>Dominant: {s.dominantCondition}</li>
-                  </ul>
-                </div>
-              ))}
             </div>
           </div>
 
