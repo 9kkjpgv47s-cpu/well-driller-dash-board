@@ -5,6 +5,7 @@ type OmResponse = {
   hourly: {
     time: string[];
     temperature_2m: number[];
+    apparent_temperature?: number[];
     precipitation_probability?: number[];
     weathercode: number[];
     cloud_cover: number[];
@@ -14,7 +15,7 @@ type OmResponse = {
 };
 
 const HOURLY_PARAMS =
-  "temperature_2m,precipitation_probability,weathercode,cloud_cover,wind_speed_10m,wind_direction_10m";
+  "temperature_2m,apparent_temperature,precipitation_probability,weathercode,cloud_cover,wind_speed_10m,wind_direction_10m";
 
 function parseHourly(data: OmResponse, sourceId: string, label: string): WeatherHourly[] {
   const { hourly } = data;
@@ -24,6 +25,7 @@ function parseHourly(data: OmResponse, sourceId: string, label: string): Weather
     out.push({
       time: hourly.time[i],
       tempF: hourly.temperature_2m[i],
+      feelsLikeF: hourly.apparent_temperature?.[i] ?? null,
       precipPop: hourly.precipitation_probability?.[i] ?? null,
       cloudPct: hourly.cloud_cover[i] ?? null,
       windMph: hourly.wind_speed_10m[i] ?? null,

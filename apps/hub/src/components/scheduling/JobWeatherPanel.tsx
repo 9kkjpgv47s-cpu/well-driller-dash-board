@@ -200,6 +200,8 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
       let maxWindMph: number | null = null;
       let minTempF: number | null = null;
       let maxTempF: number | null = null;
+      let minFeelsLikeF: number | null = null;
+      let maxFeelsLikeF: number | null = null;
       const labels = new Map<string, number>();
       for (const h of rows) {
         if (h.precipPop != null) {
@@ -212,6 +214,12 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
         }
         minTempF = minTempF == null ? h.tempF : Math.min(minTempF, h.tempF);
         maxTempF = maxTempF == null ? h.tempF : Math.max(maxTempF, h.tempF);
+        if (h.feelsLikeF != null) {
+          minFeelsLikeF =
+            minFeelsLikeF == null ? h.feelsLikeF : Math.min(minFeelsLikeF, h.feelsLikeF);
+          maxFeelsLikeF =
+            maxFeelsLikeF == null ? h.feelsLikeF : Math.max(maxFeelsLikeF, h.feelsLikeF);
+        }
         labels.set(h.conditionLabel, (labels.get(h.conditionLabel) ?? 0) + 1);
       }
       const dominantCondition =
@@ -227,6 +235,8 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
         maxWindMph,
         minTempF,
         maxTempF,
+        minFeelsLikeF,
+        maxFeelsLikeF,
         dominantCondition,
       };
     });
@@ -513,6 +523,12 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
                           ? `${Math.round(s.minTempF)}–${Math.round(s.maxTempF)}°F`
                           : "—"}
                       </li>
+                      <li>
+                        Feels like:{" "}
+                        {s.minFeelsLikeF != null && s.maxFeelsLikeF != null
+                          ? `${Math.round(s.minFeelsLikeF)}–${Math.round(s.maxFeelsLikeF)}°F`
+                          : "—"}
+                      </li>
                       <li>Dominant: {s.dominantCondition}</li>
                     </ul>
                   </button>
@@ -540,7 +556,7 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
                 )}
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <Stat
                 label="Peak rain chance"
                 value={
@@ -562,6 +578,14 @@ export function JobWeatherPanel({ job, timezone, headerActions }: Props) {
                 value={
                   activeSourceDay?.minTempF != null && activeSourceDay?.maxTempF != null
                     ? `${Math.round(activeSourceDay.minTempF)}–${Math.round(activeSourceDay.maxTempF)}°F`
+                    : "—"
+                }
+              />
+              <Stat
+                label="Feels like range"
+                value={
+                  activeSourceDay?.minFeelsLikeF != null && activeSourceDay?.maxFeelsLikeF != null
+                    ? `${Math.round(activeSourceDay.minFeelsLikeF)}–${Math.round(activeSourceDay.maxFeelsLikeF)}°F`
                     : "—"
                 }
               />

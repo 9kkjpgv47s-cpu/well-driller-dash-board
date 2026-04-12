@@ -1,6 +1,7 @@
 export type WeatherHourly = {
   time: string;
   tempF: number;
+  feelsLikeF: number | null;
   precipPop: number | null;
   cloudPct: number | null;
   windMph: number | null;
