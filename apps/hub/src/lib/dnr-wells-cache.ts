@@ -10,10 +10,21 @@ export function getDnrWellsCached(
 ): Promise<WellRecord[]> {
   if (wellsCache) return Promise.resolve(wellsCache);
   if (!wellsCachePromise) {
-    wellsCachePromise = loadAllDnrChunksFromPublic(onProgress).then((w) => {
-      wellsCache = w;
-      return w;
-    });
+    wellsCachePromise = loadAllDnrChunksFromPublic(onProgress)
+      .then((w) => {
+        wellsCache = w;
+        return w;
+      })
+      .catch((err) => {
+        // Allow a retry after transient fetch/schema errors.
+        wellsCachePromise = null;
+        throw err;
+      });
   }
   return wellsCachePromise;
+}
+
+export function resetDnrWellsCache(): void {
+  wellsCache = null;
+  wellsCachePromise = null;
 }

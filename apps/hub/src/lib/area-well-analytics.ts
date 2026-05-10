@@ -39,20 +39,58 @@ export function chunkRockTopFt(w: WellRecord): number | null {
 const ROCK_FORM =
   /lime|dolomite|shale|slate|sandstone|siltstone|bedrock|granite|marble|chert|quartzite|basalt|gneiss|schist|conglomerate|argillite|\brock\b/i;
 
-function formationName(layer: unknown): string {
+export const LITHO_FORMATION_KEYS = [
+  "formation",
+  "Formation",
+  "material",
+  "Material",
+  "description",
+  "Description",
+  "lithology",
+  "Lithology",
+  "strata",
+  "Strata",
+] as const;
+
+export const LITHO_TOP_KEYS = [
+  "top",
+  "Top",
+  "from",
+  "From",
+  "depth_from",
+  "DepthFrom",
+  "depth_top",
+  "DepthTop",
+  "start_depth",
+  "upper_depth",
+  "upperDepth",
+  "begin_depth",
+  "BeginDepth",
+  "start",
+  "Start",
+] as const;
+
+export const LITHO_BOTTOM_KEYS = [
+  "bottom",
+  "Bottom",
+  "to",
+  "To",
+  "depth_to",
+  "DepthTo",
+  "depth_bottom",
+  "DepthBottom",
+  "end_depth",
+  "lower_depth",
+  "lowerDepth",
+  "end",
+  "End",
+] as const;
+
+export function lithologyFormationName(layer: unknown): string {
   if (!layer || typeof layer !== "object") return "";
   const o = layer as Record<string, unknown>;
   return String(
-    o.formation ??
-      o.Formation ??
-      o.material ??
-      o.Material ??
-      o.description ??
-      o.Description ??
-      o.lithology ??
-      o.Lithology ??
-      o.strata ??
-      o.Strata ??
+    LITHO_FORMATION_KEYS.map((k) => o[k]).find((v) => v != null && v !== "") ??
       "",
   ).trim();
 }
@@ -62,7 +100,11 @@ function parseDepthField(v: unknown): number {
   return parseFloat(String(v).replace(/,/g, "").replace(/[^\d.\-]/g, ""));
 }
 
-function layerTopBottom(
+function formationName(layer: unknown): string {
+  return lithologyFormationName(layer);
+}
+
+export function lithologyLayerTopBottomFt(
   layer: unknown,
   prevBottom: number,
 ): { top: number; bot: number } {
@@ -70,39 +112,20 @@ function layerTopBottom(
     return { top: NaN, bot: NaN };
   const o = layer as Record<string, unknown>;
   let top = parseDepthField(
-    o.top ??
-      o.Top ??
-      o.from ??
-      o.From ??
-      o.depth_from ??
-      o.DepthFrom ??
-      o.depth_top ??
-      o.DepthTop ??
-      o.start_depth ??
-      o.upper_depth ??
-      o.upperDepth ??
-      o.begin_depth ??
-      o.BeginDepth ??
-      o.start ??
-      o.Start,
+    LITHO_TOP_KEYS.map((k) => o[k]).find((v) => v != null && v !== ""),
   );
   const bot = parseDepthField(
-    o.bottom ??
-      o.Bottom ??
-      o.to ??
-      o.To ??
-      o.depth_to ??
-      o.DepthTo ??
-      o.depth_bottom ??
-      o.DepthBottom ??
-      o.end_depth ??
-      o.lower_depth ??
-      o.lowerDepth ??
-      o.end ??
-      o.End,
+    LITHO_BOTTOM_KEYS.map((k) => o[k]).find((v) => v != null && v !== ""),
   );
   if (Number.isNaN(top) && !Number.isNaN(prevBottom)) top = prevBottom;
   return { top, bot };
+}
+
+function layerTopBottom(
+  layer: unknown,
+  prevBottom: number,
+): { top: number; bot: number } {
+  return lithologyLayerTopBottomFt(layer, prevBottom);
 }
 
 /** Merged lithology when valid; otherwise raw log intervals (many exports only use From/To). */
@@ -387,28 +410,6 @@ export function displayDepthFt(w: WellRecord): number | null {
   return null;
 }
 
-/** Parse static water level (ft) from chunk/registry columns when present. */
-export function parseStaticWaterFt(w: WellRecord): number | null {
-  const keys = [
-    "static_water",
-    "static_water_ft",
-    "static_water_level",
-    "static_water_level_ft",
-    "static_level",
-    "swl",
-    "swl_ft",
-    "water_level_static",
-    "level_static",
-  ] as const;
-  for (const k of keys) {
-    const raw = w[k];
-    if (raw == null || raw === "") continue;
-    const n = parseFloat(String(raw).replace(/,/g, "").replace(/[^\d.\-]/g, ""));
-    if (Number.isFinite(n) && n > 0) return n;
-  }
-  return null;
-}
-
 export function haversineMiles(
   lat1: number,
   lon1: number,
@@ -453,6 +454,12 @@ export type AreaInsightsReport = {
     rockTopCol: number;
     registryAquiferNonBlank: number;
   };
+  insightQuality: {
+    grade: "high" | "medium" | "low";
+    /** 0-100 weighted confidence from available well signals in-radius. */
+    score: number;
+    reasons: string[];
+  };
   /** Narrative bullets (complete analysis, not single-bar UI). */
   narratives: string[];
   /** Structured buckets for tables / future charts. */
@@ -489,12 +496,6 @@ export type AreaInsightsReport = {
   depthMedianFt: number | null;
   depthMedianHighYieldFt: number | null;
   depthMedianLowYieldFt: number | null;
-  /** Same-radius registry snapshot for field prep (not mock optimization). */
-  fieldPrepNeighborhood: {
-    medianCompletedDepthFt: number | null;
-    staticWaterBandLabel: string;
-    wellsWithStaticWater: number;
-  };
   disclaimers: string[];
 };
 
@@ -508,24 +509,6 @@ function median(nums: number[]): number | null {
   const s = [...nums].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-}
-
-function formatStaticWaterBandLabel(levels: number[]): string {
-  if (levels.length === 0) {
-    return "No static water values in chunk columns for wells in this radius.";
-  }
-  if (levels.length < 5) {
-    const m = median(levels);
-    return m != null
-      ? `~${Math.round(m)} ft median (${levels.length} well(s) with static data)`
-      : "—";
-  }
-  const s = [...levels].sort((a, b) => a - b);
-  const pick = (q: number) =>
-    s[Math.min(s.length - 1, Math.max(0, Math.floor(q * (s.length - 1))))];
-  const lo = pick(0.25);
-  const hi = pick(0.75);
-  return `${Math.round(lo)}–${Math.round(hi)} ft (IQR, ${levels.length} wells with static)`;
 }
 
 /**
@@ -608,7 +591,6 @@ export function computeAreaInsights(
   const depthsHigh: number[] = [];
   const depthsLow: number[] = [];
   const depthsAll: number[] = [];
-  const staticWaterLevels: number[] = [];
 
   for (const w of inR) {
     if (isDryOrAbandoned(w)) dryOrAbandoned++;
@@ -688,9 +670,6 @@ export function computeAreaInsights(
       yieldBuckets.unknown++;
     }
     if (d != null) depthsAll.push(d);
-
-    const sw = parseStaticWaterFt(w);
-    if (sw != null) staticWaterLevels.push(sw);
   }
 
   const depthMedianFt = median(depthsAll);
@@ -792,6 +771,29 @@ export function computeAreaInsights(
     "The well viewer modal may still show raw chunk lithology strings.",
   ];
 
+  const covLithPct = n > 0 ? covLithIntervals / n : 0;
+  const covVeinPct = n > 0 ? covVein / n : 0;
+  const covRockPct = n > 0 ? covRock / n : 0;
+  const covAqPct = n > 0 ? covAq / n : 0;
+  const weightedScore = Math.round(
+    100 * (covLithPct * 0.45 + covVeinPct * 0.2 + covRockPct * 0.15 + covAqPct * 0.2),
+  );
+  const grade: "high" | "medium" | "low" =
+    weightedScore >= 75 ? "high" : weightedScore >= 45 ? "medium" : "low";
+  const reasons: string[] = [];
+  if (covLithIntervals < n * 0.6) {
+    reasons.push("Many nearby wells do not have parseable lithology intervals.");
+  }
+  if (covAq < n * 0.5) {
+    reasons.push("Registry aquifer text is sparse, so inference contributes heavily.");
+  }
+  if (covVein === 0 && covRock === 0) {
+    reasons.push("No vein/rock helper columns were found in this radius.");
+  }
+  if (!reasons.length) {
+    reasons.push("Coverage is strong across lithology, vein/rock columns, and aquifer text.");
+  }
+
   return {
     center: { lat, lon },
     radiusMiles,
@@ -804,6 +806,11 @@ export function computeAreaInsights(
       rockTopCol: covRock,
       registryAquiferNonBlank: covAq,
     },
+    insightQuality: {
+      grade,
+      score: weightedScore,
+      reasons,
+    },
     narratives,
     aquiferMix,
     gravelVeinDistribution,
@@ -814,11 +821,6 @@ export function computeAreaInsights(
     depthMedianFt,
     depthMedianHighYieldFt,
     depthMedianLowYieldFt,
-    fieldPrepNeighborhood: {
-      medianCompletedDepthFt: depthMedianFt,
-      staticWaterBandLabel: formatStaticWaterBandLabel(staticWaterLevels),
-      wellsWithStaticWater: staticWaterLevels.length,
-    },
     disclaimers,
   };
 }

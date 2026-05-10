@@ -8,8 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "verify:chunks": "python3 ../../scripts/verify-hub-well-chunks.py",
+    "verify:lithology-kpi": "python3 scripts/report-lithology-kpi.py",
+    "verify:viewer-hub-artifacts": "python3 scripts/verify-viewer-hub-artifacts.py",
+    "lithology:export-none": "python3 scripts/export-none-lithology-wells.py --out ../../../data/out/lithology-none-wells.csv",
     "rebuild:viewer-data": "python3 scripts/rebuild-viewer-data.py",
-    "rebuild:viewer-data:html-full": "python3 scripts/run-viewer-full-lithology.py"
+    "rebuild:viewer-data:html-full": "python3 scripts/run-viewer-full-lithology.py",
+    "lithology:statewide": "python3 scripts/run-statewide-lithology-plan.py",
+    "lithology:iterate-to-target": "python3 scripts/iterate-lithology-to-target.py",
+    "test:hub-lithology": "vitest run"
   },
   "dependencies": {
     "dnr-report-local": "file:./vendor/dnr-report-local",
@@ -20,9 +26,9 @@
     "react-dom": "19.1.0"
   },
   "devDependencies": {
-    "@types/leaflet": "^1.9.21",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^20",
     "@types/papaparse": "^5.3.14",
     "@types/react": "^19",
@@ -30,6 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.14",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.5"
   }
 }

@@ -6,6 +6,12 @@ import type { WellRecord } from "@/lib/area-well-analytics";
 const CHUNK_PREFIX = "/well-viewer/dnr_wells_chunk_";
 const CHUNK_SUFFIX = ".csv.gz";
 const MAX_CHUNK_INDEX = 24;
+const CORE_COLUMN_ALIASES: Record<string, string[]> = {
+  lat: ["lat", "latitude"],
+  lon: ["lon", "longitude", "lng"],
+  lithology_json: ["lithology_json", "lithology", "well_log_json", "welllog_json"],
+  lithology_source: ["lithology_source"],
+};
 
 async function gunzipText(buf: ArrayBuffer): Promise<string> {
   const u8 = new Uint8Array(buf);
@@ -34,6 +40,22 @@ function normalizeRow(row: Record<string, string>): WellRecord {
   return out;
 }
 
+function normalizeHeaderSet(fields: string[] | undefined): Set<string> {
+  const out = new Set<string>();
+  for (const f of fields ?? []) {
+    out.add(String(f ?? "").replace(/^\ufeff/, "").toLowerCase().trim());
+  }
+  return out;
+}
+
+function missingCoreColumns(h: Set<string>): string[] {
+  const missing: string[] = [];
+  for (const [core, aliases] of Object.entries(CORE_COLUMN_ALIASES)) {
+    if (!aliases.some((a) => h.has(a))) missing.push(core);
+  }
+  return missing;
+}
+
 /**
  * Load all DNR gzip chunks from the static viewer path (same origin as the hub).
  */
@@ -41,6 +63,7 @@ export async function loadAllDnrChunksFromPublic(
   onProgress?: (msg: string) => void,
 ): Promise<WellRecord[]> {
   const all: WellRecord[] = [];
+  let warnedLithologySourceMissing = false;
   for (let i = 0; i <= MAX_CHUNK_INDEX; i++) {
     const url = `${CHUNK_PREFIX}${i}${CHUNK_SUFFIX}`;
     onProgress?.(`Loading chunk ${i}…`);
@@ -58,6 +81,19 @@ export async function loadAllDnrChunksFromPublic(
       header: true,
       skipEmptyLines: true,
     });
+    const headers = normalizeHeaderSet(parsed.meta.fields);
+    const missing = missingCoreColumns(headers);
+    if (i === 0 && missing.length) {
+      throw new Error(
+        `Chunk schema drift detected in ${url}; missing core columns: ${missing.join(", ")}.`,
+      );
+    }
+    if (!warnedLithologySourceMissing && !headers.has("lithology_source")) {
+      warnedLithologySourceMissing = true;
+      onProgress?.(
+        "Warning: chunks missing lithology_source; KPI/source-aware insights may be degraded.",
+      );
+    }
     const rows = parsed.data ?? [];
     for (const row of rows) {
       const w = normalizeRow(row);

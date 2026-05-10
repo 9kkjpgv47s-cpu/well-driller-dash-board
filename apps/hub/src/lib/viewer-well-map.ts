@@ -3,7 +3,12 @@
  * and filter toggles — kept aligned with the standalone viewer behavior.
  */
 import type { WellRecord } from "@/lib/area-well-analytics";
-import { getLithLayers, primaryAquiferText } from "@/lib/area-well-analytics";
+import {
+  getLithLayers,
+  lithologyFormationName,
+  lithologyLayerTopBottomFt,
+  primaryAquiferText,
+} from "@/lib/area-well-analytics";
 
 export const SHOW_G_VEIN_THICKNESS_FT = true;
 
@@ -61,50 +66,18 @@ export const DEFAULT_VIEWER_MAP_FILTERS: ViewerMapFilters = {
 };
 
 function lithoFormationName(layer: unknown): string {
-  if (!layer || typeof layer !== "object") return "";
-  const o = layer as Record<string, unknown>;
-  return String(
-    o.formation ??
-      o.Formation ??
-      o.material ??
-      o.Material ??
-      o.lithology ??
-      o.Lithology ??
-      o.description ??
-      o.strata ??
-      "",
-  ).trim();
-}
-
-function lithoParseDepthFt(v: unknown): number {
-  if (v == null || v === "") return NaN;
-  return parseFloat(String(v).replace(/,/g, "").replace(/[^\d.\-]/g, ""));
+  return lithologyFormationName(layer);
 }
 
 function lithoLayerTopBottomFt(
   L: unknown,
   prevBot: number,
 ): { top: number; bot: number } {
-  if (!L || typeof L !== "object")
-    return { top: NaN, bot: NaN };
-  const o = L as Record<string, unknown>;
-  let top = lithoParseDepthFt(
-    o.top ?? o.Top ?? o.from ?? o.From ?? o.depth_top ?? o.DepthTop,
-  );
-  const bot = lithoParseDepthFt(
-    o.bottom ??
-      o.Bottom ??
-      o.to ??
-      o.To ??
-      o.depth_bottom ??
-      o.DepthBottom,
-  );
-  if (Number.isNaN(bot)) return { top, bot: NaN };
-  if (Number.isNaN(top)) {
-    if (!Number.isNaN(prevBot)) top = prevBot;
-    else top = 0;
-  }
-  return { top, bot };
+  const tb = lithologyLayerTopBottomFt(L, prevBot);
+  let top = tb.top;
+  if (Number.isNaN(tb.bot)) return { top, bot: NaN };
+  if (Number.isNaN(top)) top = Number.isNaN(prevBot) ? 0 : prevBot;
+  return { top, bot: tb.bot };
 }
 
 function lithoMaxBottomFtForDisplay(w: WellRecord): number | null {

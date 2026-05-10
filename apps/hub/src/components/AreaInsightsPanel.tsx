@@ -14,6 +14,7 @@ import {
   type AreaInsightsReport,
 } from "@/lib/area-well-analytics";
 import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
+import type { OptimizationResult } from "@/lib/optimization";
 
 type Props = {
   lat: number;
@@ -79,6 +80,9 @@ export function AreaInsightsPanel({
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<AreaInsightsReport | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prep, setPrep] = useState<OptimizationResult | null>(null);
+  const [prepErr, setPrepErr] = useState<string | null>(null);
+  const [prepLoading, setPrepLoading] = useState(false);
 
   const run = useCallback(async () => {
     setLoading(true);
@@ -102,6 +106,37 @@ export function AreaInsightsPanel({
     if (!autoRun || !Number.isFinite(lat) || !Number.isFinite(lon)) return;
     void run();
   }, [autoRun, lat, lon, radiusMiles, run]);
+
+  useEffect(() => {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const ctrl = new AbortController();
+    const q = new URLSearchParams({
+      lat: String(lat),
+      lon: String(lon),
+      radiusMiles: String(radiusMiles),
+      priority: "balanced",
+    });
+    setPrepLoading(true);
+    setPrepErr(null);
+    fetch(`/api/optimization?${q}`, { signal: ctrl.signal })
+      .then(async (r) => {
+        const data = (await r.json()) as { error?: string };
+        if (!r.ok) {
+          throw new Error(
+            typeof data.error === "string" ? data.error : r.statusText,
+          );
+        }
+        return data as OptimizationResult;
+      })
+      .then(setPrep)
+      .catch((e: Error) => {
+        if (e.name === "AbortError") return;
+        setPrepErr(e.message);
+        setPrep(null);
+      })
+      .finally(() => setPrepLoading(false));
+    return () => ctrl.abort();
+  }, [lat, lon, radiusMiles]);
 
   const breakdowns = useMemo(() => {
     if (!report) return null;
@@ -190,25 +225,38 @@ export function AreaInsightsPanel({
     };
   }, [report]);
 
-  /** Field prep line uses the same registry slice as tables (gz chunks), not the optimization mock API. */
+  /** Field prep merged into the narrative (shorter page; same information). */
   const narrativeLines = useMemo(() => {
     const lines: string[] = [];
-    if (report) {
-      const fp = report.fieldPrepNeighborhood;
-      const depth =
-        fp.medianCompletedDepthFt != null
-          ? `**${fp.medianCompletedDepthFt} ft**`
-          : "**—**";
+    if (prepLoading) {
       lines.push(
-        `**Field prep (registry, ${radiusMiles} mi):** **${report.totalWellsInRadius.toLocaleString()}** wells in radius · median completed depth ${depth} · static water (chunk columns): **${fp.staticWaterBandLabel}** (${fp.wellsWithStaticWater.toLocaleString()} well(s) with a parseable static value).`,
+        "**Field prep (mock):** loading checklist and neighborhood hints…",
       );
+    }
+    if (prepErr) {
+      lines.push(`**Field prep (mock):** could not load — ${prepErr}`);
+    }
+    if (prep) {
       lines.push(
-        "Prep checklist: confirm loc_type and ground elevation · pull DNR reports for the closest 3–5 registry wells · plan extra screen if static or gravel signals look unusual.",
+        `**Field prep (mock):** illustrative neighborhood — **~${prep.neighborhood.sampleWellsInRadius}** wells in radius, **median depth ${prep.neighborhood.medianDepthFt} ft**, **static water band ${prep.neighborhood.typicalStaticBandFt}**.`,
       );
+      for (const item of prep.checklist) {
+        lines.push(`Prep checklist: ${item}`);
+      }
+      for (const n of prep.neighborhood.notes) {
+        lines.push(`Prep note: ${n}`);
+      }
     }
     if (report?.narratives.length) lines.push(...report.narratives);
     return lines;
-  }, [report, radiusMiles]);
+  }, [prep, prepLoading, prepErr, report]);
+
+  const qualityTone =
+    report?.insightQuality.grade === "high"
+      ? "text-emerald-800 dark:text-emerald-200"
+      : report?.insightQuality.grade === "medium"
+        ? "text-amber-800 dark:text-amber-200"
+        : "text-rose-800 dark:text-rose-200";
 
   return (
     <section
@@ -282,13 +330,18 @@ export function AreaInsightsPanel({
         </div>
       ) : null}
 
-      {report && breakdowns ? (
+      {(report && breakdowns) || prepLoading || prepErr || prep ? (
         <div className="space-y-6">
           {report ? (
             <div className="rounded-lg border border-emerald-800/25 bg-white/80 p-4 dark:border-emerald-700/40 dark:bg-zinc-900/50">
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900 dark:text-emerald-200">
-                Chunk data coverage (this radius)
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900 dark:text-emerald-200">
+                  Chunk data coverage (this radius)
+                </p>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${qualityTone}`}>
+                  Insight confidence {report.insightQuality.grade} · {report.insightQuality.score}/100
+                </p>
+              </div>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
                 These counts show how many wells in your circle actually carry
                 each field from the synced{" "}
@@ -298,6 +351,11 @@ export function AreaInsightsPanel({
                 export. Area tables use registry aquifer text when present, then
                 infer from lithology + vein/rock columns when aquifer is blank.
               </p>
+              <ul className={`mt-2 list-inside list-disc text-xs ${qualityTone}`}>
+                {report.insightQuality.reasons.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
               <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
                 <div className="flex justify-between gap-2 rounded-md bg-emerald-50/80 px-3 py-2 dark:bg-emerald-950/40">
                   <dt className="text-zinc-600 dark:text-zinc-400">
