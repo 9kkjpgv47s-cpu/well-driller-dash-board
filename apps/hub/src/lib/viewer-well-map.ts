@@ -9,6 +9,7 @@ import {
   lithologyLayerTopBottomFt,
   primaryAquiferText,
 } from "@/lib/area-well-analytics";
+import { wellTypeV2 } from "@/lib/lithology-v2";
 
 export const SHOW_G_VEIN_THICKNESS_FT = true;
 
@@ -17,10 +18,7 @@ const ROCK_FORM =
 const DRY_HOLE_COMMENT_RE =
   /dry hole|dry test|dry well|no water|abandoned|\bplugged\b|insufficient|bad water|can\x27t locate|cannot locate/i;
 
-const WELL_GR_R_OVERRIDES: Record<string, "bedrock" | "unconsolidated"> = {
-  "308016": "bedrock",
-  "DNR-308016": "bedrock",
-};
+const WELL_GR_R_OVERRIDES: Record<string, "bedrock" | "unconsolidated"> = {};
 
 export type ViewerMapFilters = {
   elevBlue: boolean;
@@ -613,22 +611,39 @@ export function isUnconsolidatedWellViewer(w: WellRecord): boolean {
   if (ov === "bedrock") return false;
   if (ov === "unconsolidated") return true;
 
+  const v2 = wellTypeV2(w);
+  if (v2 === true) return true;
+  if (v2 === false) return false;
+
+  const layers = getLithLayers(w);
+  const hasRealLitho = layers.length > 0;
+  if (hasRealLitho) {
+    const wb = lastWaterBearingVeinThicknessFt(w);
+    const sg = sumAquiferThicknessAboveRockFt(w);
+    const col = columnSandGravelTopToRockFt(w);
+    if (
+      (wb != null && wb > 0) ||
+      (sg != null && sg > 0) ||
+      (col != null && col > 0)
+    )
+      return true;
+    const rockFromLitho = lithoDepthToRock(w);
+    if (rockFromLitho != null) return false;
+  }
+
   const aq = primaryAquiferText(w).toLowerCase();
   if (
-    aq.includes("unconsolidated") ||
-    aq.includes("sand") ||
-    aq.includes("gravel")
-  )
-    return true;
-  if (
-    aq.includes("bedrock") ||
-    aq.includes("limestone") ||
-    aq.includes("dolomite") ||
-    aq.includes("shale") ||
-    aq.includes("sandstone") ||
-    aq.includes("siltstone")
+    /\b(bedrock|limestone|dolomite|dolostone|shale|sandstone|siltstone|greensand|granite|marble|basalt|quartzite|chert|gneiss|schist|conglomerate)\b/.test(
+      aq,
+    )
   )
     return false;
+  if (
+    aq.includes("unconsolidated") ||
+    aq.includes("gravel") ||
+    (aq.includes("sand") && !aq.includes("sandstone"))
+  )
+    return true;
 
   const db = parseFloat(String(w.depth_bedrock ?? ""));
   let depth = parseFloat(String(w.depth ?? ""));
@@ -692,6 +707,79 @@ export function wellGrRNumberForTagViewer(
 export function wellMapGrTagViewer(w: WellRecord): string {
   const t = wellGrRNumberForTagViewer(w);
   return t ? ` ${t.kind}${t.n}` : "";
+}
+
+function getGravelLayerThicknessesFtViewer(w: WellRecord): number[] {
+  const layers = getLithLayers(w);
+  if (!layers.length) return [];
+  const depthFt = getWellDisplayDepthFtViewer(w);
+  const depthN = depthFt != null ? Number(depthFt) : NaN;
+  const out: number[] = [];
+  let prevBot = NaN;
+  const gLabelLayerEligibleFormation = (fmRaw: string): boolean => {
+    const l = String(fmRaw ?? "").toLowerCase();
+    if (!l.trim()) return false;
+    if (/dry\s*hole|no\s*water|abandon|plugged/i.test(l)) return false;
+    const hasSand =
+      /\bsand\b|\bsnds?\b|\bsa\b|fine\s*sand|medium\s*sand|coarse\s*sand|silty\s*sand|sand\s*fill|sandy\b/i.test(
+        l,
+      );
+    const hasGravel =
+      /\bgravel\b|\bgrav\b|\bgr\b|\bsg\b|s\s*\/\s*g|s\s*&\s*g|sand\s*and\s*gravel|pea\s*stone/i.test(
+        l,
+      );
+    if (!hasSand && !hasGravel) return false;
+    if (
+      (/shale|limestone|dolomite|slate|bedrock|granite|marble|sandstone/i.test(
+        l,
+      ) ||
+        /\b(ls|lm|dl)\b/i.test(l)) &&
+      !hasSand &&
+      !hasGravel
+    )
+      return false;
+    return true;
+  };
+  for (let i = 0; i < layers.length; i++) {
+    const L = layers[i];
+    const fm = lithoFormationName(L);
+    if (!fm) continue;
+    if (/no digitized|merged welllogs|open dnr report|placeholder/i.test(fm))
+      continue;
+    const tb = lithoLayerTopBottomFt(L, prevBot);
+    if (!Number.isNaN(tb.bot)) prevBot = tb.bot;
+    if (Number.isNaN(tb.bot) || Number.isNaN(tb.top) || tb.bot <= tb.top) continue;
+    if (!gLabelLayerEligibleFormation(fm)) continue;
+    let top = tb.top;
+    let bot = tb.bot;
+    if (!Number.isNaN(depthN) && depthN > 0) {
+      if (top < 0) top = 0;
+      if (bot > depthN) bot = depthN;
+    }
+    if (Number.isNaN(top) || Number.isNaN(bot) || bot <= top) continue;
+    const thick = Math.round(bot - top);
+    if (thick > 0) out.push(thick);
+  }
+  return out;
+}
+
+export function getGravelLayerTagsViewer(w: WellRecord): string[] {
+  const layers = getGravelLayerThicknessesFtViewer(w);
+  return layers.map((n, i) => `g${i + 1} ${n}`);
+}
+
+export function getOrderedTagTokensViewer(w: WellRecord): string[] {
+  const t = wellGrRNumberForTagViewer(w);
+  const gLayers = getGravelLayerTagsViewer(w);
+  const out: string[] = [];
+  const aqBed = /bedrock/i.test(String(w.aquifer ?? ""));
+  const rDepth = getRockTagDepthFt(w);
+  if (rDepth != null && rDepth > 0 && (t?.kind === "r" || aqBed)) out.push(`r${Math.round(rDepth)}`);
+  else if (t?.kind === "r") out.push(`r${t.n}`);
+  if (gLayers.length) out.push(...gLayers);
+  if (!out.length && t?.kind === "g") out.push(`g${t.n}`);
+  if (!out.length && t?.kind === "r") out.push(`r${t.n}`);
+  return out;
 }
 
 export function getWellBottomElevViewer(w: WellRecord): number | null {
@@ -881,10 +969,30 @@ function wellMatchesTextSearch(w: WellRecord, q: string): boolean {
   if (!q.trim()) return true;
   const t = q.toLowerCase().trim();
   const dDisp = getWellDisplayDepthFtViewer(w);
+  const identityText = String(
+    (w as WellRecord).well_key ??
+      (w as WellRecord).well_id_canonical ??
+      "",
+  )
+    .toLowerCase()
+    .trim();
+  const aliasText = String((w as WellRecord).well_identity_aliases ?? "")
+    .toLowerCase()
+    .trim();
+  const provenanceText = String((w as WellRecord).well_identity_provenance ?? "")
+    .toLowerCase()
+    .trim();
+  const confidenceText = String((w as WellRecord).well_identity_confidence ?? "")
+    .toLowerCase()
+    .trim();
   return (
     String(w.id ?? "")
       .toLowerCase()
       .includes(t) ||
+    identityText.includes(t) ||
+    aliasText.includes(t) ||
+    provenanceText.includes(t) ||
+    confidenceText.includes(t) ||
     primaryAquiferText(w).toLowerCase().includes(t) ||
     String(w.owner ?? "")
       .toLowerCase()

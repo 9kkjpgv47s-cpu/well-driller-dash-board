@@ -1,8 +1,9 @@
 export type WeatherHourly = {
   time: string;
   tempF: number;
-  feelsLikeF: number | null;
   precipPop: number | null;
+  /** Hourly precipitation total (inches) when available from Open-Meteo. */
+  precipInches: number | null;
   cloudPct: number | null;
   windMph: number | null;
   windDirDeg: number | null;
@@ -28,6 +29,10 @@ export type DayWeatherSummary = {
   minTempF: number | null;
   maxTempF: number | null;
   dominantCondition: string;
+  /** Sum of hourly precipitation (inches) for this calendar day. */
+  totalPrecipInches: number | null;
+  /** Count of hourly periods flagged as thunderstorm. */
+  thunderstormHours: number;
   /** How much GFS vs ECMWF max POP differs on this calendar day (if both exist) */
   modelSpreadPop?: number | null;
 };

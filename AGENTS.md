@@ -23,6 +23,8 @@
 | Hub dev | `apps/hub` | `npm install && npm run dev` |
 | Run viewer rebuild (delegates to other repo) | `apps/hub` | `export WELL_VIEWER_ROOT=...` then `npm run rebuild:viewer-data` |
 | Viewer HTML lithology backfill (long) | `apps/hub` | `export WELL_VIEWER_ROOT=...` then `npm run rebuild:viewer-data:html-full` |
+| Dual KPI report (real parsed + parseable JSON) | `apps/hub` | `npm run verify:lithology-kpi` |
+| Canonical statewide execution lane (baseline/window/cycle) | `apps/hub` | `export WELL_VIEWER_ROOT=...` then `npm run lithology:statewide -- --mode cycle --window-max 5000 --delay-sec 0.2` |
 | Copy built viewer into `public/well-viewer/` | repo root | `export WELL_VIEWER_ROOT=...` then `./scripts/sync-well-viewer-into-hub.sh` |
 | Viewer fetch + statewide build | repo root | `export DNR_VIEWER_ROOT=...` then `./scripts/sync_dnr_data.sh` |
 | Verify chunk columns | `apps/hub` | `npm run verify:chunks` |

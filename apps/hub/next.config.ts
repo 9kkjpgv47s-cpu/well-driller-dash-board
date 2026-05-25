@@ -8,6 +8,20 @@ const nextConfig: NextConfig = {
   // Pin NFT tracing to this app directory so builds stay correct after the repo is moved
   // out of any parent project (avoids stale absolute roots in `.next`).
   outputFileTracingRoot: path.join(__dirname),
+  async redirects() {
+    return [
+      {
+        source: "/scheduling",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/scheduling/:path*",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

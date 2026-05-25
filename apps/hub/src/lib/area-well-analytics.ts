@@ -440,6 +440,13 @@ export function wellsWithinRadius(
   });
 }
 
+export type NarrativeScope = "all" | "unconsolidated" | "rock";
+
+export type AreaNarrative = {
+  text: string;
+  scope: NarrativeScope;
+};
+
 export type AreaInsightsReport = {
   center: { lat: number; lon: number };
   radiusMiles: number;
@@ -461,7 +468,7 @@ export type AreaInsightsReport = {
     reasons: string[];
   };
   /** Narrative bullets (complete analysis, not single-bar UI). */
-  narratives: string[];
+  narratives: AreaNarrative[];
   /** Structured buckets for tables / future charts. */
   aquiferMix: {
     unconsolidated: number;
@@ -509,6 +516,41 @@ function median(nums: number[]): number | null {
   const s = [...nums].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+function average(nums: number[]): number | null {
+  if (!nums.length) return null;
+  return nums.reduce((a, b) => a + b, 0) / nums.length;
+}
+
+function aquiferBucketForGpm(w: WellRecord): "unconsolidated" | "bedrock" | "other" {
+  const aqText = primaryAquiferText(w);
+  const aqTrim = aqText.trim();
+  const mixLower = aqTrim ? aqText.toLowerCase() : inferAquiferForMix(w);
+  if (
+    mixLower.includes("unconsolidated") ||
+    mixLower.includes("sand") ||
+    mixLower.includes("gravel")
+  )
+    return "unconsolidated";
+  if (
+    mixLower.includes("bedrock") ||
+    mixLower.includes("limestone") ||
+    mixLower.includes("dolomite")
+  )
+    return "bedrock";
+  return "other";
+}
+
+function yieldBreakdownText(values: number[], label: string): string | null {
+  if (values.length < 3) return null;
+  const under10 = values.filter((g) => g < 10).length;
+  const tenTo25 = values.filter((g) => g >= 10 && g <= 25).length;
+  const over25 = values.filter((g) => g > 25).length;
+  const n = values.length;
+  const avg = average(values);
+  if (avg == null) return null;
+  return `Among **${n}** ${label} wells with GPM: **${pct(under10, n)}%** under **10 GPM**, **${pct(tenTo25, n)}%** at **10–25 GPM**, **${pct(over25, n)}%** over **25 GPM** (avg **${avg.toFixed(1)} GPM**).`;
 }
 
 /**
@@ -591,6 +633,11 @@ export function computeAreaInsights(
   const depthsHigh: number[] = [];
   const depthsLow: number[] = [];
   const depthsAll: number[] = [];
+  const gpmUnconsolidated: number[] = [];
+  const gpmBedrock: number[] = [];
+  const gpmAllValues: number[] = [];
+  const rockTopDepths: number[] = [];
+  let rockTopWithGravelBefore = 0;
 
   for (const w of inR) {
     if (isDryOrAbandoned(w)) dryOrAbandoned++;
@@ -644,6 +691,13 @@ export function computeAreaInsights(
       chunkRockTopFt(w) != null;
     if (hasLithSignal) {
       lithN++;
+      const rockTop = lithoDepthToRockFt(w);
+      if (rockTop != null) {
+        rockTopDepths.push(rockTop);
+        if (countGravelLikeIntervals(w, minGravelFt) >= 1) {
+          rockTopWithGravelBefore++;
+        }
+      }
       if (gc >= 3) gravelVeinDistribution.threePlus++;
       else if (gc === 2) gravelVeinDistribution.two++;
       else if (gc === 1) gravelVeinDistribution.one++;
@@ -659,6 +713,10 @@ export function computeAreaInsights(
     const d = displayDepthFt(w);
     if (g != null) {
       gpmN++;
+      gpmAllValues.push(g);
+      const bucket = aquiferBucketForGpm(w);
+      if (bucket === "unconsolidated") gpmUnconsolidated.push(g);
+      else if (bucket === "bedrock") gpmBedrock.push(g);
       if (g < 10) yieldBuckets.under10++;
       else if (g <= 25) yieldBuckets.tenTo25++;
       else yieldBuckets.over25++;
@@ -676,32 +734,36 @@ export function computeAreaInsights(
   const depthMedianHighYieldFt = median(depthsHigh);
   const depthMedianLowYieldFt = median(depthsLow);
 
-  const narratives: string[] = [];
+  const narratives: AreaNarrative[] = [];
+  const add = (text: string, scope: NarrativeScope) =>
+    narratives.push({ text, scope });
 
   if (n === 0) {
-    narratives.push(
+    add(
       "No registry wells in this radius. Widen the search or confirm coordinates.",
+      "all",
     );
   } else {
-    narratives.push(
+    add(
       `Found **${n}** DNR registry wells within **${radiusMiles} mi** of the point (all statistics below use only those wells).`,
-    );
-    narratives.push(
-      "**Aquifer mix** (green summary table) prefers registry aquifer columns when present; when those are blank—as in many statewide exports—the hub **infers** sand/gravel vs bedrock from lithology (including `from`/`to` depths), completed depth vs interpreted rock top, and estimated-location wording.",
+      "all",
     );
   }
 
   if (lithN > 0) {
     const denom = lithN;
-    narratives.push(
+    add(
       `Among **${lithN}** wells with **lithology intervals and/or chunk vein/rock fields** (\`vein_size_ft\`, \`gravel_thickness_ft\`, \`rock_start_ft\`, \`depth_bedrock\`): **${pct(gravelVeinDistribution.threePlus, denom)}%** show **three or more** sand/gravel/drift intervals (≥${minGravelFt}′ each), **${pct(gravelVeinDistribution.one, denom)}%** show **exactly one**, **${pct(gravelVeinDistribution.two, denom)}%** show **two**, and **${pct(gravelVeinDistribution.zero, denom)}%** show **none** by parsed log + vein thickness rules.`,
+      "unconsolidated",
     );
-    narratives.push(
+    add(
       `**${pct(usableGravel.onePlus, denom)}%** of those wells have at least **one water-bearing** sand/gravel interval by text rules; **${pct(usableGravel.none, denom)}%** have gravel-like intervals flagged but none matched the water-bearing heuristic (re-check raw logs for borderline wording).`,
+      "unconsolidated",
     );
   } else {
-    narratives.push(
+    add(
       "No lithology intervals **and** no vein/rock thickness columns in chunk data for wells in this radius — run the statewide ETL (\`build_statewide_data.py\` / chunk sync) so rows include \`lithology_json\` and \`vein_size_ft\` / \`rock_start_ft\` from the same gravel–vein corrector as the well viewer.",
+      "all",
     );
   }
 
@@ -711,56 +773,71 @@ export function computeAreaInsights(
     registryAquifer.estimated +
     registryAquifer.other;
   if (aqClassified > 0) {
-    narratives.push(
+    add(
       `Registry **aquifer** field (where present): **${pct(registryAquifer.unconsolidated, aqClassified)}%** unconsolidated/sand/gravel, **${pct(registryAquifer.rock, aqClassified)}%** bedrock/limestone/dolomite, **${pct(registryAquifer.estimated, aqClassified)}%** estimated location, **${pct(registryAquifer.other, aqClassified)}%** other/uncategorized (**${registryAquifer.blank}** wells with blank aquifer in this radius).`,
+      "all",
     );
   }
 
-  const lithRockHint = inR.filter(
-    (w) =>
-      lithologyLayersForStats(w).length > 0 && lithoDepthToRockFt(w) != null,
-  ).length;
-  if (lithN > 0 && lithRockHint > 0) {
-    narratives.push(
-      `**${pct(lithRockHint, lithN)}%** of wells with lithology show a **rock top** depth in the log — often meaning the rig passed through sand/gravel before entering rock (does not by itself mean finished in rock).`,
+  if (lithN > 0 && rockTopDepths.length > 0) {
+    const rockMin = Math.min(...rockTopDepths);
+    const rockMax = Math.max(...rockTopDepths);
+    const depthBand =
+      rockMin === rockMax ? `${rockMin} ft` : `${rockMin}–${rockMax} ft`;
+    add(
+      `**${pct(rockTopDepths.length, lithN)}%** of wells with lithology logged a **rock top**. Of those, **${pct(rockTopWithGravelBefore, rockTopDepths.length)}%** drilled **sand/gravel before rock** — rock tops here run **${depthBand}**.`,
+      "rock",
     );
   }
 
   if (n > 0) {
     const productive = n - dryOrAbandoned;
-    narratives.push(
+    add(
       dryOrAbandoned === 0
         ? "By registry **aquifer / notes** flags, **no dry-hole records** appeared in this slice (still verify on-site)."
         : `**${dryOrAbandoned}** well(s) flagged as dry/abandoned in registry text; **${productive}** treated as water found for this summary.`,
+      "all",
     );
   }
 
   if (gpmN > 0) {
     const gd = gpmN;
     const noGpm = n - gpmN;
-    narratives.push(
-      `Among **${gpmN}** wells with a parseable **pump/test GPM** field: **${pct(yieldBuckets.under10, gd)}%** are **under 10 GPM**, **${pct(yieldBuckets.tenTo25, gd)}%** fall **10–25 GPM**, **${pct(yieldBuckets.over25, gd)}%** report **over 25 GPM**. Across **all ${n}** wells in the radius, **${pct(noGpm, n)}%** have **no GPM** in the export (older records or missing pump fields).`,
+    const overallAvg = average(gpmAllValues);
+    add(
+      `Among **${gpmN}** wells with a parseable **pump/test GPM** field: **${pct(yieldBuckets.under10, gd)}%** are **under 10 GPM**, **${pct(yieldBuckets.tenTo25, gd)}%** fall **10–25 GPM**, **${pct(yieldBuckets.over25, gd)}%** report **over 25 GPM**${overallAvg != null ? ` (avg **${overallAvg.toFixed(1)} GPM** across those wells)` : ""}. Across **all ${n}** wells in the radius, **${pct(noGpm, n)}%** have **no GPM** in the export (older records or missing pump fields).`,
+      "all",
     );
+    const gravelGpm = yieldBreakdownText(
+      gpmUnconsolidated,
+      "sand/gravel (unconsolidated)",
+    );
+    if (gravelGpm) add(gravelGpm, "unconsolidated");
+    const rockGpm = yieldBreakdownText(gpmBedrock, "bedrock/rock");
+    if (rockGpm) add(rockGpm, "rock");
     if (depthsHigh.length >= 3 && depthsLow.length >= 3) {
       const hi = depthMedianHighYieldFt;
       const lo = depthMedianLowYieldFt;
       if (hi != null && lo != null) {
-        narratives.push(
+        add(
           hi > lo
             ? `Wells reporting **over 25 GPM** have a **higher median completed depth (${hi} ft)** here than those at **25 GPM or below (${lo} ft)** — consistent with needing more footage to reach a stronger producing zone in this neighborhood (sample sizes: ${depthsHigh.length} vs ${depthsLow.length}).`
             : `Median depth for **over 25 GPM** wells (**${hi} ft**) is **not deeper** than for **25 GPM or below (${lo} ft)** in this slice — treat yield–depth coupling as **weak** until more tests are in the export.`,
+          "all",
         );
       }
     }
   } else {
-    narratives.push(
+    add(
       "No GPM values parsed in this radius — enrich chunks with pump/test fields or DNR HTML parsing for capacity data.",
+      "all",
     );
   }
 
   if (depthMedianFt != null) {
-    narratives.push(
+    add(
       `**Median completed depth** in the radius: **${depthMedianFt} ft** (from registry depth / construction fields).`,
+      "all",
     );
   }
 
@@ -828,4 +905,19 @@ export function computeAreaInsights(
 /** Convert **bold** markdown-like segments to <strong> for simple rendering. */
 export function formatNarrativeHtml(text: string): string {
   return text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+}
+
+/** Left accent bar color keyed to well-type scope. */
+export function narrativeBorderClass(scope: NarrativeScope): string {
+  const base =
+    "relative pl-3 before:absolute before:left-0 before:top-0 before:h-full before:w-0.5";
+  switch (scope) {
+    case "unconsolidated":
+      return `${base} before:bg-blue-600 dark:before:bg-blue-500`;
+    case "rock":
+      return `${base} before:bg-red-600 dark:before:bg-red-500`;
+    case "all":
+    default:
+      return `${base} before:bg-[linear-gradient(to_bottom,#2563eb_0%,#2563eb_33.33%,#16a34a_33.33%,#16a34a_66.66%,#dc2626_66.66%,#dc2626_100%)] dark:before:bg-[linear-gradient(to_bottom,#3b82f6_0%,#3b82f6_33.33%,#22c55e_33.33%,#22c55e_66.66%,#ef4444_66.66%,#ef4444_100%)]`;
+  }
 }

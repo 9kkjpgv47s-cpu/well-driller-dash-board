@@ -1,23 +1,16 @@
 import type { WellRecord } from "@/lib/area-well-analytics";
 import { displayDepthFt } from "@/lib/area-well-analytics";
 import type { CjDrillerJobEntry } from "@/lib/cj-driller-job";
-
-function parseRefno(w: WellRecord): number | undefined {
-  const raw = w.refno ?? w.id;
-  if (raw == null || raw === "") return undefined;
-  if (typeof raw === "number" && Number.isFinite(raw)) return Math.trunc(raw);
-  const m = String(raw).match(/(\d+)/);
-  return m ? parseInt(m[1], 10) : undefined;
-}
+import { resolveCanonicalWellIdentity } from "@/lib/well-identity";
 
 export function wellRecordToDrillerEntry(w: WellRecord): CjDrillerJobEntry | null {
   const lat = Number(w.lat);
   const lon = Number(w.lon);
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-  const refno = parseRefno(w);
+  const identity = resolveCanonicalWellIdentity(w);
+  const refno = identity.refno;
   const idStr = String(w.id ?? "").trim();
-  const wellId =
-    idStr || (refno != null ? `DNR-${refno}` : `hub-${lat.toFixed(5)}-${lon.toFixed(5)}`);
+  const wellId = identity.canonicalId;
   let report = String(w.report ?? "").trim();
   if (!report && refno != null) {
     report = `https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=${refno}&_from=SUMMARY&_action=Details`;
@@ -30,6 +23,11 @@ export function wellRecordToDrillerEntry(w: WellRecord): CjDrillerJobEntry | nul
     snap: {
       id: idStr || undefined,
       refno,
+      well_id_canonical: identity.canonicalId,
+      well_identity_aliases: identity.aliases.join("|"),
+      well_identity_confidence: identity.confidence,
+      well_identity_provenance: identity.provenance.join("|"),
+      well_identity_resolver_version: identity.resolverVersion,
       lat,
       lon,
       county: String(w.county ?? ""),

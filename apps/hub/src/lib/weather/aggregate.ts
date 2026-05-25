@@ -19,13 +19,26 @@ export function summarizeDayFromHourly(
   let maxWind = -1;
   let minT = Infinity;
   let maxT = -Infinity;
+  let precipSum = 0;
+  let precipKnown = false;
+  let thunderstormHours = 0;
   const condCounts = new Map<string, number>();
 
   for (const h of slice) {
     if (h.precipPop != null) maxPop = Math.max(maxPop, h.precipPop);
+    if (h.precipInches != null) {
+      precipSum += h.precipInches;
+      precipKnown = true;
+    }
     if (h.windMph != null) maxWind = Math.max(maxWind, h.windMph);
     minT = Math.min(minT, h.tempF);
     maxT = Math.max(maxT, h.tempF);
+    if (
+      (h.weatherCode >= 95 && h.weatherCode <= 99) ||
+      /thunder/i.test(h.conditionLabel)
+    ) {
+      thunderstormHours++;
+    }
     condCounts.set(
       h.conditionLabel,
       (condCounts.get(h.conditionLabel) ?? 0) + 1,
@@ -48,6 +61,8 @@ export function summarizeDayFromHourly(
     minTempF: Number.isFinite(minT) ? minT : null,
     maxTempF: Number.isFinite(maxT) ? maxT : null,
     dominantCondition,
+    totalPrecipInches: precipKnown ? precipSum : null,
+    thunderstormHours,
   };
 }
 

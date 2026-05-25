@@ -11,10 +11,10 @@ import {
 import {
   computeAreaInsights,
   formatNarrativeHtml,
+  narrativeBorderClass,
   type AreaInsightsReport,
 } from "@/lib/area-well-analytics";
 import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
-import type { OptimizationResult } from "@/lib/optimization";
 
 type Props = {
   lat: number;
@@ -80,9 +80,6 @@ export function AreaInsightsPanel({
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<AreaInsightsReport | null>(null);
   const [loading, setLoading] = useState(false);
-  const [prep, setPrep] = useState<OptimizationResult | null>(null);
-  const [prepErr, setPrepErr] = useState<string | null>(null);
-  const [prepLoading, setPrepLoading] = useState(false);
 
   const run = useCallback(async () => {
     setLoading(true);
@@ -106,37 +103,6 @@ export function AreaInsightsPanel({
     if (!autoRun || !Number.isFinite(lat) || !Number.isFinite(lon)) return;
     void run();
   }, [autoRun, lat, lon, radiusMiles, run]);
-
-  useEffect(() => {
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-    const ctrl = new AbortController();
-    const q = new URLSearchParams({
-      lat: String(lat),
-      lon: String(lon),
-      radiusMiles: String(radiusMiles),
-      priority: "balanced",
-    });
-    setPrepLoading(true);
-    setPrepErr(null);
-    fetch(`/api/optimization?${q}`, { signal: ctrl.signal })
-      .then(async (r) => {
-        const data = (await r.json()) as { error?: string };
-        if (!r.ok) {
-          throw new Error(
-            typeof data.error === "string" ? data.error : r.statusText,
-          );
-        }
-        return data as OptimizationResult;
-      })
-      .then(setPrep)
-      .catch((e: Error) => {
-        if (e.name === "AbortError") return;
-        setPrepErr(e.message);
-        setPrep(null);
-      })
-      .finally(() => setPrepLoading(false));
-    return () => ctrl.abort();
-  }, [lat, lon, radiusMiles]);
 
   const breakdowns = useMemo(() => {
     if (!report) return null;
@@ -225,32 +191,6 @@ export function AreaInsightsPanel({
     };
   }, [report]);
 
-  /** Field prep merged into the narrative (shorter page; same information). */
-  const narrativeLines = useMemo(() => {
-    const lines: string[] = [];
-    if (prepLoading) {
-      lines.push(
-        "**Field prep (mock):** loading checklist and neighborhood hints…",
-      );
-    }
-    if (prepErr) {
-      lines.push(`**Field prep (mock):** could not load — ${prepErr}`);
-    }
-    if (prep) {
-      lines.push(
-        `**Field prep (mock):** illustrative neighborhood — **~${prep.neighborhood.sampleWellsInRadius}** wells in radius, **median depth ${prep.neighborhood.medianDepthFt} ft**, **static water band ${prep.neighborhood.typicalStaticBandFt}**.`,
-      );
-      for (const item of prep.checklist) {
-        lines.push(`Prep checklist: ${item}`);
-      }
-      for (const n of prep.neighborhood.notes) {
-        lines.push(`Prep note: ${n}`);
-      }
-    }
-    if (report?.narratives.length) lines.push(...report.narratives);
-    return lines;
-  }, [prep, prepLoading, prepErr, report]);
-
   const qualityTone =
     report?.insightQuality.grade === "high"
       ? "text-emerald-800 dark:text-emerald-200"
@@ -330,7 +270,7 @@ export function AreaInsightsPanel({
         </div>
       ) : null}
 
-      {(report && breakdowns) || prepLoading || prepErr || prep ? (
+      {(report && breakdowns) ? (
         <div className="space-y-6">
           {report ? (
             <div className="rounded-lg border border-emerald-800/25 bg-white/80 p-4 dark:border-emerald-700/40 dark:bg-zinc-900/50">
@@ -412,17 +352,19 @@ export function AreaInsightsPanel({
               </dl>
             </div>
           ) : null}
-          {narrativeLines.length > 0 ? (
+          {report && report.narratives.length > 0 ? (
             <div className="space-y-3 rounded-lg bg-white/70 p-4 dark:bg-zinc-900/60">
               <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                 Narrative summary
               </p>
               <ul className="space-y-3 text-sm leading-relaxed text-zinc-800 dark:text-zinc-200">
-                {narrativeLines.map((t, i) => (
+                {report.narratives.map((entry, i) => (
                   <li
                     key={i}
-                    className="border-l-2 border-emerald-600 pl-3 dark:border-emerald-500"
-                    dangerouslySetInnerHTML={{ __html: formatNarrativeHtml(t) }}
+                    className={narrativeBorderClass(entry.scope)}
+                    dangerouslySetInnerHTML={{
+                      __html: formatNarrativeHtml(entry.text),
+                    }}
                   />
                 ))}
               </ul>

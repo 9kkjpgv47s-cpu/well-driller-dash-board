@@ -1,17 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AreaInsightsPanel } from "@/components/AreaInsightsPanel";
-import {
-  computeAreaInsights,
-  type AreaInsightsReport,
-} from "@/lib/area-well-analytics";
-import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
 import { DEFAULT_AREA_RADIUS_MILES } from "@/lib/hub-area-defaults";
-import {
-  SITE_PREP_CHECKLIST_ITEMS,
-  type OptimizationResult,
-} from "@/lib/optimization";
+import type { OptimizationResult } from "@/lib/optimization";
 
 const defaultLat = 39.7684;
 const defaultLon = -86.1581;
@@ -33,9 +25,6 @@ export function OptimizationPanel() {
   const [result, setResult] = useState<OptimizationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [registry, setRegistry] = useState<AreaInsightsReport | null>(null);
-  const [registryErr, setRegistryErr] = useState<string | null>(null);
-  const [registryLoading, setRegistryLoading] = useState(false);
 
   const queryString = useMemo(() => {
     const p = new URLSearchParams({
@@ -76,37 +65,6 @@ export function OptimizationPanel() {
     }
   }, [queryString]);
 
-  useEffect(() => {
-    if (!coordsOk) {
-      setRegistry(null);
-      setRegistryErr(null);
-      return;
-    }
-    let alive = true;
-    setRegistryLoading(true);
-    setRegistryErr(null);
-    void getDnrWellsCached()
-      .then((wells) => {
-        if (!alive) return;
-        setRegistry(
-          computeAreaInsights(wells, latN, lonN, Math.min(25, Math.max(0.5, radiusN))),
-        );
-      })
-      .catch((e: unknown) => {
-        if (!alive) return;
-        setRegistryErr(
-          e instanceof Error ? e.message : "Failed to load registry wells",
-        );
-        setRegistry(null);
-      })
-      .finally(() => {
-        if (alive) setRegistryLoading(false);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [coordsOk, latN, lonN, radiusN]);
-
   return (
     <div className="space-y-8">
       <div className="grid gap-8 lg:grid-cols-5">
@@ -123,8 +81,8 @@ export function OptimizationPanel() {
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Coordinates drive the{" "}
             <strong>registry area analysis</strong> below (same gz chunks as the
-            map). The three summary tiles on the right use those same chunks;
-            “Refresh field checklist” only updates planner scores and notes.
+            embedded well viewer). The checklist API is still a lightweight mock
+            for crew reminders.
           </p>
           <div className="space-y-3">
             <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-300">
@@ -167,7 +125,7 @@ export function OptimizationPanel() {
             </label>
             <fieldset>
               <legend className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
-                Planner priority (scores only)
+                Checklist priority (mock API)
               </legend>
               <div className="mt-2 flex flex-wrap gap-2">
                 {(
@@ -219,46 +177,39 @@ export function OptimizationPanel() {
             id="opt-results-heading"
             className="text-sm font-semibold text-zinc-900 dark:text-zinc-50"
           >
-            Registry neighborhood & checklist
+            Field checklist (mock)
           </h2>
-          {registryErr ? (
-            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-              {registryErr}
-            </p>
-          ) : null}
-          {registryLoading && !registry ? (
+          {!result ? (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Loading registry slice…
+              Tap “Refresh field checklist” for planner-style reminders. Full{" "}
+              <strong>area drilling intelligence</strong> is in the green panel
+              below (live chunk data).
             </p>
-          ) : null}
-          {registry ? (
+          ) : (
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                <div className="w-fit max-w-full rounded-lg bg-zinc-50 px-2.5 py-1.5 dark:bg-zinc-800/80">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Wells in radius (registry)
+                    Wells in radius (mock count)
                   </p>
                   <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                    {registry.totalWellsInRadius.toLocaleString()}
+                    {result.neighborhood.sampleWellsInRadius}
                   </p>
                 </div>
-                <div className="w-fit max-w-full rounded-lg bg-zinc-50 px-2.5 py-1.5 dark:bg-zinc-800/80">
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Median completed depth (registry)
+                    Median depth (illustrative)
                   </p>
                   <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-                    {registry.fieldPrepNeighborhood.medianCompletedDepthFt !=
-                    null
-                      ? `${registry.fieldPrepNeighborhood.medianCompletedDepthFt} ft`
-                      : "—"}
+                    {result.neighborhood.medianDepthFt} ft
                   </p>
                 </div>
-                <div className="w-fit max-w-full rounded-lg bg-zinc-50 px-2.5 py-1.5 dark:bg-zinc-800/80">
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Static water (chunk columns)
+                    Static band (illustrative)
                   </p>
                   <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                    {registry.fieldPrepNeighborhood.staticWaterBandLabel}
+                    {result.neighborhood.typicalStaticBandFt}
                   </p>
                 </div>
               </div>
@@ -268,42 +219,26 @@ export function OptimizationPanel() {
                   Checklist
                 </p>
                 <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
-                  {(result?.checklist ?? [...SITE_PREP_CHECKLIST_ITEMS]).map(
-                    (item) => (
-                      <li key={item}>{item}</li>
-                    ),
-                  )}
+                  {result.checklist.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
                 </ul>
               </div>
 
-              {result ? (
-                <>
-                  <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-                    <p className="font-semibold">Planner notes (illustrative)</p>
-                    <ul className="mt-2 list-inside list-disc space-y-1">
-                      {result.neighborhood.notes.map((n) => (
-                        <li key={n}>{n}</li>
-                      ))}
-                    </ul>
-                  </div>
+              <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+                <p className="font-semibold">Mock API notes</p>
+                <ul className="mt-2 list-inside list-disc space-y-1">
+                  {result.neighborhood.notes.map((n) => (
+                    <li key={n}>{n}</li>
+                  ))}
+                </ul>
+              </div>
 
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                    Planner response{" "}
-                    {new Date(result.generatedAt).toLocaleString()}
-                  </p>
-                </>
-              ) : (
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  Tap <strong>Refresh field checklist</strong> for planner scores
-                  and extra notes (optional).
-                </p>
-              )}
+              <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                Generated {new Date(result.generatedAt).toLocaleString()}
+              </p>
             </div>
-          ) : !coordsOk ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Enter valid coordinates to load the registry slice.
-            </p>
-          ) : null}
+          )}
         </section>
       </div>
 

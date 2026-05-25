@@ -77,6 +77,11 @@ for f in "$ROOT"/dnr_wells_chunk_*.csv.gz "$ROOT"/dnr-chunks/dnr_wells_chunk_*.c
   cp "$f" "$DEST/"
 done
 [[ -d "$ROOT/litho_parts" ]] && rm -rf "$DEST/litho_parts" && cp -R "$ROOT/litho_parts" "$DEST/"
+# V2 lithology sidecar + loader (optional overlay; original lithology unchanged)
+if [[ -d "$ROOT/lithology_v2" ]]; then
+  rm -rf "$DEST/lithology_v2"
+  cp -R "$ROOT/lithology_v2" "$DEST/"
+fi
 
 echo "Synced viewer → $DEST (vendor libs + api duplicate + index)"
 echo "Updated DNR report handler → $VENDOR_DNR"

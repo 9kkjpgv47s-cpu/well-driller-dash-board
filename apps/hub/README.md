@@ -23,6 +23,28 @@ The **`vendor/dnr-report-local`** package (synced from the viewer’s `api/dnr-r
 
 **Canonical well JSONL** (hub analytics / `data/out/`) can be built **without** the viewer checkout by placing **`dnr_wells_full.csv.gz`** at the **monorepo root** and running `python3 scripts/build_canonical_jsonl.py --from-full` (see repo root `README.md` and `data/README.md`).
 
+## Statewide lithology execution lane
+
+Use `apps/hub` scripts as the canonical control plane, with ETL executed in `WELL_VIEWER_ROOT`:
+
+```bash
+export WELL_VIEWER_ROOT="/absolute/path/to/dnr-viewer-repo"
+
+# Baseline rebuild + one resumable HTML backfill window + verify/sync + KPI
+npm run lithology:statewide -- --mode cycle --window-max 5000 --delay-sec 0.2
+
+# KPI-only report
+npm run verify:lithology-kpi
+
+# Export unresolved none-source wells for targeted retry analysis
+npm run lithology:export-none
+
+# Loop windows until target or max windows
+npm run lithology:iterate-to-target -- --target-real-pct 90 --max-windows 8 --window-max 4000 --delay-sec 0.05
+```
+
+`rebuild:viewer-data:html-full` now uses `run_full_lithology_html_statewide.sh` when present, and otherwise falls back to `run_dnr_pipeline_local.sh` with `RUN_HTML_BACKFILL=1`.
+
 ## Scheduling + weather
 
 - **Crews:** 1–5 active (default 3), **weekdays only**, **1 or 2 jobs per crew per day** (no clock time slots).

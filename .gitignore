@@ -14,8 +14,17 @@ venv/
 __pycache__/
 *.pyc
 
-# Next.js (if build artifacts appear at repo root paths)
+# Next.js build artifacts
+.next/
 apps/hub/.next/
+
+# Dependencies
+node_modules/
+apps/hub/node_modules/
+
+# Vercel + local env
+.vercel
+.env*.local
 
 # Cursor IDE (local only)
 .cursor/

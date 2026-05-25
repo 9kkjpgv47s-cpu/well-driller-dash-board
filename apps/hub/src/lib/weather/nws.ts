@@ -51,8 +51,8 @@ export async function fetchNwsHourly(
     const hourly: WeatherHourly[] = periods.map((p) => ({
       time: p.startTime,
       tempF: p.temperature,
-      feelsLikeF: null,
       precipPop: p.probabilityOfPrecipitation?.value ?? null,
+      precipInches: null,
       cloudPct: p.cloudCover?.value ?? null,
       windMph: parseWindMph(p.windSpeed),
       windDirDeg: null,

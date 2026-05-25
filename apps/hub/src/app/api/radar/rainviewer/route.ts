@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 const UPSTREAM = "https://api.rainviewer.com/public/weather-maps.json";
 
-/** Proxies RainViewer's public map index so the hub can load frames without browser CORS surprises. */
+/** Proxies RainViewer’s public map index so the hub can load frames without browser CORS surprises. */
 export async function GET() {
   const res = await fetch(UPSTREAM, { next: { revalidate: 60 } });
   if (!res.ok) {

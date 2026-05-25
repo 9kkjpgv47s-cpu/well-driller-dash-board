@@ -195,11 +195,8 @@ export function DrillerJobClient() {
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-zinc-600 dark:text-zinc-300">
           Same queue as the Field hub <strong>Add to job queue</strong> flow.
-          When your wells include coordinates, this page mirrors{" "}
-          <Link href="/scheduling" className="text-sky-700 underline dark:text-sky-400">
-            Office
-          </Link>
-          : weather, registry area analysis, mock preparation checklist, and the
+          When your wells include coordinates, this page mirrors the Field hub:
+          weather, registry area analysis, mock preparation checklist, and the
           native registry map (same code as Field — no static viewer iframe). Area
           stats default to <strong>{DEFAULT_AREA_RADIUS_MILES} mi</strong>.
         </p>
@@ -217,12 +214,6 @@ export function DrillerJobClient() {
           className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
           Driller job (this page)
-        </Link>
-        <Link
-          href="/scheduling"
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800"
-        >
-          Office board
         </Link>
         <button
           type="button"
@@ -249,11 +240,7 @@ export function DrillerJobClient() {
 
       {!entries.length ? (
         <p className="rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 dark:border-zinc-600 dark:text-zinc-300">
-          No wells yet. In{" "}
-          <Link href="/scheduling" className="text-sky-700 underline dark:text-sky-400">
-            Office
-          </Link>{" "}
-          or the{" "}
+          No wells yet. In the{" "}
           <Link href="/" className="text-sky-700 underline dark:text-sky-400">
             Field hub
           </Link>

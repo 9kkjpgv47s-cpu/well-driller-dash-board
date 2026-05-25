@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { WellRecord } from "@/lib/area-well-analytics";
 import { getLithLayers } from "@/lib/area-well-analytics";
+import { resolveWellRefNo } from "@/lib/well-identity";
 import { getWellDisplayDepthFtViewer } from "@/lib/viewer-well-map";
 
 type DnrApi = {
@@ -74,8 +75,11 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
       setDnr({});
       return;
     }
-    const refRaw = well.refno ?? String(well.id ?? "").replace(/^DNR-/, "");
-    const refNo = String(refRaw).replace(/\.0+$/, "").trim();
+    const refNo = String(resolveWellRefNo(well) ?? "").replace(/\.0+$/, "").trim();
+    if (!refNo) {
+      setDnr({ loading: false });
+      return;
+    }
     const hasLithCsv = (() => {
       try {
         const j = getLithLayers(well);
@@ -191,11 +195,12 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
     "rig",
   ]);
   if (dnr.drillRigType) drillRig = dnr.drillRigType;
+  const resolvedRefNo = resolveWellRefNo(well);
 
   const rep =
     String(well.report ?? "").trim() ||
-    (well.refno
-      ? `https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=${well.refno}&_from=SUMMARY&_action=Details`
+    (resolvedRefNo
+      ? `https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=${resolvedRefNo}&_from=SUMMARY&_action=Details`
       : "");
 
   return (

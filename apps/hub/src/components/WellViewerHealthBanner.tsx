@@ -23,13 +23,9 @@ export function WellViewerHealthBanner() {
         <strong>Registry chunk data is available</strong> for maps and area
         analysis. Open{" "}
         <Link href="/" className="font-semibold underline">
-          Field
+          Field hub
         </Link>{" "}
-        to plan a site, or{" "}
-        <Link href="/scheduling" className="underline">
-          Office
-        </Link>{" "}
-        and jump to the field workspace from a selected job.
+        to plan a site from dispatch.
       </div>
     );
   }

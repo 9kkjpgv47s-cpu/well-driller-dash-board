@@ -164,7 +164,7 @@ export function extractPhone(text: string): string | null {
 
 export function extractPumpHp(text: string): string | null {
   const m =
-    /\b(\d+\s*\/\s*\d+\s*HP|\d+\s*\/\s*\d+\s*hp|\d+\s*HP|\d+\s*hp)\b/i.exec(
+    /\b(\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?\s*hp|\d+(?:\.\d+)?\s*hp)\b/i.exec(
       text,
     );
   if (!m?.[1]) return null;
@@ -188,6 +188,22 @@ export function extractDistanceOffDrive(text: string): string | null {
   if (m2?.[1]) return `${m2[1]} ft off drive`;
   return null;
 }
+
+/** Numeric feet from a {@link extractDistanceOffDrive} label, if present. */
+export function parseDistanceOffDriveFt(raw: string | null): number | undefined {
+  if (!raw) return undefined;
+  const m = /(\d+)/.exec(raw);
+  if (!m?.[1]) return undefined;
+  const n = parseInt(m[1], 10);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+export type DispatchJobsiteApply = {
+  lat: number;
+  lon: number;
+  title?: string | null;
+  distanceOffDriveFt?: number;
+};
 
 export function extractTitle(
   lines: string[],

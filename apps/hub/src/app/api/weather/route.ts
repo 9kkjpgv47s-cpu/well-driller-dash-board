@@ -35,7 +35,6 @@ export async function GET(req: Request) {
   const today = todayIsoDateInTimeZone(timezone);
   const anchorDate =
     rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : today;
-  const bypassCache = searchParams.get("noCache") === "1";
 
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
     return NextResponse.json(
@@ -124,9 +123,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json(body, {
     headers: {
-      "Cache-Control": bypassCache
-        ? "private, no-store, must-revalidate"
-        : "public, s-maxage=900, stale-while-revalidate=1800",
+      "Cache-Control": "public, s-maxage=900, stale-while-revalidate=1800",
     },
   });
 }

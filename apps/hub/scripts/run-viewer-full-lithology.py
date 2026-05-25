@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the DNR viewer's run_full_lithology_html_statewide.sh (separate repo)."""
+"""Run statewide HTML lithology backfill in the external DNR viewer checkout."""
 from __future__ import annotations
 
 import os
@@ -14,13 +14,28 @@ from viewer_env import require_viewer_root  # noqa: E402
 
 def main() -> int:
     viewer = require_viewer_root()
-    sh = viewer / "run_full_lithology_html_statewide.sh"
-    if not sh.is_file():
-        print(f"Missing {sh}", file=sys.stderr)
-        return 1
     env = os.environ.copy()
     env.setdefault("DNR_OUT_DIR", str(viewer))
-    return subprocess.call(["bash", str(sh)], cwd=str(viewer), env=env)
+    # Canonical backfill intent: one run window with HTML lithology enabled.
+    env.setdefault("RUN_HTML_BACKFILL", "1")
+    env.setdefault("DNR_FILL_LITHO_HTML", "1")
+
+    legacy = viewer / "run_full_lithology_html_statewide.sh"
+    if legacy.is_file():
+        print(f"[lithology] using legacy statewide script: {legacy}")
+        return subprocess.call(["bash", str(legacy)], cwd=str(viewer), env=env)
+
+    local = viewer / "run_dnr_pipeline_local.sh"
+    if local.is_file():
+        print(f"[lithology] using resumable local pipeline: {local}")
+        return subprocess.call(["bash", str(local)], cwd=str(viewer), env=env)
+
+    print(
+        "Missing expected viewer scripts: run_full_lithology_html_statewide.sh "
+        "or run_dnr_pipeline_local.sh",
+        file=sys.stderr,
+    )
+    return 1
 
 
 if __name__ == "__main__":

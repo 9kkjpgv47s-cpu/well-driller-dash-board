@@ -4,6 +4,11 @@ export const CJ_DRILLER_JOB_KEY = "cjDrillerJobV1";
 export type CjWellSnap = {
   id?: string;
   refno?: number;
+  well_id_canonical?: string;
+  well_identity_aliases?: string;
+  well_identity_confidence?: "high" | "medium" | "low";
+  well_identity_provenance?: string;
+  well_identity_resolver_version?: string;
   lat?: number;
   lon?: number;
   county?: string;

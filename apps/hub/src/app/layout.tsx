@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Driller Dashboard — Hub",
+  title: "Driller Dashboard — Field Hub",
   description:
-    "Pre-departure hub: office scheduling and field jobsite workspace (MVP).",
+    "Field jobsite workspace: dispatch parsing, DNR wells map, depth view, weather, and area drilling analysis.",
 };
 
 export default function RootLayout({

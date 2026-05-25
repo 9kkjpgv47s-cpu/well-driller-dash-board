@@ -16,6 +16,15 @@ Static map + Python ETL for Indiana DNR chunks live in **another git checkout**.
 1. Clone or keep your viewer repo anywhere on disk.
 2. Export **`WELL_VIEWER_ROOT`** or **`DNR_VIEWER_ROOT`** to that directory’s **absolute path** whenever you sync or run delegated builds (see `AGENTS.md`).
 
+Statewide lithology command lane (hub-canonical):
+
+```bash
+cd apps/hub
+export WELL_VIEWER_ROOT="/absolute/path/to/dnr-viewer-repo"
+npm run lithology:statewide -- --mode cycle --window-max 5000 --delay-sec 0.2
+npm run verify:lithology-kpi
+```
+
 Optional: add to `apps/hub/.env.local` (gitignored):
 
 ```bash
