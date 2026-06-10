@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WellRecord } from "@/lib/area-well-analytics";
 import { getLithLayers } from "@/lib/area-well-analytics";
 import { resolveWellRefNo } from "@/lib/well-identity";
@@ -69,6 +69,56 @@ type Props = {
 
 export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
   const [dnr, setDnr] = useState<DnrApi>({});
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Escape-to-close + focus trap while the dialog is open; restores the
+  // previously focused element (usually the map marker trigger) on close.
+  useEffect(() => {
+    if (!well) return;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    closeBtnRef.current?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusables = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+      if (!focusables.length) return;
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !dialog.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !dialog.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [well]);
 
   useEffect(() => {
     if (!well) {
@@ -212,6 +262,7 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-600 dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
@@ -223,8 +274,10 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
             {String(well.id ?? well.refno ?? "Well")}
           </h2>
           <button
+            ref={closeBtnRef}
             type="button"
             onClick={onClose}
+            aria-label="Close well details"
             className="rounded-lg px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             Close

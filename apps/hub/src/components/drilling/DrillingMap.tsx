@@ -1,13 +1,25 @@
 "use client";
 
-import type { WellRecord } from "@/lib/area-well-analytics";
+import {
+  haversineMiles,
+  type WellRecord,
+} from "@/lib/area-well-analytics";
 import {
   buildViewerWellMarker,
   type ViewerMapFilters,
   wellPassesHubViewerFilters,
 } from "@/lib/viewer-well-map";
-import type { Circle, LayerGroup, Map as LeafletMap } from "leaflet";
-import { useEffect, useRef, useState } from "react";
+import {
+  buildWellSpatialIndex,
+  type WellSpatialIndex,
+} from "@/lib/well-spatial-index";
+import type {
+  Circle,
+  LayerGroup,
+  Map as LeafletMap,
+  Marker,
+} from "leaflet";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "./drilling-map-viewer.css";
 
@@ -31,6 +43,10 @@ type Props = {
 };
 
 const MAX_MARKERS = 800;
+/** Padding factor applied to viewport bounds so panning has pre-rendered margin. */
+const VIEWPORT_PAD = 0.2;
+
+type LeafletModule = typeof import("leaflet");
 
 function escapePopupHtml(s: string): string {
   return s
@@ -38,6 +54,10 @@ function escapePopupHtml(s: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function wellMarkerKey(w: WellRecord): string {
+  return String(w.id ?? w.refno ?? `${w.lat},${w.lon}`);
 }
 
 export function DrillingMap({
@@ -50,13 +70,130 @@ export function DrillingMap({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
+  const leafletRef = useRef<LeafletModule | null>(null);
   const markersRef = useRef<LayerGroup | null>(null);
+  const markersByKeyRef = useRef<Map<string, Marker>>(new Map());
   const jobsiteGroupRef = useRef<LayerGroup | null>(null);
   const circleRef = useRef<Circle | null>(null);
   const onWellOpenRef = useRef(onWellOpen);
   onWellOpenRef.current = onWellOpen;
   const [mapReady, setMapReady] = useState(false);
   const [mapZoom, setMapZoom] = useState(13);
+  const [capNote, setCapNote] = useState<string | null>(null);
+
+  /** Wells matching the hub filter set (radius-limited upstream). */
+  const filteredWells = useMemo(
+    () => wells.filter((w) => wellPassesHubViewerFilters(w, filters)),
+    [wells, filters],
+  );
+
+  /** Grid index over the filtered set for fast viewport (bounds) queries. */
+  const wellIndex = useMemo(
+    () => buildWellSpatialIndex(filteredWells),
+    [filteredWells],
+  );
+
+  // Refs so map event handlers (moveend) always see the latest data.
+  const wellIndexRef = useRef<WellSpatialIndex>(wellIndex);
+  wellIndexRef.current = wellIndex;
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+  const centerRef = useRef(center);
+  centerRef.current = center;
+  const totalMatchingRef = useRef(0);
+  totalMatchingRef.current = filteredWells.length;
+
+  /**
+   * Render markers for the current viewport.
+   *
+   * - Viewport culling: only wells inside the (padded) map bounds are queried
+   *   from the spatial index.
+   * - Deterministic cap: when more than MAX_MARKERS match, the nearest
+   *   MAX_MARKERS to the search center are kept (no random subsampling).
+   * - `mode: "diff"` (pan/zoom-end) adds/removes markers by well key instead
+   *   of clearing the layer group; `mode: "rebuild"` recreates everything
+   *   (needed when filters or zoom-dependent icon HTML change).
+   */
+  const renderMarkersRef = useRef<(mode: "rebuild" | "diff") => void>(() => {});
+  renderMarkersRef.current = (mode) => {
+    const map = mapRef.current;
+    const group = markersRef.current;
+    const L = leafletRef.current;
+    if (!map || !group || !L) return;
+    const byKey = markersByKeyRef.current;
+
+    if (filtersRef.current.hideWellLabels) {
+      group.clearLayers();
+      byKey.clear();
+      setCapNote(null);
+      return;
+    }
+
+    if (mode === "rebuild") {
+      group.clearLayers();
+      byKey.clear();
+    }
+
+    const b = map.getBounds().pad(VIEWPORT_PAD);
+    const candidates = wellIndexRef.current.queryBounds({
+      south: b.getSouth(),
+      west: b.getWest(),
+      north: b.getNorth(),
+      east: b.getEast(),
+    });
+
+    let visible = candidates;
+    if (candidates.length > MAX_MARKERS) {
+      const c = centerRef.current;
+      visible = candidates
+        .map((w) => ({
+          w,
+          d: haversineMiles(c.lat, c.lon, Number(w.lat), Number(w.lon)),
+        }))
+        .sort((a, b2) => a.d - b2.d || wellMarkerKey(a.w).localeCompare(wellMarkerKey(b2.w)))
+        .slice(0, MAX_MARKERS)
+        .map((x) => x.w);
+      setCapNote(
+        `Showing ${MAX_MARKERS.toLocaleString()} nearest of ${candidates.length.toLocaleString()} matching wells in view — zoom in or tighten filters to see the rest.`,
+      );
+    } else {
+      setCapNote(null);
+    }
+
+    const desired = new Map<string, WellRecord>();
+    for (const w of visible) desired.set(wellMarkerKey(w), w);
+
+    for (const [key, marker] of byKey) {
+      if (!desired.has(key)) {
+        group.removeLayer(marker);
+        byKey.delete(key);
+      }
+    }
+
+    const zoom = map.getZoom();
+    for (const [key, w] of desired) {
+      if (byKey.has(key)) continue;
+      const lat = Number(w.lat);
+      const lon = Number(w.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+
+      const built = buildViewerWellMarker(w, filtersRef.current, zoom);
+      const marker = L.marker([lat, lon], {
+        icon: L.divIcon({
+          className: "vj-well-dot",
+          html: built.html,
+          iconSize: [built.iconW, built.iconH],
+          iconAnchor: built.iconAnchor,
+        }),
+      });
+      marker.bindPopup(built.popupHtml);
+      marker.on("click", () => {
+        onWellOpenRef.current(w);
+      });
+      marker.addTo(group);
+      byKey.set(key, marker);
+    }
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -64,6 +201,7 @@ export function DrillingMap({
 
     void import("leaflet").then((L) => {
       if (cancelled || !containerRef.current) return;
+      leafletRef.current = L;
       const map = L.map(containerRef.current).setView(
         [center.lat, center.lon],
         13,
@@ -81,8 +219,10 @@ export function DrillingMap({
       }).addTo(map);
       mapRef.current = map;
       setMapZoom(map.getZoom());
-      const onZoom = () => setMapZoom(map.getZoom());
-      map.on("zoomend", onZoom);
+      map.on("zoomend", () => setMapZoom(map.getZoom()));
+      // Re-cull markers for the new viewport after pans (zoom changes
+      // trigger a full rebuild via the mapZoom effect below).
+      map.on("moveend", () => renderMarkersRef.current("diff"));
       setMapReady(true);
     });
 
@@ -91,7 +231,9 @@ export function DrillingMap({
       setMapReady(false);
       mapRef.current?.remove();
       mapRef.current = null;
+      leafletRef.current = null;
       markersRef.current = null;
+      markersByKeyRef.current.clear();
       jobsiteGroupRef.current = null;
       circleRef.current = null;
     };
@@ -169,51 +311,23 @@ export function DrillingMap({
     });
   }, [jobsiteLocation, center.lat, center.lon, mapReady]);
 
+  // Full rebuild when the well set, filters, or zoom-dependent icon HTML change.
   useEffect(() => {
-    const map = mapRef.current;
-    const group = markersRef.current;
-    if (!map || !group || !mapReady) return;
-
-    if (filters.hideWellLabels) {
-      group.clearLayers();
-      return;
-    }
-
-    void import("leaflet").then((L) => {
-      group.clearLayers();
-      let filtered = wells.filter((w) => wellPassesHubViewerFilters(w, filters));
-      if (filtered.length > MAX_MARKERS) {
-        filtered = [...filtered].sort(() => 0.5 - Math.random());
-        filtered = filtered.slice(0, MAX_MARKERS);
-      }
-
-      for (const w of filtered) {
-        const lat = Number(w.lat);
-        const lon = Number(w.lon);
-        if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
-
-        const built = buildViewerWellMarker(w, filters, mapZoom);
-        const marker = L.marker([lat, lon], {
-          icon: L.divIcon({
-            className: "vj-well-dot",
-            html: built.html,
-            iconSize: [built.iconW, built.iconH],
-            iconAnchor: built.iconAnchor,
-          }),
-        });
-        marker.bindPopup(built.popupHtml);
-        marker.on("click", () => {
-          onWellOpenRef.current(w);
-        });
-        marker.addTo(group);
-      }
-    });
-  }, [wells, filters, mapReady, mapZoom]);
+    if (!mapReady) return;
+    renderMarkersRef.current("rebuild");
+  }, [filteredWells, wellIndex, filters, mapReady, mapZoom]);
 
   return (
-    <div
-      ref={containerRef}
-      className="z-0 h-[min(55vh,520px)] min-w-0 w-full max-w-full rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900"
-    />
+    <div className="min-w-0 space-y-1.5">
+      <div
+        ref={containerRef}
+        className="z-0 h-[min(55vh,520px)] min-w-0 w-full max-w-full rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900"
+      />
+      {capNote ? (
+        <p className="text-xs text-[var(--muted)]" role="status">
+          {capNote}
+        </p>
+      ) : null}
+    </div>
   );
 }
