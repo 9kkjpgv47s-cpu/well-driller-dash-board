@@ -2,12 +2,14 @@
 
 Pre-departure hub for water-well drillers: location context, nearby well intelligence, and (later) community notes.
 
+**The app is a single page on `/`** (`apps/hub`): paste a dispatch email, generate a job brief, and the DNR wells map, job-scoped weather, and area drilling analysis unlock around the parsed jobsite. Legacy routes (`/drilling`, `/driller-job`, `/optimization`, `/well-viewer`) redirect to `/`; `?lat=&lon=` deep links and `?job=` share links are supported on `/`. See [`apps/hub/README.md`](./apps/hub/README.md) for routes, data loading, and scripts.
+
 ## Easiest hub path after `git clone` (no Homebrew, no Git LFS for DNR data)
 
 1. Optional: `./setup.sh` — prints Python version and the two canonical-JSONL commands.
 2. **DNR data in git:** **`dnr_wells_full.csv.gz`** at the **repo root** (~22 MB) and **`dnr_wells_chunk_*.csv.gz`** under **`apps/hub/public/well-viewer/`** (~20 MB total) are committed so a fresh clone can run the map and `build_canonical_jsonl.py --from-full` without copying files from the viewer. Plain **`dnr_wells_full.csv`** stays gitignored (over GitHub’s 100 MB cap); if both `.csv` and `.gz` exist locally, scripts prefer the `.csv`.
 3. Build area-insights / canonical lines: `python3 scripts/build_canonical_jsonl.py --from-full` → `data/out/canonical_wells.jsonl.gz`.
-4. Next app: `cd apps/hub && npm install && npm run dev` — **`/well-viewer`** loads chunks from the same origin. When you change **`index.html`**, **`api/dnr-report.js`**, or rebuild chunks in the standalone viewer, run `export WELL_VIEWER_ROOT=...` and **`./scripts/sync-well-viewer-into-hub.sh`** to refresh those pieces (then commit any updates).
+4. Next app: `cd apps/hub && npm install && npm run dev` — the page on **`/`** loads the well chunks from the same origin (parallel fetch + Web Worker parsing) once a jobsite is set. When you rebuild chunks or change viewer-derived files in the standalone viewer repo, run `export WELL_VIEWER_ROOT=...` and **`./scripts/sync-well-viewer-into-hub.sh`** to refresh those pieces (then commit any updates).
 
 ## DNR well viewer (separate repository)
 

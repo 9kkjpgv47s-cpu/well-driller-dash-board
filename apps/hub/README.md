@@ -1,95 +1,71 @@
 # Driller Dashboard — hub (`apps/hub`)
 
-Next.js app for the field hub: scheduling, optimization demos, job-scoped weather, and the **embedded C&J DNR well viewer**.
+Next.js 15 / React 19 / Tailwind v4 **mono-page field hub** for water-well drillers.
 
-## Well viewer inside the hub
+Everything lives on **`/`** (rendered by `src/components/drilling/DrillingHubClient.tsx`):
 
-The static Leaflet viewer lives under **`public/well-viewer/`** (served as `/well-viewer/index.html`). Routes:
+1. **Dispatch input** — paste a dispatch email; we heuristically extract title, contact, phone, schedule, rig path, address, and GPS coordinates. If only an address is found, a **Geocode address** button resolves it via `GET /api/geocode` (Nominatim, server-side).
+2. **Map & views** — Leaflet map of nearby DNR registry wells (with viewport culling and a deterministic nearest-800 marker cap), plus **Depth** (thermometer) and **ASL** (stratigraphy) views over the same data.
+3. **Weather** — job-scoped forecast panel (`/api/weather` blends Open-Meteo and US NWS; cached ~15 min server-side).
+4. **Area drilling analysis** — registry-backed insights (aquifer mix, sand/gravel intervals, yield buckets, depth medians) computed once per radius and shared across the page.
 
-- **`/well-viewer`** — full-page iframe; optional query `?lat=&lon=&tab=driller` to center the map or open the Driller tab.
-- **`/driller-job`** — React view of the same **driller job queue** as the viewer (`localStorage` key `cjDrillerJobV1`).
-- **Scheduling** — selecting a job embeds the viewer centered on that job’s coordinates.
+Sections are reorderable; radius, view, and ordering persist in `localStorage`.
 
-**`dnr_wells_chunk_*.csv.gz`** live next to **`index.html`** under **`public/well-viewer/`** and are **tracked in git** so clone → `npm run dev` → **`/well-viewer`** has real data. When you regenerate chunks or change static viewer files in the standalone repo, sync into this app:
+## Routes
+
+| Route | Behavior |
+| --- | --- |
+| `/` | The app. Optional `?lat=&lon=` deep link sets the jobsite center; `?job=` loads a shared job link. |
+| `/drilling`, `/driller-job`, `/optimization`, `/well-viewer` | **Redirect to `/`** (legacy bookmarks; `/well-viewer` forwards `?lat=&lon=`). |
+| `/api/area-insights?lat=&lon=&radius=` | Server-computed `AreaInsightsReport` JSON for a point + radius (miles). |
+| `/api/optimization?lat=&lon=&radiusMiles=` | Depth/yield optimization summary from the same server chunk cache. |
+| `/api/geocode?q=` | Forward geocode (Indiana-biased Nominatim). |
+| `/api/elevation` | POST DEM ground elevations for a list of locations. |
+| `/api/weather`, `/api/radar` | Forecast + radar proxies for the weather panel. |
+| `/api/dnr-report?refNo=` | Official DNR record HTML parsing for the well detail modal (`vendor/dnr-report-local`). |
+
+There is no separate scheduling board, optimization page, or iframe well viewer anymore — those legacy components were removed; git history is the record.
+
+## How well data loads
+
+- **Source files:** `public/well-viewer/dnr_wells_chunk_*.csv.gz` (~10 gzipped CSV chunks, tracked in git so a fresh clone works offline).
+- **Browser:** once a jobsite center is set, `src/lib/dnr-chunk-browser.ts` fetches all existing chunks **concurrently** and decompresses + parses them in a small **Web Worker pool** (`dnr-chunk-worker.ts`), reporting per-chunk progress to a determinate progress bar. Rows are cached per session (`dnr-wells-cache.ts`).
+- **Server (API routes):** `dnr-chunk-server.ts` + `dnr-wells-server-cache.ts` load the same chunks from disk once per process.
+- **Queries:** `src/lib/well-spatial-index.ts` buckets wells into a 0.05° grid; radius and map-viewport queries go through it instead of scanning all ~415k rows. Lithology JSON is parsed once per record (`WeakMap` cache in `area-well-analytics.ts`).
+
+When chunks are regenerated in the standalone DNR viewer repo, sync them in:
 
 ```bash
-# absolute path to your DNR viewer checkout (separate repo)
 export WELL_VIEWER_ROOT="/absolute/path/to/dnr-viewer-repo"
-chmod +x scripts/sync-well-viewer-into-hub.sh
-./scripts/sync-well-viewer-into-hub.sh
+./scripts/sync-well-viewer-into-hub.sh   # run from the monorepo root
 ```
 
-The **`vendor/dnr-report-local`** package (synced from the viewer’s `api/dnr-report.js`) powers **`GET /api/dnr-report`** for modal HTML parsing when `CJ_STATIC_DEPLOY` is false in the viewer.
-
-**Canonical well JSONL** (hub analytics / `data/out/`) can be built **without** the viewer checkout by placing **`dnr_wells_full.csv.gz`** at the **monorepo root** and running `python3 scripts/build_canonical_jsonl.py --from-full` (see repo root `README.md` and `data/README.md`).
-
-## Statewide lithology execution lane
-
-Use `apps/hub` scripts as the canonical control plane, with ETL executed in `WELL_VIEWER_ROOT`:
+## Develop, test, build
 
 ```bash
-export WELL_VIEWER_ROOT="/absolute/path/to/dnr-viewer-repo"
+npm install
+npm run dev     # http://localhost:3000
+npm test        # vitest (src/**/*.test.ts)
+npm run build
+```
 
-# Baseline rebuild + one resumable HTML backfill window + verify/sync + KPI
+## Scripts
+
+Python tooling is canonical at the **monorepo root `scripts/`** tree; hub npm scripts call it directly:
+
+```bash
+npm run verify:chunks                 # summarize chunk columns/coverage
+npm run verify:lithology-kpi          # lithology source KPI report
+npm run verify:viewer-hub-artifacts   # viewer/hub artifact parity check
+npm run lithology:export-none         # export unresolved none-source wells → ../../data/out/
+```
+
+Statewide lithology ETL lanes (need `WELL_VIEWER_ROOT` pointing at the viewer checkout) remain hub-local under `apps/hub/scripts/`:
+
+```bash
 npm run lithology:statewide -- --mode cycle --window-max 5000 --delay-sec 0.2
-
-# KPI-only report
-npm run verify:lithology-kpi
-
-# Export unresolved none-source wells for targeted retry analysis
-npm run lithology:export-none
-
-# Loop windows until target or max windows
-npm run lithology:iterate-to-target -- --target-real-pct 90 --max-windows 8 --window-max 4000 --delay-sec 0.05
+npm run lithology:iterate-to-target -- --target-real-pct 90 --max-windows 8
+npm run rebuild:viewer-data
 ```
 
-`rebuild:viewer-data:html-full` now uses `run_full_lithology_html_statewide.sh` when present, and otherwise falls back to `run_dnr_pipeline_local.sh` with `RUN_HTML_BACKFILL=1`.
-
-## Scheduling + weather
-
-- **Crews:** 1–5 active (default 3), **weekdays only**, **1 or 2 jobs per crew per day** (no clock time slots).
-- **Horizons:** week grid and **month agenda** (far-out jobs).
-- **Emergency jobs:** quick insert; planner heuristics call out conflicts (e.g. emergency + long off-drive access).
-- **Weather:** `/api/weather` blends **Open-Meteo** (GFS + ECMWF runs) and **US NWS** hourly when the point is in the US. Responses are cached ~15 minutes server-side so revisiting morning vs afternoon can show fresher data.
-- **Job panel:** select any job for **hour-by-hour** precip probability, clouds, wind, WMO-style conditions, source list, and **“Things to consider”** driven by distance off the drive (30+ ft threshold), wind, POP, and emergency context.
-
-Timezone defaults to `America/Indiana/Indianapolis`; override via `JobWeatherPanel` later if you add a setting.
-
----
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Canonical well JSONL** (hub analytics / `data/out/`) can be built **without** the viewer checkout by placing `dnr_wells_full.csv.gz` at the monorepo root and running `python3 scripts/build_canonical_jsonl.py --from-full` (see root `README.md` and `data/README.md`).
