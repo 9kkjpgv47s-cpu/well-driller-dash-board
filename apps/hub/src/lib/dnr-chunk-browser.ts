@@ -103,12 +103,78 @@ async function parseChunkBuffers(
   }
 }
 
+const CHUNK_COUNT_CACHE_KEY = "cj_dnr_chunk_count_v1";
+const CHUNK_COUNT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const DISCOVERY_BATCH_SIZE = 4;
+
+function readCachedChunkCount(): number | null {
+  try {
+    const raw = window.localStorage.getItem(CHUNK_COUNT_CACHE_KEY);
+    if (!raw) return null;
+    const { count, at } = JSON.parse(raw) as { count: number; at: number };
+    if (
+      typeof count !== "number" ||
+      count < 1 ||
+      count > MAX_CHUNK_INDEX + 1 ||
+      Date.now() - at > CHUNK_COUNT_CACHE_TTL_MS
+    ) {
+      return null;
+    }
+    return count;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedChunkCount(count: number): void {
+  try {
+    window.localStorage.setItem(
+      CHUNK_COUNT_CACHE_KEY,
+      JSON.stringify({ count, at: Date.now() }),
+    );
+  } catch {
+    /* private mode etc. — discovery just reruns next load */
+  }
+}
+
+/**
+ * Discover the contiguous chunk count by fetching small parallel batches and
+ * stopping at the first batch containing a miss. Avoids blasting
+ * MAX_CHUNK_INDEX requests (and a wall of 404s) on every page load.
+ */
+async function discoverChunks(): Promise<{ i: number; res: Response }[]> {
+  const ok: { i: number; res: Response }[] = [];
+  for (let start = 0; start <= MAX_CHUNK_INDEX; start += DISCOVERY_BATCH_SIZE) {
+    const end = Math.min(start + DISCOVERY_BATCH_SIZE - 1, MAX_CHUNK_INDEX);
+    const batch = await Promise.all(
+      Array.from({ length: end - start + 1 }, (_, k) =>
+        fetch(chunkUrl(start + k)).then(
+          (res) => ({ i: start + k, res: res as Response | null }),
+          () => ({ i: start + k, res: null as Response | null }),
+        ),
+      ),
+    );
+    let stopped = false;
+    for (const { i, res } of batch) {
+      if (!stopped && res?.ok) {
+        ok.push({ i, res });
+      } else {
+        stopped = true;
+        void res?.body?.cancel();
+      }
+    }
+    if (stopped) break;
+  }
+  return ok;
+}
+
 /**
  * Load all DNR gzip chunks from the static viewer path (same origin as the hub).
  *
- * Chunks are fetched concurrently (existing files are discovered by status —
- * the first missing index ends the contiguous set, matching how the ETL
- * writes chunk files), then decompressed + parsed in a Web Worker pool.
+ * The contiguous chunk count is discovered in small batches (the ETL writes
+ * chunk_0..chunk_{n-1}) and cached in localStorage for 24h so repeat loads
+ * fetch exactly the right files. Decompression + parsing runs in a Web Worker
+ * pool.
  */
 export async function loadAllDnrChunksFromPublic(
   onProgress?: ChunkProgressCallback,
@@ -118,36 +184,44 @@ export async function loadAllDnrChunksFromPublic(
 
   report(0, 0, 0, "Checking registry chunks…");
 
-  // Fetch all candidate chunks concurrently; missing indices 404 cheaply.
-  const responses = await Promise.all(
-    Array.from({ length: MAX_CHUNK_INDEX + 1 }, (_, i) =>
-      fetch(chunkUrl(i)).then(
-        (res) => ({ i, res }),
-        () => ({ i, res: null as Response | null }),
-      ),
-    ),
-  );
+  let chunkResponses: { i: number; res: Response }[] | null = null;
 
-  if (!responses[0]?.res?.ok) {
+  const cachedCount = readCachedChunkCount();
+  if (cachedCount) {
+    const batch = await Promise.all(
+      Array.from({ length: cachedCount }, (_, i) =>
+        fetch(chunkUrl(i)).then(
+          (res) => ({ i, res: res as Response | null }),
+          () => ({ i, res: null as Response | null }),
+        ),
+      ),
+    );
+    if (batch.every(({ res }) => res?.ok)) {
+      chunkResponses = batch as { i: number; res: Response }[];
+    } else {
+      // Stale cache (dataset changed) — drain and rediscover.
+      for (const { res } of batch) void res?.body?.cancel();
+    }
+  }
+
+  if (!chunkResponses) {
+    chunkResponses = await discoverChunks();
+    if (chunkResponses.length) writeCachedChunkCount(chunkResponses.length);
+  }
+
+  if (!chunkResponses.length) {
     throw new Error(
       `No chunk data at ${chunkUrl(0)}. Run scripts/sync-well-viewer-into-hub.sh and ensure .csv.gz files exist under public/well-viewer/.`,
     );
   }
 
-  // Contiguous count from index 0 (the ETL writes chunk_0..chunk_{n-1}).
-  let total = 0;
-  while (total <= MAX_CHUNK_INDEX && responses[total]?.res?.ok) total++;
-  for (let i = total; i <= MAX_CHUNK_INDEX; i++) {
-    // Drain ignored bodies so connections can be reused/closed.
-    void responses[i]?.res?.body?.cancel();
-  }
-
+  const total = chunkResponses.length;
   report(0, total, 0, `Downloading ${total} registry chunks…`);
 
   let fetched = 0;
   const buffers = await Promise.all(
-    responses.slice(0, total).map(async ({ i, res }) => {
-      const buf = await (res as Response).arrayBuffer();
+    chunkResponses.map(async ({ i, res }) => {
+      const buf = await res.arrayBuffer();
       fetched++;
       report(0, total, 0, `Downloaded chunk ${fetched}/${total}…`);
       return { index: i, buf };
