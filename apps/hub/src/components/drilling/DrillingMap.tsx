@@ -226,6 +226,7 @@ export function DrillingMap({
       setMapReady(true);
     });
 
+    const markersByKey = markersByKeyRef.current;
     return () => {
       cancelled = true;
       setMapReady(false);
@@ -233,7 +234,7 @@ export function DrillingMap({
       mapRef.current = null;
       leafletRef.current = null;
       markersRef.current = null;
-      markersByKeyRef.current.clear();
+      markersByKey.clear();
       jobsiteGroupRef.current = null;
       circleRef.current = null;
     };
