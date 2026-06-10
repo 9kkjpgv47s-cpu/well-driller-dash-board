@@ -8,13 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "verify:chunks": "python3 ../../scripts/verify-hub-well-chunks.py",
-    "verify:lithology-kpi": "python3 scripts/report-lithology-kpi.py",
-    "verify:viewer-hub-artifacts": "python3 scripts/verify-viewer-hub-artifacts.py",
-    "lithology:export-none": "python3 scripts/export-none-lithology-wells.py --out ../../../data/out/lithology-none-wells.csv",
+    "verify:lithology-kpi": "python3 ../../scripts/report-lithology-kpi.py",
+    "verify:viewer-hub-artifacts": "python3 ../../scripts/verify-viewer-hub-artifacts.py",
+    "lithology:export-none": "python3 ../../scripts/export-none-lithology-wells.py --out ../../data/out/lithology-none-wells.csv",
     "rebuild:viewer-data": "python3 scripts/rebuild-viewer-data.py",
     "rebuild:viewer-data:html-full": "python3 scripts/run-viewer-full-lithology.py",
     "lithology:statewide": "python3 scripts/run-statewide-lithology-plan.py",
     "lithology:iterate-to-target": "python3 scripts/iterate-lithology-to-target.py",
+    "test": "vitest run",
     "test:hub-lithology": "vitest run"
   },
   "dependencies": {
