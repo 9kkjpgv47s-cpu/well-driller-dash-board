@@ -1,27 +1,26 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, type ReactNode } from "react";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  computeAreaInsights,
   formatNarrativeHtml,
   narrativeBorderClass,
   type AreaInsightsReport,
 } from "@/lib/area-well-analytics";
-import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
 
 type Props = {
   lat: number;
   lon: number;
   radiusMiles: number;
-  /** When true, auto-load on mount / when coords change */
-  autoRun?: boolean;
+  /**
+   * Computed report from the owner (DrillingHubClient computes insights once
+   * for the whole page and passes them down — this panel no longer rescans
+   * the well set itself).
+   */
+  report: AreaInsightsReport | null;
+  /** True while the owner is still loading well data. */
+  loading?: boolean;
+  error?: string | null;
   title?: string;
   /** Extra line under the title (e.g. hub-only lithology note for drillers). */
   detailNote?: string;
@@ -70,39 +69,15 @@ export function AreaInsightsPanel({
   lat,
   lon,
   radiusMiles,
-  autoRun = true,
+  report,
+  loading = false,
+  error = null,
   title = "Area drilling insights",
   detailNote,
   showViewerLinks = true,
   headerActions,
 }: Props) {
-  const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [report, setReport] = useState<AreaInsightsReport | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const run = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    setReport(null);
-    try {
-      const wells = await getDnrWellsCached();
-      setStatus(`Analyzing ${wells.length.toLocaleString()} loaded wells…`);
-      const r = computeAreaInsights(wells, lat, lon, radiusMiles);
-      setReport(r);
-      setStatus(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load well data");
-      setStatus(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [lat, lon, radiusMiles]);
-
-  useEffect(() => {
-    if (!autoRun || !Number.isFinite(lat) || !Number.isFinite(lon)) return;
-    void run();
-  }, [autoRun, lat, lon, radiusMiles, run]);
+  const status = loading && !report ? "Analyzing loaded wells…" : null;
 
   const breakdowns = useMemo(() => {
     if (!report) return null;
@@ -229,14 +204,6 @@ export function AreaInsightsPanel({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {headerActions}
-          <button
-            type="button"
-            onClick={() => void run()}
-            disabled={loading}
-            className="rounded-lg bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-900 disabled:opacity-50 dark:bg-emerald-700 dark:hover:bg-emerald-600"
-          >
-            {loading ? "Loading…" : "Refresh analysis"}
-          </button>
           {showViewerLinks ? (
             <Link
               href={`/?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`}

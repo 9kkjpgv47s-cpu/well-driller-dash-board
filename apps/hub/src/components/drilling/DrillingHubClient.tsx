@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AreaInsightsPanel } from "@/components/AreaInsightsPanel";
 import { SectionMoveControls } from "@/components/SectionMoveControls";
@@ -10,18 +10,22 @@ import {
   computeAreaInsights,
   getLithLayers,
   haversineMiles,
-  wellsWithinRadius,
   type WellRecord,
 } from "@/lib/area-well-analytics";
 import { appendDrillerJobEntry } from "@/lib/cj-driller-job";
+import type { ChunkLoadProgress } from "@/lib/dnr-chunk-browser";
 import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
 import { wellRecordToDrillerEntry } from "@/lib/drilling-well-entry";
 import {
   DEFAULT_AREA_RADIUS_MILES,
   DEFAULT_DEPTH_VIEW_RADIUS_MILES,
 } from "@/lib/hub-area-defaults";
-import type { DispatchJobsiteApply } from "@/lib/dispatch-parse";
+import type {
+  DispatchJobsiteApply,
+  DispatchParseResult,
+} from "@/lib/dispatch-parse";
 import { parseDispatchEmail } from "@/lib/dispatch-parse";
+import { wellsWithinRadiusIndexed } from "@/lib/well-spatial-index";
 import { decodeJobShareParam } from "@/lib/job-share";
 import { type DrillJob } from "@/lib/scheduling-data";
 import { syntheticDrillJobForWeather } from "@/lib/synthetic-drill-job";
@@ -158,7 +162,6 @@ type DispatchContext = {
 };
 
 export function DrillingHubClient() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [center, setCenter] = useState<{ lat: number; lon: number } | null>(
@@ -188,7 +191,14 @@ export function DrillingHubClient() {
 
   const [allWells, setAllWells] = useState<WellRecord[]>([]);
   const [wellsStatus, setWellsStatus] = useState<string | null>(null);
+  const [wellsProgress, setWellsProgress] =
+    useState<ChunkLoadProgress | null>(null);
   const [wellsError, setWellsError] = useState<string | null>(null);
+
+  const [lastParsedDispatch, setLastParsedDispatch] =
+    useState<DispatchParseResult | null>(null);
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
 
   const [toast, setToast] = useState<string | null>(null);
 
@@ -258,7 +268,7 @@ export function DrillingHubClient() {
     [],
   );
 
-  /** Load shared job links; strip legacy bare ?lat=&lon= bookmarks. */
+  /** Load shared job links (?job=) and plain ?lat=&lon= deep links. */
   useEffect(() => {
     if (sharedJobLoadedRef.current) return;
 
@@ -279,31 +289,53 @@ export function DrillingHubClient() {
       }
     }
 
-    const la = searchParams.get("lat");
-    const lo = searchParams.get("lon");
-    if (la || lo) {
-      router.replace("/", { scroll: false });
+    const la = parseFloat(searchParams.get("lat") ?? "");
+    const lo = parseFloat(searchParams.get("lon") ?? "");
+    if (
+      Number.isFinite(la) &&
+      Number.isFinite(lo) &&
+      la >= -90 &&
+      la <= 90 &&
+      lo >= -180 &&
+      lo <= 180
+    ) {
+      sharedJobLoadedRef.current = true;
+      setCenter({ lat: la, lon: lo });
+      setDispatchContext({
+        title: `Map link (${la.toFixed(4)}, ${lo.toFixed(4)})`,
+      });
+      setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
     }
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!center) return;
     setWellsStatus("Loading registry chunks…");
-    void getDnrWellsCached((msg) => setWellsStatus(msg))
+    void getDnrWellsCached((p) => {
+      setWellsProgress(p);
+      setWellsStatus(p.message);
+    })
       .then((w) => {
         setAllWells(w);
         setWellsStatus(null);
+        setWellsProgress(null);
         setWellsError(null);
       })
       .catch((e: Error) => {
         setWellsError(e.message);
         setWellsStatus(null);
+        setWellsProgress(null);
       });
   }, [center]);
 
   const wellsInRadius = useMemo(() => {
     if (!center) return [];
-    return wellsWithinRadius(allWells, center.lat, center.lon, radiusMiles);
+    return wellsWithinRadiusIndexed(
+      allWells,
+      center.lat,
+      center.lon,
+      radiusMiles,
+    );
   }, [allWells, center, radiusMiles]);
 
   const wellsMatchingMapFilters = useMemo(
@@ -313,7 +345,7 @@ export function DrillingHubClient() {
 
   const wellsInDepthRadius = useMemo(() => {
     if (!center) return [];
-    return wellsWithinRadius(
+    return wellsWithinRadiusIndexed(
       allWells,
       center.lat,
       center.lon,
@@ -334,8 +366,17 @@ export function DrillingHubClient() {
       center.lat,
       center.lon,
       depthRadiusMiles,
+      { wellsInRadius: wellsInDepthRadius },
     );
-  }, [allWells, center, depthRadiusMiles]);
+  }, [allWells, center, depthRadiusMiles, wellsInDepthRadius]);
+
+  /** Single analytics pass for the insights panel (radius selector lives on this page). */
+  const areaInsights = useMemo(() => {
+    if (!center || !allWells.length) return null;
+    return computeAreaInsights(allWells, center.lat, center.lon, radiusMiles, {
+      wellsInRadius,
+    });
+  }, [allWells, center, radiusMiles, wellsInRadius]);
 
   const nearestWellsForElev = useMemo(() => {
     if (!center) return [];
@@ -522,6 +563,60 @@ export function DrillingHubClient() {
     setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
   }, []);
 
+  const handleDispatchParsed = useCallback((parsed: DispatchParseResult) => {
+    setLastParsedDispatch(parsed);
+    setGeocodeError(null);
+  }, []);
+
+  /** Address parsed but no GPS in the paste — offer server-side geocoding. */
+  const geocodableAddress =
+    !center &&
+    lastParsedDispatch?.locationSource === "address_only" &&
+    lastParsedDispatch.address
+      ? lastParsedDispatch.address
+      : null;
+
+  const geocodeDispatchAddress = useCallback(async () => {
+    if (!geocodableAddress) return;
+    setGeocoding(true);
+    setGeocodeError(null);
+    try {
+      const res = await fetch(
+        `/api/geocode?q=${encodeURIComponent(geocodableAddress)}`,
+      );
+      const data = (await res.json()) as {
+        results?: { lat: number; lon: number; label: string }[];
+        error?: string;
+      };
+      if (!res.ok) {
+        throw new Error(
+          typeof data.error === "string" ? data.error : res.statusText,
+        );
+      }
+      const hit = data.results?.find(
+        (r) => Number.isFinite(r.lat) && Number.isFinite(r.lon),
+      );
+      if (!hit) {
+        throw new Error(
+          "No geocoder match for that address. Try simplifying it or paste GPS coordinates.",
+        );
+      }
+      setCenter({ lat: hit.lat, lon: hit.lon });
+      setDispatchContext({
+        title:
+          lastParsedDispatch?.title ?? lastParsedDispatch?.address ?? hit.label,
+        feetOffDrive: undefined,
+      });
+      setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
+    } catch (e) {
+      setGeocodeError(
+        e instanceof Error ? e.message : "Geocoding failed — try again.",
+      );
+    } finally {
+      setGeocoding(false);
+    }
+  }, [geocodableAddress, lastParsedDispatch]);
+
   const wellsForMap = useMemo(() => {
     if (!demGroundElevFtByKey?.size) return wellsInRadius;
     return wellsInRadius.map((w) => {
@@ -570,13 +665,41 @@ export function DrillingHubClient() {
     <div className="field-hub-scope space-y-8">
       <FieldDispatchPanel
         onApplyToFieldMap={applyDispatchJobsite}
+        onParsed={handleDispatchParsed}
         jobsiteCoords={center}
         feetOffDrive={dispatchContext?.feetOffDrive}
         initialRaw={dispatchHydrate?.raw}
         initialParsed={dispatchHydrate?.parsed ?? null}
       />
 
-      {center && wellsStatus ? (
+      {center && wellsProgress && wellsProgress.total > 0 ? (
+        <div className="space-y-1.5" aria-live="polite">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm text-[var(--muted)]">
+            <span>
+              Loading registry chunks — {wellsProgress.done} /{" "}
+              {wellsProgress.total}
+            </span>
+            <span className="tabular-nums">
+              {wellsProgress.wellsLoaded.toLocaleString()} wells so far
+            </span>
+          </div>
+          <div
+            className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]"
+            role="progressbar"
+            aria-label="Registry chunk loading progress"
+            aria-valuemin={0}
+            aria-valuemax={wellsProgress.total}
+            aria-valuenow={wellsProgress.done}
+          >
+            <div
+              className="h-full rounded-full bg-emerald-600 transition-[width] duration-300 dark:bg-emerald-500"
+              style={{
+                width: `${Math.round((100 * wellsProgress.done) / wellsProgress.total)}%`,
+              }}
+            />
+          </div>
+        </div>
+      ) : center && wellsStatus ? (
         <p className="text-sm text-[var(--muted)]">{wellsStatus}</p>
       ) : null}
       {wellsError ? (
@@ -867,7 +990,9 @@ export function DrillingHubClient() {
                     lat={center.lat}
                     lon={center.lon}
                     radiusMiles={radiusMiles}
-                    autoRun
+                    report={areaInsights}
+                    loading={!allWells.length && !wellsError}
+                    error={wellsError}
                     title={`Area drilling analysis (${formatRadiusMiShort(radiusMiles)})`}
                     showViewerLinks
                     headerActions={
@@ -885,10 +1010,64 @@ export function DrillingHubClient() {
           })}
         </>
       ) : (
-        <p className="rounded-xl border border-dashed border-[var(--border)] p-6 text-sm text-[var(--muted)]">
-          Paste dispatch email text and generate a job brief to open the map,
-          weather, and area analysis.
-        </p>
+        <section
+          className="card space-y-4 rounded-xl border border-dashed border-[var(--border)] p-6"
+          aria-labelledby="field-onboarding-h"
+        >
+          <h2
+            id="field-onboarding-h"
+            className="text-base font-semibold text-[var(--foreground)]"
+          >
+            Get the field map started
+          </h2>
+          <ol className="list-inside list-decimal space-y-2 text-sm text-[var(--muted)]">
+            <li>
+              <strong className="text-[var(--foreground)]">
+                Paste dispatch text
+              </strong>{" "}
+              (email body with an address and/or GPS coordinates) into the box
+              above.
+            </li>
+            <li>
+              <strong className="text-[var(--foreground)]">
+                Tap “Generate job brief”
+              </strong>{" "}
+              — we pull out the location, contact, and rig-path details.
+            </li>
+            <li>
+              <strong className="text-[var(--foreground)]">
+                Map unlocks automatically
+              </strong>{" "}
+              with nearby DNR registry wells, weather, and area drilling
+              analysis once a jobsite location is known.
+            </li>
+          </ol>
+          {geocodableAddress ? (
+            <div className="space-y-2 rounded-lg border border-emerald-300 bg-emerald-50/80 p-4 dark:border-emerald-800 dark:bg-emerald-950/40">
+              <p className="text-sm text-emerald-950 dark:text-emerald-100">
+                We found an address but no GPS coordinates in the paste:
+                <br />
+                <strong>{geocodableAddress}</strong>
+              </p>
+              <button
+                type="button"
+                onClick={() => void geocodeDispatchAddress()}
+                disabled={geocoding}
+                className="btn-primary disabled:opacity-50"
+              >
+                {geocoding ? "Geocoding…" : "Geocode address"}
+              </button>
+              {geocodeError ? (
+                <p
+                  className="text-sm text-red-600 dark:text-red-400"
+                  role="alert"
+                >
+                  {geocodeError}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </section>
       )}
 
       <WellDetailModal

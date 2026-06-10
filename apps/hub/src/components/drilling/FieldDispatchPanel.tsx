@@ -17,6 +17,8 @@ import { directionsLinksForDispatch } from "@/lib/navigation-links";
 type Props = {
   /** Called when dispatch paste includes GPS coordinates (not address stubs). */
   onApplyToFieldMap: (site: DispatchJobsiteApply) => void;
+  /** Called with every parse result (including address-only pastes) so the owner can offer geocoding. */
+  onParsed?: (parsed: DispatchParseResult) => void;
   jobsiteCoords?: { lat: number; lon: number } | null;
   feetOffDrive?: number;
   initialRaw?: string;
@@ -25,6 +27,7 @@ type Props = {
 
 export function FieldDispatchPanel({
   onApplyToFieldMap,
+  onParsed,
   jobsiteCoords,
   feetOffDrive,
   initialRaw = "",
@@ -79,6 +82,7 @@ export function FieldDispatchPanel({
   const generate = useCallback(() => {
     const result = parseDispatchEmail(raw);
     setParsed(result);
+    onParsed?.(result);
     if (
       result.lat != null &&
       result.lon != null &&
@@ -91,7 +95,7 @@ export function FieldDispatchPanel({
         distanceOffDriveFt: parseDistanceOffDriveFt(result.distanceOffDrive),
       });
     }
-  }, [raw, onApplyToFieldMap]);
+  }, [raw, onApplyToFieldMap, onParsed]);
 
   const mapsUrl = parsed ? mapsUrlForDispatch(parsed) : null;
   const directions = parsed ? directionsLinksForDispatch(parsed) : null;
