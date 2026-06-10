@@ -155,7 +155,22 @@ function lithologyArrayFromParsed(j: unknown): unknown[] {
   return [];
 }
 
+/**
+ * Parsed-lithology cache: getLithLayers is called repeatedly per well from
+ * filters, markers, analytics, and charts; JSON.parse on every call dominated
+ * profile time. Keyed by record identity so reloading chunks invalidates naturally.
+ */
+const lithLayersCache = new WeakMap<WellRecord, unknown[]>();
+
 export function getLithLayers(w: WellRecord): unknown[] {
+  const cached = lithLayersCache.get(w);
+  if (cached) return cached;
+  const layers = parseLithLayersUncached(w);
+  lithLayersCache.set(w, layers);
+  return layers;
+}
+
+function parseLithLayersUncached(w: WellRecord): unknown[] {
   const raw =
     w.lithology_json ??
     w.lithology ??
@@ -584,13 +599,23 @@ function inferAquiferForMix(w: WellRecord): string {
   return "";
 }
 
+export type ComputeAreaInsightsOptions = {
+  /**
+   * Pre-selected wells within the radius (e.g. from a spatial index).
+   * When provided, skips the O(n) haversine scan over `wells`.
+   */
+  wellsInRadius?: WellRecord[];
+};
+
 export function computeAreaInsights(
   wells: WellRecord[],
   lat: number,
   lon: number,
   radiusMiles: number,
+  options?: ComputeAreaInsightsOptions,
 ): AreaInsightsReport {
-  const inR = wellsWithinRadius(wells, lat, lon, radiusMiles);
+  const inR =
+    options?.wellsInRadius ?? wellsWithinRadius(wells, lat, lon, radiusMiles);
   const n = inR.length;
 
   const aquiferMix = {
