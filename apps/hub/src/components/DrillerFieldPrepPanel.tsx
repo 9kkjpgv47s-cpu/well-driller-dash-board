@@ -67,8 +67,7 @@ export function DrillerFieldPrepPanel({
           </h2>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
             Checklist and neighborhood hints load automatically for the active
-            jobsite coordinates (mock API for now). When you add accounts, this
-            will attach to the job your driller opens—no separate run step.
+            jobsite coordinates from registry chunk data.
           </p>
         </div>
         {headerActions ? (
@@ -94,7 +93,7 @@ export function DrillerFieldPrepPanel({
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Wells in radius (mock)
+                Wells in radius
               </p>
               <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
                 {result.neighborhood.sampleWellsInRadius}
@@ -102,7 +101,7 @@ export function DrillerFieldPrepPanel({
             </div>
             <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Median depth (illustrative)
+                Median depth
               </p>
               <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
                 {result.neighborhood.medianDepthFt} ft
@@ -110,7 +109,7 @@ export function DrillerFieldPrepPanel({
             </div>
             <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Static band (illustrative)
+                Static band
               </p>
               <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
                 {result.neighborhood.typicalStaticBandFt}
@@ -128,7 +127,11 @@ export function DrillerFieldPrepPanel({
             </ul>
           </div>
           <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-            <p className="font-semibold">Mock API notes</p>
+            <p className="font-semibold">
+              {result.dataSource === "registry"
+                ? "Registry notes"
+                : "Fallback notes (chunk load failed)"}
+            </p>
             <ul className="mt-2 list-inside list-disc space-y-1">
               {result.neighborhood.notes.map((n) => (
                 <li key={n}>{n}</li>

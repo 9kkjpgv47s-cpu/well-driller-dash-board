@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { getDnrWellsServerCached } from "@/lib/dnr-wells-server-cache";
 import {
-  computeOptimization,
+  computeOptimizationFromWells,
+  computeOptimizationMock,
   parseOptimizationSearchParams,
 } from "@/lib/optimization";
 
@@ -22,7 +24,13 @@ export async function GET(request: Request) {
     );
   }
 
-  const body = computeOptimization(input);
+  let body;
+  try {
+    const wells = await getDnrWellsServerCached();
+    body = computeOptimizationFromWells(input, wells);
+  } catch {
+    body = computeOptimizationMock(input);
+  }
 
   return NextResponse.json(body, {
     headers: {

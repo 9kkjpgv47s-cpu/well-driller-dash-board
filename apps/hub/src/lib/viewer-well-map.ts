@@ -692,6 +692,15 @@ export function wellGrRNumberForTagViewer(
   ) {
     return { kind: "g", n: Math.round(csvG) };
   }
+  /** Bedrock aquifer + litho rock top: prefer r over sand-only g inference above shale/limestone. */
+  const rockFromLitho = getRockTagDepthFt(w);
+  if (
+    rockFromLitho != null &&
+    rockFromLitho > 0 &&
+    /bedrock/i.test(primaryAquiferText(w))
+  ) {
+    return { kind: "r", n: Math.round(rockFromLitho) };
+  }
   if (isUnconsolidatedWellViewer(w)) {
     const gv = getGravelVeinDisplayFt(w);
     if (gv != null && gv > 0) return { kind: "g", n: Math.round(gv) };

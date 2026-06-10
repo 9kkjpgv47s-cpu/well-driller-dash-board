@@ -55,6 +55,20 @@ export function extractCoordinates(text: string): { lat: number; lon: number } |
     if (isValidLatLon(lat, lon)) return { lat, lon };
   }
 
+  // Dot-glued: 40.100369.-85.789937 (mobile copy-paste artifact — no comma/space)
+  const dotGlued = /(-?\d{1,2}\.\d{3,})\.(-?\d{1,3}\.\d{3,})/g;
+  let dm: RegExpExecArray | null;
+  while ((dm = dotGlued.exec(normalized)) !== null) {
+    let lat = parseFloat(dm[1]!);
+    let lon = parseFloat(dm[2]!);
+    if (Math.abs(lat) > 90) {
+      const t = lat;
+      lat = lon;
+      lon = t;
+    }
+    if (isValidLatLon(lat, lon)) return { lat, lon };
+  }
+
   // Tight comma: 39.407951,-85.862947 (no space after comma — common in dispatches)
   const tight = /(-?\d{1,2}\.\d{4,})\s*,\s*(-?\d{1,3}\.\d{4,})/g;
   let tm: RegExpExecArray | null;
@@ -90,7 +104,7 @@ export function extractCoordinates(text: string): { lat: number; lon: number } |
 }
 
 const STREET_HINT =
-  /\d.+\b(?:st|street|rd|road|ave|avenue|dr|drive|ln|lane|hwy|highway|ct|court|blvd|boulevard|way|cir|circle|pkwy|parkway|route|private\s+road)\b/i;
+  /\d.+\b(?:st|street|rd|road|ave|avenue|dr|drive|ln|lane|hwy|highway|ct|court|blvd|boulevard|way|cir|circle|pkwy|parkway|route|private\s+road|sr)\b|\b\d+\s+SR\s+\d+/i;
 
 export function extractAddress(text: string): string | null {
   const lines = text
@@ -129,7 +143,11 @@ const LIKELY_NAME = /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3}$/;
 
 export function extractScheduleLine(lines: string[]): string | null {
   for (const line of lines) {
-    if (/^\d{1,2}\/\d{1,2}/.test(line) && line.length < 80) return line;
+    if (line.length >= 80) continue;
+    // Reject fraction horsepower like "3/4hp CPPS"
+    if (/\d\/\d\s*hp/i.test(line)) continue;
+    // M/D with optional time, e.g. "6/3 8:00 AM"
+    if (/^\d{1,2}\/\d{1,2}(?:\s|$)/.test(line)) return line;
   }
   return null;
 }
@@ -173,18 +191,21 @@ export function extractPumpHp(text: string): string | null {
 
 export function extractDistanceOffDrive(text: string): string | null {
   const normalized = text.replace(/\u00a0/g, " ").replace(/\u202f/g, " ");
+  const drivePhrase = "(?:off\\s+(?:of\\s+)?(?:the\\s+)?drive(?:way)?|from\\s+(?:the\\s+)?drive(?:way)?)";
   const m =
-    /\b(\d+)\s*(?:ft|')\s*(?:off\s*(?:the\s*)?drive|from\s*(?:the\s*)?drive)\b/i.exec(
+    new RegExp(`\\b(\\d+)\\s*(?:ft|')\\s*${drivePhrase}\\b`, "i").exec(
       normalized,
     );
   if (m?.[1]) return `${m[1]} ft off drive`;
   const m0 =
-    /\b(\d+)(?:ft|')\s*(?:off\s*(?:the\s*)?drive|from\s*(?:the\s*)?drive)\b/i.exec(
+    new RegExp(`\\b(\\d+)(?:ft|')\\s*${drivePhrase}\\b`, "i").exec(
       normalized,
     );
   if (m0?.[1]) return `${m0[1]} ft off drive`;
   const m2 =
-    /\boff\s*(?:the\s*)?drive\s*[:\s]*(\d+)\s*(?:ft|')\b/i.exec(normalized);
+    /\boff\s+(?:of\s+)?(?:the\s+)?drive(?:way)?\s*[:\s]*(\d+)\s*(?:ft|')\b/i.exec(
+      normalized,
+    );
   if (m2?.[1]) return `${m2[1]} ft off drive`;
   return null;
 }

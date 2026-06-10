@@ -81,8 +81,8 @@ export function OptimizationPanel() {
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Coordinates drive the{" "}
             <strong>registry area analysis</strong> below (same gz chunks as the
-            embedded well viewer). The checklist API is still a lightweight mock
-            for crew reminders.
+            embedded well viewer). The checklist API uses those same wells for
+            neighborhood stats and crew reminders.
           </p>
           <div className="space-y-3">
             <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-300">
@@ -125,7 +125,7 @@ export function OptimizationPanel() {
             </label>
             <fieldset>
               <legend className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
-                Checklist priority (mock API)
+                Checklist priority
               </legend>
               <div className="mt-2 flex flex-wrap gap-2">
                 {(
@@ -177,20 +177,21 @@ export function OptimizationPanel() {
             id="opt-results-heading"
             className="text-sm font-semibold text-zinc-900 dark:text-zinc-50"
           >
-            Field checklist (mock)
+            Field checklist
           </h2>
           {!result ? (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Tap “Refresh field checklist” for planner-style reminders. Full{" "}
+              Tap “Refresh field checklist” for planner-style reminders from
+              registry wells in radius. Full{" "}
               <strong>area drilling intelligence</strong> is in the green panel
-              below (live chunk data).
+              below.
             </p>
           ) : (
             <div className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Wells in radius (mock count)
+                    Wells in radius
                   </p>
                   <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
                     {result.neighborhood.sampleWellsInRadius}
@@ -198,7 +199,7 @@ export function OptimizationPanel() {
                 </div>
                 <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Median depth (illustrative)
+                    Median depth
                   </p>
                   <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
                     {result.neighborhood.medianDepthFt} ft
@@ -206,7 +207,7 @@ export function OptimizationPanel() {
                 </div>
                 <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Static band (illustrative)
+                    Static band
                   </p>
                   <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
                     {result.neighborhood.typicalStaticBandFt}
@@ -226,7 +227,11 @@ export function OptimizationPanel() {
               </div>
 
               <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-                <p className="font-semibold">Mock API notes</p>
+                <p className="font-semibold">
+                  {result.dataSource === "registry"
+                    ? "Registry notes"
+                    : "Fallback notes (chunk load failed)"}
+                </p>
                 <ul className="mt-2 list-inside list-disc space-y-1">
                   {result.neighborhood.notes.map((n) => (
                     <li key={n}>{n}</li>
