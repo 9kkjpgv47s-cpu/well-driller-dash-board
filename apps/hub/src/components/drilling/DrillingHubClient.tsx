@@ -10,6 +10,7 @@ import {
   computeAreaInsights,
   getLithLayers,
   haversineMiles,
+  type AreaInsightsReport,
   type WellRecord,
 } from "@/lib/area-well-analytics";
 import { appendDrillerJobEntry } from "@/lib/cj-driller-job";
@@ -189,11 +190,18 @@ export function DrillingHubClient() {
   );
   const [detailWell, setDetailWell] = useState<WellRecord | null>(null);
 
-  const [allWells, setAllWells] = useState<WellRecord[]>([]);
+  const [areaWells, setAreaWells] = useState<WellRecord[]>([]);
+  const [areaInsights, setAreaInsights] = useState<AreaInsightsReport | null>(
+    null,
+  );
+  const [areaInsightsForDepth, setAreaInsightsForDepth] =
+    useState<AreaInsightsReport | null>(null);
   const [wellsStatus, setWellsStatus] = useState<string | null>(null);
   const [wellsProgress, setWellsProgress] =
     useState<ChunkLoadProgress | null>(null);
   const [wellsError, setWellsError] = useState<string | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const fallbackAttemptedRef = useRef(false);
 
   const [lastParsedDispatch, setLastParsedDispatch] =
     useState<DispatchParseResult | null>(null);
@@ -308,35 +316,152 @@ export function DrillingHubClient() {
     }
   }, [searchParams]);
 
+  const loadWellsFallback = useCallback(
+    (site: { lat: number; lon: number }) => {
+      if (fallbackAttemptedRef.current) return;
+      fallbackAttemptedRef.current = true;
+      setWellsStatus("Server unavailable — loading registry chunks locally…");
+      void getDnrWellsCached((p) => {
+        setWellsProgress(p);
+        setWellsStatus(p.message);
+      })
+        .then((w) => {
+          setAreaWells(w);
+          const inRadius = wellsWithinRadiusIndexed(
+            w,
+            site.lat,
+            site.lon,
+            radiusMiles,
+          );
+          const inDepthRadius = wellsWithinRadiusIndexed(
+            w,
+            site.lat,
+            site.lon,
+            depthRadiusMiles,
+          );
+          setAreaInsights(
+            computeAreaInsights(w, site.lat, site.lon, radiusMiles, {
+              wellsInRadius: inRadius,
+            }),
+          );
+          setAreaInsightsForDepth(
+            computeAreaInsights(w, site.lat, site.lon, depthRadiusMiles, {
+              wellsInRadius: inDepthRadius,
+            }),
+          );
+          setInsightsLoading(false);
+          setWellsStatus(null);
+          setWellsProgress(null);
+          setWellsError(null);
+        })
+        .catch((e: Error) => {
+          setWellsError(e.message);
+          setWellsStatus(null);
+          setWellsProgress(null);
+          setInsightsLoading(false);
+        });
+    },
+    [radiusMiles, depthRadiusMiles],
+  );
+
+  /** API-first: nearby wells + area insights; full registry only on 503 fallback. */
   useEffect(() => {
     if (!center) return;
-    setWellsStatus("Loading registry chunks…");
-    void getDnrWellsCached((p) => {
-      setWellsProgress(p);
-      setWellsStatus(p.message);
-    })
-      .then((w) => {
-        setAllWells(w);
+    const ac = new AbortController();
+    const fetchRadius = Math.max(radiusMiles, depthRadiusMiles);
+    setWellsStatus("Loading nearby wells…");
+    setInsightsLoading(true);
+    setWellsError(null);
+    setWellsProgress(null);
+    fallbackAttemptedRef.current = false;
+
+    const wellsUrl = `/api/wells-nearby?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(fetchRadius))}&limit=800`;
+    const insightsUrl = `/api/area-insights?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(radiusMiles))}`;
+    const depthInsightsUrl = `/api/area-insights?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(depthRadiusMiles))}`;
+
+    void (async () => {
+      try {
+        const fetches: Promise<Response>[] = [
+          fetch(wellsUrl, { signal: ac.signal }),
+          fetch(insightsUrl, { signal: ac.signal }),
+        ];
+        if (depthRadiusMiles !== radiusMiles) {
+          fetches.push(fetch(depthInsightsUrl, { signal: ac.signal }));
+        }
+
+        const [wellsRes, insightsRes, depthInsightsRes] = await Promise.all(
+          fetches,
+        );
+
+        if (wellsRes.status === 503 || insightsRes.status === 503) {
+          const errBody = (await wellsRes.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          setWellsError(
+            typeof errBody.error === "string"
+              ? errBody.error
+              : "Server well data unavailable.",
+          );
+          setInsightsLoading(false);
+          loadWellsFallback(center);
+          return;
+        }
+
+        if (!wellsRes.ok) {
+          throw new Error(
+            `Wells request failed (${wellsRes.status} ${wellsRes.statusText})`,
+          );
+        }
+        if (!insightsRes.ok) {
+          throw new Error(
+            `Insights request failed (${insightsRes.status} ${insightsRes.statusText})`,
+          );
+        }
+
+        const wells = (await wellsRes.json()) as WellRecord[];
+        const insights = (await insightsRes.json()) as AreaInsightsReport;
+        let depthInsights: AreaInsightsReport | null = insights;
+        if (depthRadiusMiles !== radiusMiles && depthInsightsRes) {
+          if (!depthInsightsRes.ok) {
+            throw new Error(
+              `Depth insights request failed (${depthInsightsRes.status})`,
+            );
+          }
+          depthInsights = (await depthInsightsRes.json()) as AreaInsightsReport;
+        }
+
+        if (ac.signal.aborted) return;
+        setAreaWells(Array.isArray(wells) ? wells : []);
+        setAreaInsights(insights);
+        setAreaInsightsForDepth(depthInsights);
         setWellsStatus(null);
-        setWellsProgress(null);
         setWellsError(null);
-      })
-      .catch((e: Error) => {
-        setWellsError(e.message);
+      } catch (e) {
+        if (ac.signal.aborted) return;
+        setWellsError(
+          e instanceof Error ? e.message : "Failed to load nearby wells.",
+        );
+        setAreaWells([]);
+        setAreaInsights(null);
+        setAreaInsightsForDepth(null);
         setWellsStatus(null);
-        setWellsProgress(null);
-      });
-  }, [center]);
+      } finally {
+        if (!ac.signal.aborted) setInsightsLoading(false);
+      }
+    })();
+
+    return () => ac.abort();
+  }, [center, radiusMiles, depthRadiusMiles, loadWellsFallback]);
 
   const wellsInRadius = useMemo(() => {
     if (!center) return [];
     return wellsWithinRadiusIndexed(
-      allWells,
+      areaWells,
       center.lat,
       center.lon,
       radiusMiles,
     );
-  }, [allWells, center, radiusMiles]);
+  }, [areaWells, center, radiusMiles]);
 
   const wellsMatchingMapFilters = useMemo(
     () => wellsInRadius.filter((w) => wellPassesHubViewerFilters(w, mapFilters)),
@@ -346,37 +471,18 @@ export function DrillingHubClient() {
   const wellsInDepthRadius = useMemo(() => {
     if (!center) return [];
     return wellsWithinRadiusIndexed(
-      allWells,
+      areaWells,
       center.lat,
       center.lon,
       depthRadiusMiles,
     );
-  }, [allWells, center, depthRadiusMiles]);
+  }, [areaWells, center, depthRadiusMiles]);
 
   const wellsMatchingDepthFilters = useMemo(
     () =>
       wellsInDepthRadius.filter((w) => wellPassesHubViewerFilters(w, mapFilters)),
     [wellsInDepthRadius, mapFilters],
   );
-
-  const areaInsightsForDepth = useMemo(() => {
-    if (!center) return null;
-    return computeAreaInsights(
-      allWells,
-      center.lat,
-      center.lon,
-      depthRadiusMiles,
-      { wellsInRadius: wellsInDepthRadius },
-    );
-  }, [allWells, center, depthRadiusMiles, wellsInDepthRadius]);
-
-  /** Single analytics pass for the insights panel (radius selector lives on this page). */
-  const areaInsights = useMemo(() => {
-    if (!center || !allWells.length) return null;
-    return computeAreaInsights(allWells, center.lat, center.lon, radiusMiles, {
-      wellsInRadius,
-    });
-  }, [allWells, center, radiusMiles, wellsInRadius]);
 
   const nearestWellsForElev = useMemo(() => {
     if (!center) return [];
@@ -991,7 +1097,7 @@ export function DrillingHubClient() {
                     lon={center.lon}
                     radiusMiles={radiusMiles}
                     report={areaInsights}
-                    loading={!allWells.length && !wellsError}
+                    loading={insightsLoading && !areaInsights}
                     error={wellsError}
                     title={`Area drilling analysis (${formatRadiusMiShort(radiusMiles)})`}
                     showViewerLinks
