@@ -45,8 +45,56 @@ type Props = {
 const MAX_MARKERS = 800;
 /** Padding factor applied to viewport bounds so panning has pre-rendered margin. */
 const VIEWPORT_PAD = 0.2;
+/** Above this zoom, divIcon markers render individually (not clustered). */
+const CLUSTER_DISABLE_ZOOM = 15;
 
 type LeafletModule = typeof import("leaflet");
+
+type MarkerClusterGroup = LayerGroup & {
+  clearLayers: () => void;
+  removeLayer: (layer: Marker) => void;
+  addLayer: (layer: Marker) => void;
+};
+
+let markerClusterLoadPromise: Promise<void> | null = null;
+
+function loadMarkerCluster(L: LeafletModule): Promise<void> {
+  if ((L as LeafletModule & { MarkerClusterGroup?: unknown }).MarkerClusterGroup) {
+    return Promise.resolve();
+  }
+  if (markerClusterLoadPromise) return markerClusterLoadPromise;
+  markerClusterLoadPromise = new Promise<void>((resolve, reject) => {
+    (window as Window & { L?: LeafletModule }).L = L;
+    const script = document.createElement("script");
+    script.src = "/well-viewer/vendor/leaflet.markercluster.js";
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => {
+      markerClusterLoadPromise = null;
+      reject(new Error("Failed to load leaflet.markercluster"));
+    };
+    document.head.appendChild(script);
+  });
+  return markerClusterLoadPromise;
+}
+
+function createMarkerClusterGroup(L: LeafletModule): MarkerClusterGroup {
+  const MCG = (
+    L as LeafletModule & {
+      markerClusterGroup?: (opts?: object) => MarkerClusterGroup;
+    }
+  ).markerClusterGroup;
+  if (!MCG) {
+    return L.layerGroup() as MarkerClusterGroup;
+  }
+  return MCG({
+    disableClusteringAtZoom: CLUSTER_DISABLE_ZOOM,
+    maxClusterRadius: 60,
+    showCoverageOnHover: false,
+    spiderfyOnMaxZoom: true,
+    zoomToBoundsOnClick: true,
+  });
+}
 
 function escapePopupHtml(s: string): string {
   return s
@@ -71,7 +119,7 @@ export function DrillingMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const leafletRef = useRef<LeafletModule | null>(null);
-  const markersRef = useRef<LayerGroup | null>(null);
+  const markersRef = useRef<MarkerClusterGroup | null>(null);
   const markersByKeyRef = useRef<Map<string, Marker>>(new Map());
   const jobsiteGroupRef = useRef<LayerGroup | null>(null);
   const circleRef = useRef<Circle | null>(null);
@@ -199,32 +247,34 @@ export function DrillingMap({
     if (!containerRef.current) return;
     let cancelled = false;
 
-    void import("leaflet").then((L) => {
-      if (cancelled || !containerRef.current) return;
-      leafletRef.current = L;
-      const map = L.map(containerRef.current).setView(
-        [center.lat, center.lon],
-        13,
-      );
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-      }).addTo(map);
-      markersRef.current = L.layerGroup().addTo(map);
-      jobsiteGroupRef.current = L.layerGroup().addTo(map);
-      circleRef.current = L.circle([center.lat, center.lon], {
-        radius: radiusMiles * 1609.34,
-        color: "#0284c7",
-        weight: 2,
-        fillOpacity: 0.07,
-      }).addTo(map);
-      mapRef.current = map;
-      setMapZoom(map.getZoom());
-      map.on("zoomend", () => setMapZoom(map.getZoom()));
-      // Re-cull markers for the new viewport after pans (zoom changes
-      // trigger a full rebuild via the mapZoom effect below).
-      map.on("moveend", () => renderMarkersRef.current("diff"));
-      setMapReady(true);
-    });
+    void import("leaflet")
+      .then((L) => loadMarkerCluster(L).then(() => L))
+      .then((L) => {
+        if (cancelled || !containerRef.current) return;
+        leafletRef.current = L;
+        const map = L.map(containerRef.current).setView(
+          [center.lat, center.lon],
+          13,
+        );
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+        markersRef.current = createMarkerClusterGroup(L).addTo(map);
+        jobsiteGroupRef.current = L.layerGroup().addTo(map);
+        circleRef.current = L.circle([center.lat, center.lon], {
+          radius: radiusMiles * 1609.34,
+          color: "#0284c7",
+          weight: 2,
+          fillOpacity: 0.07,
+        }).addTo(map);
+        mapRef.current = map;
+        setMapZoom(map.getZoom());
+        map.on("zoomend", () => setMapZoom(map.getZoom()));
+        // Re-cull markers for the new viewport after pans (zoom changes
+        // trigger a full rebuild via the mapZoom effect below).
+        map.on("moveend", () => renderMarkersRef.current("diff"));
+        setMapReady(true);
+      });
 
     const markersByKey = markersByKeyRef.current;
     return () => {

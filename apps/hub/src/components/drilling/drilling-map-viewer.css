@@ -1,3 +1,6 @@
+@import url("/well-viewer/vendor/MarkerCluster.css");
+@import url("/well-viewer/vendor/MarkerCluster.Default.css");
+
 /* Parity with standalone viewer: Leaflet divIcon + combo chips */
 .leaflet-marker-icon.vj-well-dot.leaflet-div-icon {
   background: transparent !important;
