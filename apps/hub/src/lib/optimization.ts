@@ -1,8 +1,8 @@
 import {
   computeAreaInsights,
   type WellRecord,
-  wellsWithinRadius,
 } from "@/lib/area-well-analytics";
+import { wellsWithinRadiusIndexed } from "@/lib/well-spatial-index";
 
 export type OptimizationPriority = "depth" | "yield" | "balanced";
 
@@ -169,17 +169,18 @@ export function computeOptimizationFromWells(
   wells: WellRecord[],
 ): OptimizationResult {
   const { priority } = input;
-  const insights = computeAreaInsights(
+  const inR = wellsWithinRadiusIndexed(
     wells,
     input.lat,
     input.lon,
     input.radiusMiles,
   );
-  const inR = wellsWithinRadius(
+  const insights = computeAreaInsights(
     wells,
     input.lat,
     input.lon,
     input.radiusMiles,
+    { wellsInRadius: inR },
   );
   const statics: number[] = [];
   for (const w of inR) {

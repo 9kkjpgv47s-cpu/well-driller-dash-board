@@ -1,6 +1,18 @@
 import type { WellRecord } from "@/lib/area-well-analytics";
 import { loadAllDnrChunksFromDisk } from "@/lib/dnr-chunk-server";
 
+/** Local/dev budget for loading gz chunks from disk. */
+export const DNR_WELLS_SERVER_LOAD_TIMEOUT_MS = 20_000;
+
+/** Shorter budget on Vercel so routes fall back before the platform kills the function. */
+export const DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS = 8_000;
+
+export function getDnrWellsServerLoadTimeoutMs(): number {
+  return process.env.VERCEL
+    ? DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS
+    : DNR_WELLS_SERVER_LOAD_TIMEOUT_MS;
+}
+
 let wellsCache: WellRecord[] | null = null;
 let wellsCachePromise: Promise<WellRecord[]> | null = null;
 
@@ -19,6 +31,33 @@ export function getDnrWellsServerCached(): Promise<WellRecord[]> {
       });
   }
   return wellsCachePromise;
+}
+
+/**
+ * Bounded wait for the server chunk cache. Rejects on timeout so API routes can
+ * return mock/fallback JSON before the platform kills the function.
+ */
+export function getDnrWellsServerCachedWithTimeout(
+  timeoutMs = DNR_WELLS_SERVER_LOAD_TIMEOUT_MS,
+): Promise<WellRecord[]> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(
+        new Error(
+          `DNR chunk load timed out after ${timeoutMs}ms (serverless cold start).`,
+        ),
+      );
+    }, timeoutMs);
+  });
+  return Promise.race([getDnrWellsServerCached(), timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
+/** Bounded cache read for API routes (shorter timeout on Vercel). */
+export function getDnrWellsServerCachedForApi(): Promise<WellRecord[]> {
+  return getDnrWellsServerCachedWithTimeout(getDnrWellsServerLoadTimeoutMs());
 }
 
 export function resetDnrWellsServerCache(): void {

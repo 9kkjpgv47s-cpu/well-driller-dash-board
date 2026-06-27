@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
-import { getDnrWellsServerCached } from "@/lib/dnr-wells-server-cache";
+import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
 import {
   computeOptimizationFromWells,
   computeOptimizationMock,
   parseOptimizationSearchParams,
 } from "@/lib/optimization";
+
+export const runtime = "nodejs";
+/** Must exceed getDnrWellsServerLoadTimeoutMs() on Vercel so mock fallback can respond. */
+export const maxDuration = 15;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -26,7 +30,7 @@ export async function GET(request: Request) {
 
   let body;
   try {
-    const wells = await getDnrWellsServerCached();
+    const wells = await getDnrWellsServerCachedForApi();
     body = computeOptimizationFromWells(input, wells);
   } catch {
     body = computeOptimizationMock(input);
