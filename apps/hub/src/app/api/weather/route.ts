@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { cachedJson, jsonError } from "@/lib/api/responses";
+import { INVALID_LAT_LON_ERROR, isValidLatLon } from "@/lib/api/geo-query";
 import {
   buildExplanations,
   mergeDaySummaryWithSpread,
@@ -36,11 +37,8 @@ export async function GET(req: Request) {
   const anchorDate =
     rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : today;
 
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-    return NextResponse.json(
-      { error: "Provide lat and lon" },
-      { status: 400 },
-    );
+  if (!isValidLatLon(lat, lon)) {
+    return jsonError(INVALID_LAT_LON_ERROR, 400);
   }
 
   const omOpts = openMeteoWindowForAnchor(anchorDate, timezone);
@@ -73,18 +71,12 @@ export async function GET(req: Request) {
   if (nws) sources.push(nws);
 
   if (!sources.length) {
-    return NextResponse.json(
-      { error: "All weather sources failed" },
-      { status: 502 },
-    );
+    return jsonError("All weather sources failed", 502);
   }
 
   const primary = primaryOpenMeteo(sources);
   if (!primary) {
-    return NextResponse.json(
-      { error: "No Open-Meteo source available" },
-      { status: 502 },
-    );
+    return jsonError("No Open-Meteo source available", 502);
   }
 
   const gfsHourly = gfs?.hourly ?? [];
@@ -121,9 +113,5 @@ export async function GET(req: Request) {
     primaryHourlyForDay,
   };
 
-  return NextResponse.json(body, {
-    headers: {
-      "Cache-Control": "public, s-maxage=900, stale-while-revalidate=1800",
-    },
-  });
+  return cachedJson(body, 900);
 }

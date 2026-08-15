@@ -1,8 +1,7 @@
-import {
-  haversineMiles,
-  type WellRecord,
-} from "@/lib/area-well-analytics";
+import type { WellRecord } from "@/lib/area-well-analytics";
+import { parseLatLonRadiusParams } from "@/lib/api/geo-query";
 import { getWellSpatialIndex } from "@/lib/well-spatial-index";
+import { sortWellsByDistance } from "@/lib/well-ordering";
 import {
   DEFAULT_VIEWER_MAP_FILTERS,
   type ViewerMapFilters,
@@ -137,35 +136,16 @@ export function parseHubViewerFiltersFromSearchParams(
 export function parseWellsNearbyInput(
   sp: URLSearchParams,
 ): WellsNearbyInput | { error: string } {
-  const lat = parseFloat(sp.get("lat") ?? "");
-  const lon = parseFloat(sp.get("lon") ?? "");
-  const radius = parseFloat(sp.get("radius") ?? sp.get("radiusMiles") ?? "");
+  const geo = parseLatLonRadiusParams(sp, MAX_RADIUS_MILES);
+  if ("error" in geo) return geo;
+
   const limitRaw = parseInt(sp.get("limit") ?? String(DEFAULT_WELLS_NEARBY_LIMIT), 10);
-
-  if (
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lon) ||
-    lat < -90 ||
-    lat > 90 ||
-    lon < -180 ||
-    lon > 180
-  ) {
-    return { error: "Invalid or missing `lat` / `lon` query parameters." };
-  }
-  if (!Number.isFinite(radius) || radius <= 0 || radius > MAX_RADIUS_MILES) {
-    return {
-      error: `Invalid \`radius\` — expected miles in (0, ${MAX_RADIUS_MILES}].`,
-    };
-  }
-
   const limit = Number.isFinite(limitRaw)
     ? Math.min(MAX_WELLS_NEARBY_LIMIT, Math.max(1, limitRaw))
     : DEFAULT_WELLS_NEARBY_LIMIT;
 
   return {
-    lat,
-    lon,
-    radiusMiles: radius,
+    ...geo,
     limit,
     filters: parseHubViewerFiltersFromSearchParams(sp),
   };
@@ -178,26 +158,6 @@ export function compactWellForMap(w: WellRecord): WellRecord {
     if (v != null && v !== "") out[key] = v;
   }
   return out;
-}
-
-function sortByDistance(
-  wells: WellRecord[],
-  lat: number,
-  lon: number,
-): WellRecord[] {
-  return wells
-    .map((w) => ({
-      w,
-      d: haversineMiles(lat, lon, Number(w.lat), Number(w.lon)),
-    }))
-    .sort(
-      (a, b) =>
-        a.d - b.d ||
-        String(a.w.id ?? a.w.refno ?? "").localeCompare(
-          String(b.w.id ?? b.w.refno ?? ""),
-        ),
-    )
-    .map((x) => x.w);
 }
 
 export function queryWellsNearby(
@@ -217,7 +177,7 @@ export function queryWellsNearby(
       wellPassesHubViewerFilters(w, input.filters!),
     );
   } else {
-    candidates = sortByDistance(candidates, input.lat, input.lon);
+    candidates = sortWellsByDistance(candidates, input.lat, input.lon);
   }
 
   const truncated = candidates.length > input.limit;

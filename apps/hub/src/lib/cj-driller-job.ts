@@ -1,3 +1,5 @@
+import { readStoredJson, writeStoredJson } from "@/lib/browser-storage";
+
 /** Same storage key as the static C&J well viewer — shared when hub + viewer are same origin. */
 export const CJ_DRILLER_JOB_KEY = "cjDrillerJobV1";
 
@@ -28,30 +30,18 @@ export type CjDrillerJobEntry = {
 };
 
 export function loadDrillerJob(): CjDrillerJobEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(CJ_DRILLER_JOB_KEY);
-    if (!raw) return [];
-    const p = JSON.parse(raw) as unknown;
-    if (!Array.isArray(p)) return [];
-    return p.filter(
-      (x): x is CjDrillerJobEntry =>
-        x != null &&
-        typeof x === "object" &&
-        typeof (x as CjDrillerJobEntry).wellId === "string",
-    );
-  } catch {
-    return [];
-  }
+  const parsed = readStoredJson<unknown>(CJ_DRILLER_JOB_KEY);
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter(
+    (x): x is CjDrillerJobEntry =>
+      x != null &&
+      typeof x === "object" &&
+      typeof (x as CjDrillerJobEntry).wellId === "string",
+  );
 }
 
 export function saveDrillerJob(entries: CjDrillerJobEntry[]) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(CJ_DRILLER_JOB_KEY, JSON.stringify(entries));
-  } catch {
-    /* quota */
-  }
+  writeStoredJson(CJ_DRILLER_JOB_KEY, entries);
 }
 
 /** Returns false if this wellId is already on the job. */

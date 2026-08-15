@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { cachedJson, jsonError } from "@/lib/api/responses";
 import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
 import {
   computeOptimizationFromWells,
@@ -19,12 +19,9 @@ export async function GET(request: Request) {
 
   const input = parseOptimizationSearchParams(raw);
   if (!input) {
-    return NextResponse.json(
-      {
-        error:
-          "Missing or invalid query. Required: lat, lon, radiusMiles (or radius). Optional: priority=depth|yield|balanced.",
-      },
-      { status: 400 },
+    return jsonError(
+      "Missing or invalid query. Required: lat, lon, radiusMiles (or radius). Optional: priority=depth|yield|balanced.",
+      400,
     );
   }
 
@@ -36,9 +33,5 @@ export async function GET(request: Request) {
     body = computeOptimizationMock(input);
   }
 
-  return NextResponse.json(body, {
-    headers: {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-    },
-  });
+  return cachedJson(body, 60);
 }

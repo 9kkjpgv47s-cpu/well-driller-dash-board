@@ -1,4 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import {
+  cachedJson,
+  dnrWellsUnavailable,
+  jsonError,
+} from "@/lib/api/responses";
 import { getDnrWellsServerCached } from "@/lib/dnr-wells-server-cache";
 import {
   parseWellsNearbyInput,
@@ -13,32 +18,19 @@ import {
  */
 export async function GET(req: NextRequest) {
   const input = parseWellsNearbyInput(req.nextUrl.searchParams);
-  if ("error" in input) {
-    return NextResponse.json({ error: input.error }, { status: 400 });
-  }
+  if ("error" in input) return jsonError(input.error, 400);
 
   let allWells;
   try {
     allWells = await getDnrWellsServerCached();
   } catch (e) {
-    return NextResponse.json(
-      {
-        error:
-          e instanceof Error
-            ? e.message
-            : "Failed to load DNR chunk data on the server.",
-      },
-      { status: 503 },
-    );
+    return dnrWellsUnavailable(e);
   }
 
   const { wells, totalInRadius, truncated } = queryWellsNearby(allWells, input);
 
-  return NextResponse.json(wells, {
-    headers: {
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
-      "X-Wells-In-Radius": String(totalInRadius),
-      "X-Wells-Truncated": truncated ? "1" : "0",
-    },
+  return cachedJson(wells, 300, {
+    "X-Wells-In-Radius": String(totalInRadius),
+    "X-Wells-Truncated": truncated ? "1" : "0",
   });
 }
