@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { errorMessage, logError } from "@/lib/errors";
 import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
 import {
   computeOptimizationFromWells,
@@ -32,8 +33,12 @@ export async function GET(request: Request) {
   try {
     const wells = await getDnrWellsServerCachedForApi();
     body = computeOptimizationFromWells(input, wells);
-  } catch {
-    body = computeOptimizationMock(input);
+  } catch (e) {
+    logError("api/optimization", e);
+    body = computeOptimizationMock(
+      input,
+      errorMessage(e, "Registry chunk load failed on the server."),
+    );
   }
 
   return NextResponse.json(body, {

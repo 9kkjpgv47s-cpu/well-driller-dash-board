@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { errorMessage, logError } from "@/lib/errors";
 // Local CommonJS bundle (Indiana DNR HTML parser) — see vendor/dnr-report-local
 import handler from "dnr-report-local";
 
@@ -34,7 +35,29 @@ export async function GET(request: NextRequest) {
     query: { refNo: refNo ?? "" },
   };
 
-  const response = await new Promise<NextResponse>((resolve, reject) => {
+  let response: NextResponse;
+  try {
+    response = await runVendorHandler(req);
+  } catch (e) {
+    logError("api/dnr-report", e);
+    response = NextResponse.json(
+      {
+        error: `DNR report lookup failed — ${errorMessage(e, "upstream parser error")}.`,
+        refNo: refNo ?? null,
+      },
+      { status: 502 },
+    );
+  }
+
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  return response;
+}
+
+function runVendorHandler(req: {
+  method: string;
+  query: Record<string, string | string[] | undefined>;
+}): Promise<NextResponse> {
+  return new Promise<NextResponse>((resolve, reject) => {
     let settled = false;
     const res: DnrRes = {
       setHeader() {},
@@ -61,7 +84,4 @@ export async function GET(request: NextRequest) {
       reject(e);
     });
   });
-
-  response.headers.set("Access-Control-Allow-Origin", "*");
-  return response;
 }

@@ -1,3 +1,5 @@
+import { logWarning } from "@/lib/errors";
+
 /** Same storage key as the static C&J well viewer — shared when hub + viewer are same origin. */
 export const CJ_DRILLER_JOB_KEY = "cjDrillerJobV1";
 
@@ -40,24 +42,35 @@ export function loadDrillerJob(): CjDrillerJobEntry[] {
         typeof x === "object" &&
         typeof (x as CjDrillerJobEntry).wellId === "string",
     );
-  } catch {
+  } catch (e) {
+    logWarning("cj-driller-job", "stored job list unreadable", e);
     return [];
   }
 }
 
-export function saveDrillerJob(entries: CjDrillerJobEntry[]) {
-  if (typeof window === "undefined") return;
+/** False when the write failed (quota, blocked storage) — the job list is unchanged. */
+export function saveDrillerJob(entries: CjDrillerJobEntry[]): boolean {
+  if (typeof window === "undefined") return false;
   try {
     localStorage.setItem(CJ_DRILLER_JOB_KEY, JSON.stringify(entries));
-  } catch {
-    /* quota */
+    return true;
+  } catch (e) {
+    logWarning("cj-driller-job", "job list write failed", e);
+    return false;
   }
 }
 
-/** Returns false if this wellId is already on the job. */
-export function appendDrillerJobEntry(entry: CjDrillerJobEntry): boolean {
+export type AppendDrillerJobResult =
+  | { status: "added" }
+  | { status: "duplicate" }
+  | { status: "not-saved" };
+
+/** Appends unless the wellId is already on the job or the write is rejected. */
+export function appendDrillerJobEntry(
+  entry: CjDrillerJobEntry,
+): AppendDrillerJobResult {
   const cur = loadDrillerJob();
-  if (cur.some((e) => e.wellId === entry.wellId)) return false;
-  saveDrillerJob([...cur, entry]);
-  return true;
+  if (cur.some((e) => e.wellId === entry.wellId)) return { status: "duplicate" };
+  if (!saveDrillerJob([...cur, entry])) return { status: "not-saved" };
+  return { status: "added" };
 }

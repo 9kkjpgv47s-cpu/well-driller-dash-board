@@ -13,6 +13,7 @@ import {
   buildJobShareUrl,
 } from "@/lib/job-share";
 import { directionsLinksForDispatch } from "@/lib/navigation-links";
+import { logWarning } from "@/lib/errors";
 
 type Props = {
   /** Called when dispatch paste includes GPS coordinates (not address stubs). */
@@ -45,8 +46,13 @@ export function FieldDispatchPanel({
       await navigator.clipboard.writeText(text);
       setCopiedField(field);
       window.setTimeout(() => setCopiedField((prev) => (prev === field ? null : prev)), 2000);
-    } catch {
-      /* clipboard unavailable */
+    } catch (e) {
+      logWarning(
+        "FieldDispatchPanel",
+        `clipboard write failed for ${field}`,
+        e,
+      );
+      window.prompt("Clipboard unavailable — copy manually:", text);
     }
   }, []);
 
@@ -74,7 +80,8 @@ export function FieldDispatchPanel({
         () => setCopiedField((prev) => (prev === "share" ? null : prev)),
         2500,
       );
-    } catch {
+    } catch (e) {
+      logWarning("FieldDispatchPanel", "clipboard write failed for share link", e);
       window.prompt("Copy this job link:", url);
     }
   }, [parsed, jobsiteCoords, raw, feetOffDrive]);

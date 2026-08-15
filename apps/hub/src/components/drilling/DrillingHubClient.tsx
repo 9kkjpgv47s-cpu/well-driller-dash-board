@@ -14,6 +14,7 @@ import {
   type WellRecord,
 } from "@/lib/area-well-analytics";
 import { appendDrillerJobEntry } from "@/lib/cj-driller-job";
+import { logWarning } from "@/lib/errors";
 import type { ChunkLoadProgress } from "@/lib/dnr-chunk-browser";
 import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
 import { wellRecordToDrillerEntry } from "@/lib/drilling-well-entry";
@@ -86,15 +87,32 @@ function isDepthRadiusChoice(n: number): n is DepthRadiusMilesChoice {
   return (DEPTH_RADIUS_OPTIONS as readonly number[]).includes(n);
 }
 
-function readStoredRadiusMiles(): RadiusMilesChoice | null {
+/** localStorage throws in private/blocked-storage modes; preferences are optional. */
+function readPref(key: string): string | null {
   if (typeof window === "undefined") return null;
-  const v = parseFloat(localStorage.getItem(LS_RADIUS_MILES) ?? "");
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    logWarning("DrillingHubClient", `preference ${key} unreadable`, e);
+    return null;
+  }
+}
+
+function writePref(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    logWarning("DrillingHubClient", `preference ${key} not persisted`, e);
+  }
+}
+
+function readStoredRadiusMiles(): RadiusMilesChoice | null {
+  const v = parseFloat(readPref(LS_RADIUS_MILES) ?? "");
   return isRadiusChoice(v) ? v : null;
 }
 
 function readStoredDepthRadiusMiles(): DepthRadiusMilesChoice | null {
-  if (typeof window === "undefined") return null;
-  const v = parseFloat(localStorage.getItem(LS_DEPTH_RADIUS_MILES) ?? "");
+  const v = parseFloat(readPref(LS_DEPTH_RADIUS_MILES) ?? "");
   return isDepthRadiusChoice(v) ? v : null;
 }
 
@@ -113,20 +131,19 @@ function normalizeFieldSectionOrder(
 }
 
 function readStoredFieldWorkspaceView(): FieldWorkspaceView {
-  if (typeof window === "undefined") return "map";
-  const v = localStorage.getItem(LS_FIELD_WORKSPACE_VIEW);
+  const v = readPref(LS_FIELD_WORKSPACE_VIEW);
   if (v === "depth") return "depth";
   if (v === "asl") return "asl";
   return "map";
 }
 
 function readStoredFieldOrder(): FieldSectionId[] | null {
-  if (typeof window === "undefined") return null;
+  const raw = readPref(LS_FIELD_SECTION_ORDER);
+  if (!raw) return null;
   try {
-    const raw = localStorage.getItem(LS_FIELD_SECTION_ORDER);
-    if (!raw) return null;
     return normalizeFieldSectionOrder(JSON.parse(raw));
-  } catch {
+  } catch (e) {
+    logWarning("DrillingHubClient", "stored section order unusable", e);
     return null;
   }
 }
@@ -242,19 +259,19 @@ export function DrillingHubClient() {
     const n = parseFloat(value);
     if (!isRadiusChoice(n)) return;
     setRadiusMiles(n);
-    localStorage.setItem(LS_RADIUS_MILES, String(n));
+    writePref(LS_RADIUS_MILES, String(n));
   }, []);
 
   const onDepthRadiusSelect = useCallback((value: string) => {
     const n = parseFloat(value);
     if (!isDepthRadiusChoice(n)) return;
     setDepthRadiusMiles(n);
-    localStorage.setItem(LS_DEPTH_RADIUS_MILES, String(n));
+    writePref(LS_DEPTH_RADIUS_MILES, String(n));
   }, []);
 
   const setFieldWorkspaceView = useCallback((view: FieldWorkspaceView) => {
     setWorkspaceView(view);
-    localStorage.setItem(LS_FIELD_WORKSPACE_VIEW, view);
+    writePref(LS_FIELD_WORKSPACE_VIEW, view);
     setWellsListMode(view === "map" ? "nearest" : "byDepth");
   }, []);
 
@@ -269,7 +286,7 @@ export function DrillingHubClient() {
         const b = next[j]!;
         next[i] = b;
         next[j] = a;
-        localStorage.setItem(LS_FIELD_SECTION_ORDER, JSON.stringify(next));
+        writePref(LS_FIELD_SECTION_ORDER, JSON.stringify(next));
         return next;
       });
     },
@@ -295,6 +312,12 @@ export function DrillingHubClient() {
         setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
         return;
       }
+      logWarning(
+        "DrillingHubClient",
+        "shared job link could not be decoded; falling back to lat/lon params",
+      );
+      setToast("That shared job link is invalid or from an older version.");
+      setTimeout(() => setToast(null), 5000);
     }
 
     const la = parseFloat(searchParams.get("lat") ?? "");
@@ -757,10 +780,17 @@ export function DrillingHubClient() {
       setTimeout(() => setToast(null), 3000);
       return;
     }
-    const ok = appendDrillerJobEntry(entry);
-    if (!ok) {
+    const result = appendDrillerJobEntry(entry);
+    if (result.status === "duplicate") {
       setToast("Already on the job list.");
       setTimeout(() => setToast(null), 3000);
+      return;
+    }
+    if (result.status === "not-saved") {
+      setToast(
+        "Couldn't save to the job list — device storage is full or blocked.",
+      );
+      setTimeout(() => setToast(null), 4000);
       return;
     }
     setToast(`Added ${entry.wellId}`);

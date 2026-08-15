@@ -104,10 +104,13 @@ function buildChecklist(
 }
 
 /**
- * Deterministic mock optimization when chunk data is unavailable.
+ * Deterministic mock optimization when chunk data is unavailable. `reason`
+ * carries the load failure into the notes so the fallback is explainable in the
+ * field instead of looking like real registry output.
  */
 export function computeOptimizationMock(
   input: OptimizationInput,
+  reason?: string,
 ): OptimizationResult {
   const { lat, lon, radiusMiles, priority } = input;
   const r = clamp(radiusMiles, 0.5, 25);
@@ -137,6 +140,7 @@ export function computeOptimizationMock(
 
   const notes = [
     "Chunk data unavailable — showing illustrative figures until registry load succeeds.",
+    ...(reason ? [`Registry load error: ${reason}`] : []),
     priorityNotes(priority),
   ];
 

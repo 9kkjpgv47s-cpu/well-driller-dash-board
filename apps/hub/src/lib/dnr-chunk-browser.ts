@@ -1,6 +1,7 @@
 "use client";
 
 import type { WellRecord } from "@/lib/area-well-analytics";
+import { logWarning } from "@/lib/errors";
 import {
   chunkUrl,
   gunzipText,
@@ -121,7 +122,8 @@ function readCachedChunkCount(): number | null {
       return null;
     }
     return count;
-  } catch {
+  } catch (e) {
+    logWarning("dnr-chunk-browser", "cached chunk count unreadable", e);
     return null;
   }
 }
@@ -132,8 +134,9 @@ function writeCachedChunkCount(count: number): void {
       CHUNK_COUNT_CACHE_KEY,
       JSON.stringify({ count, at: Date.now() }),
     );
-  } catch {
-    /* private mode etc. — discovery just reruns next load */
+  } catch (e) {
+    // Private mode etc. — discovery just reruns next load.
+    logWarning("dnr-chunk-browser", "chunk count not cached", e);
   }
 }
 
@@ -267,9 +270,14 @@ export async function loadAllDnrChunksFromPublic(
 
   // Assemble in chunk order for deterministic downstream behavior.
   const all: WellRecord[] = [];
-  for (let i = 0; i < total; i++) {
+  for (const { i } of chunkResponses) {
     const parsed = parsedByIndex.get(i);
-    if (parsed) all.push(...parsed.rows);
+    if (!parsed) {
+      throw new Error(
+        `Chunk ${i} was fetched but never parsed — refusing to report a partial registry.`,
+      );
+    }
+    all.push(...parsed.rows);
   }
 
   report(total, total, all.length, `Loaded ${all.length.toLocaleString()} wells`);

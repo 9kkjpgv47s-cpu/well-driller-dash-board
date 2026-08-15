@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { errorMessage, logWarning } from "@/lib/errors";
 
 /**
  * DEM ground elevation at lat/lon (meters), same sources as the standalone viewer:
@@ -38,6 +39,9 @@ async function fetchOpenTopoDataM(locations: Loc[]): Promise<number[] | null> {
     },
     next: { revalidate: 86400 },
   });
+  if (!res.ok) {
+    throw new Error(`OpenTopoData returned HTTP ${res.status}`);
+  }
   const text = await res.text();
   const arr = parseOpenTopoData(text);
   if (!arr || arr.length !== locations.length) return null;
@@ -61,7 +65,9 @@ async function fetchOpenElevationM(locations: Loc[]): Promise<(number | null)[]>
       })),
     }),
   });
-  if (!res.ok) return locations.map(() => null);
+  if (!res.ok) {
+    throw new Error(`Open-Elevation returned HTTP ${res.status}`);
+  }
   const data = (await res.json()) as {
     results?: { elevation?: number | null }[];
   };
@@ -110,16 +116,31 @@ export async function POST(req: NextRequest) {
     normalized.push({ lat, lon });
   }
 
+  const failures: string[] = [];
+
   let elevationsM: (number | null)[] | null = null;
   try {
     const ot = await fetchOpenTopoDataM(normalized);
     if (ot) elevationsM = ot;
-  } catch {
-    elevationsM = null;
+    else failures.push("OpenTopoData: unusable response payload");
+  } catch (e) {
+    const msg = errorMessage(e, "OpenTopoData request failed");
+    logWarning("api/elevation", `OpenTopoData lookup failed: ${msg}`, e);
+    failures.push(`OpenTopoData: ${msg}`);
   }
 
   if (!elevationsM) {
-    elevationsM = await fetchOpenElevationM(normalized);
+    try {
+      elevationsM = await fetchOpenElevationM(normalized);
+    } catch (e) {
+      const msg = errorMessage(e, "Open-Elevation request failed");
+      logWarning("api/elevation", `Open-Elevation lookup failed: ${msg}`, e);
+      failures.push(`Open-Elevation: ${msg}`);
+      return NextResponse.json(
+        { error: `Elevation lookup failed — ${failures.join("; ")}.` },
+        { status: 502 },
+      );
+    }
   }
 
   const elevationsFt = elevationsM.map((m) =>
