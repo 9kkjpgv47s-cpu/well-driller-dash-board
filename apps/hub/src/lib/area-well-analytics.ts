@@ -927,9 +927,22 @@ export function computeAreaInsights(
   };
 }
 
-/** Convert **bold** markdown-like segments to <strong> for simple rendering. */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Convert **bold** markdown-like segments to <strong> for simple rendering.
+ * All other markup is escaped, so `<strong>` is the only tag that can reach the
+ * DOM even when narratives interpolate registry text.
+ */
 export function formatNarrativeHtml(text: string): string {
-  return text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  return escapeHtml(text).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
 /** Left accent bar color keyed to well-type scope. */

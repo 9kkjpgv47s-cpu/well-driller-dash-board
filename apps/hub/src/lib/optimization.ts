@@ -6,6 +6,9 @@ import { wellsWithinRadiusIndexed } from "@/lib/well-spatial-index";
 
 export type OptimizationPriority = "depth" | "yield" | "balanced";
 
+/** Caps the well scan an unauthenticated request can trigger. */
+export const MAX_OPTIMIZATION_RADIUS_MILES = 25;
+
 export type OptimizationInput = {
   lat: number;
   lon: number;
@@ -262,7 +265,17 @@ export function parseOptimizationSearchParams(
       ? priorityRaw
       : "balanced";
 
-  if (!Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(radiusMiles)) {
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon) ||
+    lat < -90 ||
+    lat > 90 ||
+    lon < -180 ||
+    lon > 180 ||
+    !Number.isFinite(radiusMiles) ||
+    radiusMiles <= 0 ||
+    radiusMiles > MAX_OPTIMIZATION_RADIUS_MILES
+  ) {
     return null;
   }
 

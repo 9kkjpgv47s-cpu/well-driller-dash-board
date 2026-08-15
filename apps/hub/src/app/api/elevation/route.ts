@@ -101,9 +101,19 @@ export async function POST(req: NextRequest) {
   for (const p of locations) {
     const lat = Number(p.lat);
     const lon = Number(p.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon) ||
+      lat < -90 ||
+      lat > 90 ||
+      lon < -180 ||
+      lon > 180
+    ) {
       return NextResponse.json(
-        { error: "Each location needs numeric lat and lon." },
+        {
+          error:
+            "Each location needs lat in [-90, 90] and lon in [-180, 180].",
+        },
         { status: 400 },
       );
     }

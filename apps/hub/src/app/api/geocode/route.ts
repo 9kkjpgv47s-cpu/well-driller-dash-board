@@ -6,9 +6,9 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
-  if (!q || q.length < 3) {
+  if (!q || q.length < 3 || q.length > 200) {
     return NextResponse.json(
-      { error: "Query `q` must be at least 3 characters." },
+      { error: "Query `q` must be 3–200 characters." },
       { status: 400 },
     );
   }

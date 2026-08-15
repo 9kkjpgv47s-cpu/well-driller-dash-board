@@ -3,6 +3,7 @@ import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
 import {
   computeOptimizationFromWells,
   computeOptimizationMock,
+  MAX_OPTIMIZATION_RADIUS_MILES,
   parseOptimizationSearchParams,
 } from "@/lib/optimization";
 
@@ -21,8 +22,7 @@ export async function GET(request: Request) {
   if (!input) {
     return NextResponse.json(
       {
-        error:
-          "Missing or invalid query. Required: lat, lon, radiusMiles (or radius). Optional: priority=depth|yield|balanced.",
+        error: `Missing or invalid query. Required: lat in [-90, 90], lon in [-180, 180], radiusMiles (or radius) in (0, ${MAX_OPTIMIZATION_RADIUS_MILES}]. Optional: priority=depth|yield|balanced.`,
       },
       { status: 400 },
     );
