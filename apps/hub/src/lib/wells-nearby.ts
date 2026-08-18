@@ -152,7 +152,12 @@ export function parseWellsNearbyInput(
   ) {
     return { error: "Invalid or missing `lat` / `lon` query parameters." };
   }
-  if (!Number.isFinite(radius) || radius <= 0 || radius > MAX_RADIUS_MILES) {
+  // Default radius so lat/lon-only deep links still load wells.
+  let radiusMiles = radius;
+  if (!Number.isFinite(radiusMiles) || radiusMiles <= 0) {
+    radiusMiles = 5;
+  }
+  if (radiusMiles > MAX_RADIUS_MILES) {
     return {
       error: `Invalid \`radius\` — expected miles in (0, ${MAX_RADIUS_MILES}].`,
     };
@@ -165,7 +170,7 @@ export function parseWellsNearbyInput(
   return {
     lat,
     lon,
-    radiusMiles: radius,
+    radiusMiles,
     limit,
     filters: parseHubViewerFiltersFromSearchParams(sp),
   };

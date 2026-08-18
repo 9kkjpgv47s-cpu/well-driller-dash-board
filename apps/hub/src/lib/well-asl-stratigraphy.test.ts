@@ -10,6 +10,7 @@ import {
   findSharedAquiferBands,
   formatSharedAquiferDrillAdvice,
   isGravelFormation,
+  isSharedAquiferFormation,
   sharedAquiferDrillWindowFt,
 } from "./well-asl-stratigraphy";
 
@@ -24,10 +25,21 @@ describe("well-asl-stratigraphy", () => {
     expect(classifyFormation("Limestone")).toBe("rock");
   });
 
-  it("matches gravel formations only for shared aquifers", () => {
-    expect(isGravelFormation("Gravel")).toBe(true);
-    expect(isGravelFormation("Sand and gravel")).toBe(true);
-    expect(isGravelFormation("Coarse sand")).toBe(false);
+  it("matches water-bearing, sand, gravel, and S&G for shared aquifers", () => {
+    expect(isSharedAquiferFormation("Gravel")).toBe(true);
+    expect(isSharedAquiferFormation("Sand and gravel")).toBe(true);
+    expect(isSharedAquiferFormation("Coarse sand")).toBe(true);
+    expect(isSharedAquiferFormation("WATER SAND")).toBe(true);
+    expect(isSharedAquiferFormation("S&G")).toBe(true);
+    expect(isSharedAquiferFormation("S AND G")).toBe(true);
+    expect(isSharedAquiferFormation("RED S & G")).toBe(true);
+    expect(isSharedAquiferFormation("S&G WATER")).toBe(true);
+    expect(isSharedAquiferFormation("Fine sand")).toBe(true);
+    expect(isSharedAquiferFormation("Clay")).toBe(false);
+    expect(isSharedAquiferFormation("Limestone")).toBe(false);
+    expect(isSharedAquiferFormation("Sandstone")).toBe(false);
+    // alias still works
+    expect(isGravelFormation("S AND G")).toBe(true);
   });
 
   it("requires shared ASL footage to overlap", () => {
@@ -70,8 +82,8 @@ describe("well-asl-stratigraphy", () => {
       },
       725,
     );
-    const gravelA = highGround.find((s) => isGravelFormation(s.formation));
-    const gravelB = lowGround.find((s) => isGravelFormation(s.formation));
+    const gravelA = highGround.find((s) => isSharedAquiferFormation(s.formation));
+    const gravelB = lowGround.find((s) => isSharedAquiferFormation(s.formation));
     expect(gravelA?.topAslFt).toBe(755);
     expect(gravelB?.topAslFt).toBe(655);
     expect(gravelA?.bottomAslFt).toBe(730);
@@ -204,7 +216,49 @@ describe("well-asl-stratigraphy", () => {
     expect(formatSharedAquiferDrillAdvice(bands[0]!, 800)).toContain("50–90 ft");
   });
 
-  it("ignores sand-only layers and distant gravel with no shared ASL", () => {
+  it("includes sand and S&G abbreviations in shared bands with gravel", () => {
+    const layout = buildAslStratigraphyLayout(
+      [
+        {
+          id: "sand-well",
+          ground_elev: "800",
+          lithology_json: JSON.stringify({
+            layers: [{ from: 40, to: 65, formation: "Sand" }],
+          }),
+        },
+        {
+          id: "sg-well",
+          ground_elev: "800",
+          lithology_json: JSON.stringify({
+            layers: [{ from: 42, to: 60, formation: "S AND G" }],
+          }),
+        },
+        {
+          id: "gravel-well",
+          ground_elev: "800",
+          lithology_json: JSON.stringify({
+            layers: [{ from: 45, to: 70, formation: "Gravel" }],
+          }),
+        },
+        {
+          id: "clay-only",
+          ground_elev: "800",
+          lithology_json: JSON.stringify({
+            layers: [{ from: 40, to: 70, formation: "Brown clay" }],
+          }),
+        },
+      ],
+      null,
+    );
+    const bands = findSharedAquiferBands(layout.columns);
+    expect(bands.some((b) => b.wellKeys.includes("sand-well"))).toBe(true);
+    expect(bands.some((b) => b.wellKeys.includes("sg-well"))).toBe(true);
+    expect(bands.some((b) => b.wellKeys.includes("gravel-well"))).toBe(true);
+    expect(bands.some((b) => b.wellKeys.includes("clay-only"))).toBe(false);
+    expect(bands.some((b) => b.wellCount >= 3)).toBe(true);
+  });
+
+  it("ignores distant gravel packages with no shared ASL", () => {
     const layout = buildAslStratigraphyLayout(
       [
         {
@@ -221,25 +275,10 @@ describe("well-asl-stratigraphy", () => {
             layers: [{ from: 120, to: 145, formation: "Gravel" }],
           }),
         },
-        {
-          id: "shallow-sand",
-          ground_elev: "800",
-          lithology_json: JSON.stringify({
-            layers: [{ from: 40, to: 65, formation: "Sand" }],
-          }),
-        },
-        {
-          id: "shallow-gravel",
-          ground_elev: "800",
-          lithology_json: JSON.stringify({
-            layers: [{ from: 45, to: 70, formation: "Gravel" }],
-          }),
-        },
       ],
       null,
     );
     const bands = findSharedAquiferBands(layout.columns);
-    expect(bands.some((b) => b.wellKeys.includes("shallow-sand"))).toBe(false);
-    expect(bands.some((b) => b.wellCount >= 3)).toBe(false);
+    expect(bands).toHaveLength(0);
   });
 });

@@ -26,6 +26,11 @@ import type {
   DispatchParseResult,
 } from "@/lib/dispatch-parse";
 import { parseDispatchEmail } from "@/lib/dispatch-parse";
+import {
+  clearDispatchSession,
+  loadDispatchSession,
+  saveDispatchSession,
+} from "@/lib/dispatch-session-cache";
 import { wellsWithinRadiusIndexed } from "@/lib/well-spatial-index";
 import { decodeJobShareParam } from "@/lib/job-share";
 import { type DrillJob } from "@/lib/scheduling-data";
@@ -276,7 +281,7 @@ export function DrillingHubClient() {
     [],
   );
 
-  /** Load shared job links (?job=) and plain ?lat=&lon= deep links. */
+  /** Load shared job links (?job=), plain ?lat=&lon=, or last local dispatch. */
   useEffect(() => {
     if (sharedJobLoadedRef.current) return;
 
@@ -293,6 +298,13 @@ export function DrillingHubClient() {
         });
         setDispatchHydrate({ raw: payload.raw, parsed });
         setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
+        saveDispatchSession({
+          raw: payload.raw,
+          lat: payload.lat,
+          lon: payload.lon,
+          title: payload.title ?? parsed.title,
+          feetOffDrive: payload.feetOffDrive,
+        });
         return;
       }
     }
@@ -311,6 +323,28 @@ export function DrillingHubClient() {
       setCenter({ lat: la, lon: lo });
       setDispatchContext({
         title: `Map link (${la.toFixed(4)}, ${lo.toFixed(4)})`,
+      });
+      setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
+      return;
+    }
+
+    // No URL job — restore last pasted dispatch from this browser/phone.
+    const cached = loadDispatchSession();
+    if (!cached?.raw) return;
+    sharedJobLoadedRef.current = true;
+    const parsed = parseDispatchEmail(cached.raw);
+    setDispatchHydrate({ raw: cached.raw, parsed });
+    setLastParsedDispatch(parsed);
+    if (
+      cached.lat != null &&
+      cached.lon != null &&
+      Number.isFinite(cached.lat) &&
+      Number.isFinite(cached.lon)
+    ) {
+      setCenter({ lat: cached.lat, lon: cached.lon });
+      setDispatchContext({
+        title: cached.title ?? parsed.title,
+        feetOffDrive: cached.feetOffDrive,
       });
       setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
     }
@@ -393,14 +427,26 @@ export function DrillingHubClient() {
           fetches,
         );
 
-        if (wellsRes.status === 503 || insightsRes.status === 503) {
+        // 503 = intentional cold-start fallback; 500/502/timeout = treat the same
+        // so the map still fills from public/well-viewer chunks on any site lat/lon.
+        const serverUnavailable =
+          wellsRes.status === 503 ||
+          wellsRes.status === 500 ||
+          wellsRes.status === 502 ||
+          wellsRes.status === 504 ||
+          insightsRes.status === 503 ||
+          insightsRes.status === 500 ||
+          insightsRes.status === 502 ||
+          insightsRes.status === 504;
+
+        if (serverUnavailable) {
           const errBody = (await wellsRes.json().catch(() => ({}))) as {
             error?: string;
           };
           setWellsError(
             typeof errBody.error === "string"
               ? errBody.error
-              : "Server well data unavailable.",
+              : "Server well data unavailable — loading registry on device…",
           );
           setInsightsLoading(false);
           loadWellsFallback(center);
@@ -423,11 +469,11 @@ export function DrillingHubClient() {
         let depthInsights: AreaInsightsReport | null = insights;
         if (depthRadiusMiles !== radiusMiles && depthInsightsRes) {
           if (!depthInsightsRes.ok) {
-            throw new Error(
-              `Depth insights request failed (${depthInsightsRes.status})`,
-            );
+            // Depth insights are secondary — keep primary wells if we have them.
+            depthInsights = insights;
+          } else {
+            depthInsights = (await depthInsightsRes.json()) as AreaInsightsReport;
           }
-          depthInsights = (await depthInsightsRes.json()) as AreaInsightsReport;
         }
 
         if (ac.signal.aborted) return;
@@ -439,11 +485,12 @@ export function DrillingHubClient() {
       } catch (e) {
         if (ac.signal.aborted) return;
         setWellsError(
-          e instanceof Error ? e.message : "Failed to load nearby wells.",
+          e instanceof Error
+            ? e.message
+            : "Failed to load nearby wells — trying local registry…",
         );
-        setAreaWells([]);
-        setAreaInsights(null);
-        setAreaInsightsForDepth(null);
+        // Network hang/abort path: still try client chunk load for any jobsite.
+        loadWellsFallback(center);
         setWellsStatus(null);
       } finally {
         if (!ac.signal.aborted) setInsightsLoading(false);
@@ -661,17 +708,55 @@ export function DrillingHubClient() {
   }, [center, dispatchContext]);
 
   const applyDispatchJobsite = useCallback((site: DispatchJobsiteApply) => {
+    // Preserve scroll while the map section mounts — iOS was jumping to top.
+    const y = typeof window !== "undefined" ? window.scrollY : 0;
     setCenter({ lat: site.lat, lon: site.lon });
     setDispatchContext({
       title: site.title,
       feetOffDrive: site.distanceOffDriveFt,
     });
     setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
+    const cached = loadDispatchSession();
+    if (cached?.raw) {
+      saveDispatchSession({
+        raw: cached.raw,
+        lat: site.lat,
+        lon: site.lon,
+        title: site.title,
+        feetOffDrive: site.distanceOffDriveFt,
+      });
+    }
+    // After React paints the map block, restore scroll (or nudge to map if at top).
+    if (typeof window !== "undefined") {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const mapHeading = document.getElementById("drill-map-h");
+          if (y > 80) {
+            window.scrollTo(0, y);
+          } else if (mapHeading) {
+            mapHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+    }
   }, []);
 
   const handleDispatchParsed = useCallback((parsed: DispatchParseResult) => {
     setLastParsedDispatch(parsed);
     setGeocodeError(null);
+  }, []);
+
+  const handleClearSavedDispatch = useCallback(() => {
+    clearDispatchSession();
+    setCenter(null);
+    setDispatchContext(null);
+    setDispatchHydrate(null);
+    setLastParsedDispatch(null);
+    setAreaWells([]);
+    setAreaInsights(null);
+    setAreaInsightsForDepth(null);
+    setGeocodeError(null);
+    sharedJobLoadedRef.current = false;
   }, []);
 
   /** Address parsed but no GPS in the paste — offer server-side geocoding. */
@@ -708,12 +793,22 @@ export function DrillingHubClient() {
         );
       }
       setCenter({ lat: hit.lat, lon: hit.lon });
+      const title =
+        lastParsedDispatch?.title ?? lastParsedDispatch?.address ?? hit.label;
       setDispatchContext({
-        title:
-          lastParsedDispatch?.title ?? lastParsedDispatch?.address ?? hit.label,
+        title,
         feetOffDrive: undefined,
       });
       setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
+      const cached = loadDispatchSession();
+      if (cached?.raw) {
+        saveDispatchSession({
+          raw: cached.raw,
+          lat: hit.lat,
+          lon: hit.lon,
+          title,
+        });
+      }
     } catch (e) {
       setGeocodeError(
         e instanceof Error ? e.message : "Geocoding failed — try again.",
@@ -776,6 +871,7 @@ export function DrillingHubClient() {
         feetOffDrive={dispatchContext?.feetOffDrive}
         initialRaw={dispatchHydrate?.raw}
         initialParsed={dispatchHydrate?.parsed ?? null}
+        onClearSaved={handleClearSavedDispatch}
       />
 
       {center && wellsProgress && wellsProgress.total > 0 ? (
@@ -1000,6 +1096,16 @@ export function DrillingHubClient() {
                               wells={wellsForMap}
                               filters={mapFilters}
                               onWellOpen={setDetailWell}
+                              // Dead center of the 2 mi radius circle = dispatch GPS.
+                              // (Was never wired before — pin + lat/lon line never showed.)
+                              jobsiteLocation={{
+                                lat: center.lat,
+                                lon: center.lon,
+                                accuracyM: null,
+                                sourceLabel:
+                                  dispatchContext?.title?.trim() ||
+                                  "Dispatch GPS / coordinates",
+                              }}
                             />
                           </>
                         ) : workspaceView === "depth" ? (
@@ -1020,6 +1126,7 @@ export function DrillingHubClient() {
                             demElevFtByKey={demGroundElevFtByKey}
                             selectedWellKey={selectedWellKey}
                             referenceGroundElevFt={demRefGroundElevFt}
+                            center={center}
                             onSelectWell={setDetailWell}
                             onRequestElevations={() =>
                               void fetchGroundElevations(aslElevTargetWells)

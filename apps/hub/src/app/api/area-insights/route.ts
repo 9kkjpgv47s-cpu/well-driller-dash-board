@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { computeAreaInsights } from "@/lib/area-well-analytics";
-import { getDnrWellsServerCached } from "@/lib/dnr-wells-server-cache";
+import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
 import { getWellSpatialIndex } from "@/lib/well-spatial-index";
+
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 const MAX_RADIUS_MILES = 25;
 
@@ -41,7 +44,7 @@ export async function GET(req: NextRequest) {
 
   let wells;
   try {
-    wells = await getDnrWellsServerCached();
+    wells = await getDnrWellsServerCachedForApi();
   } catch (e) {
     return NextResponse.json(
       {
@@ -49,19 +52,33 @@ export async function GET(req: NextRequest) {
           e instanceof Error
             ? e.message
             : "Failed to load DNR chunk data on the server.",
+        fallback: "client-chunks",
       },
       { status: 503 },
     );
   }
 
-  const inRadius = getWellSpatialIndex(wells).queryRadius(lat, lon, radius);
-  const report = computeAreaInsights(wells, lat, lon, radius, {
-    wellsInRadius: inRadius,
-  });
+  try {
+    const inRadius = getWellSpatialIndex(wells).queryRadius(lat, lon, radius);
+    const report = computeAreaInsights(wells, lat, lon, radius, {
+      wellsInRadius: inRadius,
+    });
 
-  return NextResponse.json(report, {
-    headers: {
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
-    },
-  });
+    return NextResponse.json(report, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
+  } catch (e) {
+    return NextResponse.json(
+      {
+        error:
+          e instanceof Error
+            ? e.message
+            : "Area insights query failed on the server.",
+        fallback: "client-chunks",
+      },
+      { status: 503 },
+    );
+  }
 }

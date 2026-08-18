@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { WellRecord } from "@/lib/area-well-analytics";
+import {
+  haversineMiles,
+  type WellRecord,
+} from "@/lib/area-well-analytics";
 import {
   abbrevFormation,
   aslToChartY,
@@ -15,9 +18,11 @@ import {
   lithologyClassColors,
   sharedAquiferDrillWindowFt,
   stratumContributesToBand,
+  type AslWellColumn,
   type LithologyClass,
   type SharedAquiferBand,
 } from "@/lib/well-asl-stratigraphy";
+import { wellThermometerKey } from "@/lib/well-depth-thermometer";
 
 const CHART_HEIGHT = 440;
 const PADDING_TOP = 28;
@@ -70,10 +75,14 @@ function SharedBandLabelContent({
   band,
   drillWindow,
   wellsOnChart,
+  onViewWells,
+  isActive,
 }: {
   band: SharedAquiferBand;
   drillWindow: { startDepthFt: number; endDepthFt: number } | null;
   wellsOnChart: number;
+  onViewWells?: () => void;
+  isActive?: boolean;
 }) {
   const sharedLabel =
     band.sharedTopAslFt === band.sharedBottomAslFt
@@ -106,9 +115,35 @@ function SharedBandLabelContent({
           Load site elevation for drill depths
         </p>
       )}
+      {onViewWells ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewWells();
+          }}
+          className={`mt-1 w-full rounded border px-1 py-0.5 text-[8px] font-semibold transition-colors ${
+            isActive
+              ? "border-red-600 bg-red-600 text-white"
+              : "border-red-300 bg-white text-red-800 hover:bg-red-50 dark:border-red-800 dark:bg-zinc-900 dark:text-red-200 dark:hover:bg-red-950/40"
+          }`}
+        >
+          {isActive ? "Hide wells" : "View wells"}
+        </button>
+      ) : null}
     </>
   );
 }
+
+type SharedWellRow = {
+  key: string;
+  well: WellRecord;
+  label: string;
+  distanceMiles: number | null;
+  groundAslFt: number | null;
+  inSharedBand: boolean;
+  bandLabel: string | null;
+};
 
 type Props = {
   wells: WellRecord[];
@@ -116,6 +151,8 @@ type Props = {
   selectedWellKey?: string | null;
   /** Job-site ground elevation (ft ASL) for drill-depth targets. */
   referenceGroundElevFt?: number | null;
+  /** Site / map center for distance-to-you on shared aquifer lists. */
+  center?: { lat: number; lon: number } | null;
   onSelectWell: (w: WellRecord) => void;
   onRequestElevations?: () => void;
   elevLoading?: boolean;
@@ -129,11 +166,36 @@ const LEGEND: LithologyClass[] = [
   "other",
 ];
 
+function distanceMilesToCenter(
+  w: WellRecord,
+  center?: { lat: number; lon: number } | null,
+): number | null {
+  if (!center) return null;
+  const la = Number(w.lat);
+  const lo = Number(w.lon);
+  if (!Number.isFinite(la) || !Number.isFinite(lo)) return null;
+  return haversineMiles(center.lat, center.lon, la, lo);
+}
+
+function formatDistMi(d: number | null): string {
+  if (d == null || !Number.isFinite(d)) return "—";
+  if (d < 0.1) return "<0.1 mi";
+  return `${d.toFixed(d < 10 ? 2 : 1)} mi`;
+}
+
+function bandShortLabel(band: SharedAquiferBand): string {
+  if (band.sharedTopAslFt === band.sharedBottomAslFt) {
+    return `${band.sharedTopAslFt} ft ASL`;
+  }
+  return `${band.sharedBottomAslFt}–${band.sharedTopAslFt} ft ASL`;
+}
+
 export function WellAslStratigraphyChart({
   wells,
   demElevFtByKey,
   selectedWellKey,
   referenceGroundElevFt,
+  center = null,
   onSelectWell,
   onRequestElevations,
   elevLoading = false,
@@ -141,13 +203,20 @@ export function WellAslStratigraphyChart({
 }: Props) {
   const [hover, setHover] = useState<{
     key: string;
+    well: WellRecord;
+    label: string;
     formation: string;
     topAsl: number;
     bottomAsl: number;
     topDepth: number;
     bottomDepth: number;
+    aquiferMatch: boolean;
   } | null>(null);
   const [matchingAquiferOnly, setMatchingAquiferOnly] = useState(false);
+  /** null = closed; "all" = every shared-aquifer well; band key = one shared band */
+  const [wellsListMode, setWellsListMode] = useState<null | "all" | string>(
+    null,
+  );
 
   const fullLayout = useMemo(
     () =>
@@ -230,6 +299,74 @@ export function WellAslStratigraphyChart({
     !matchingAquiferOnly &&
     matchingWellTotal > 0 &&
     matchingInChart < matchingWellTotal;
+
+  const columnByKey = useMemo(() => {
+    const m = new Map<string, AslWellColumn>();
+    for (const c of fullLayout.columns) m.set(c.key, c);
+    return m;
+  }, [fullLayout.columns]);
+
+  const sharedWellsList: SharedWellRow[] = useMemo(() => {
+    if (!wellsListMode) return [];
+
+    let keys: string[] = [];
+    let bandForKeys: SharedAquiferBand | null = null;
+    if (wellsListMode === "all") {
+      keys = [...matchingWellKeys];
+    } else {
+      const band = sharedBands.find(
+        (b) =>
+          `${b.sharedTopAslFt}-${b.sharedBottomAslFt}-${b.centerAslFt}` ===
+          wellsListMode,
+      );
+      if (band) {
+        bandForKeys = band;
+        keys = [...band.wellKeys];
+      }
+    }
+
+    const rows: SharedWellRow[] = [];
+    for (const key of keys) {
+      const col = columnByKey.get(key);
+      const well =
+        col?.well ??
+        wells.find((w) => wellThermometerKey(w) === key) ??
+        null;
+      if (!well) continue;
+      const dist = distanceMilesToCenter(well, center);
+      const bandsForWell = sharedBands.filter((b) => b.wellKeys.includes(key));
+      rows.push({
+        key,
+        well,
+        label: col?.label ?? String(well.refno ?? well.id ?? key),
+        distanceMiles: dist,
+        groundAslFt: col?.groundAslFt ?? null,
+        inSharedBand: bandsForWell.length > 0,
+        bandLabel: bandForKeys
+          ? bandShortLabel(bandForKeys)
+          : bandsForWell.length
+            ? bandsForWell.map(bandShortLabel).join("; ")
+            : null,
+      });
+    }
+    rows.sort((a, b) => {
+      const da = a.distanceMiles ?? 9999;
+      const db = b.distanceMiles ?? 9999;
+      return da - db;
+    });
+    return rows;
+  }, [
+    wellsListMode,
+    matchingWellKeys,
+    sharedBands,
+    columnByKey,
+    wells,
+    center,
+  ]);
+
+  const toggleBandWells = (bandKey: string) => {
+    setWellsListMode((prev) => (prev === bandKey ? null : bandKey));
+  };
 
   const plotW =
     layout.columns.length * (BAR_W + BAR_GAP) - BAR_GAP + MARGIN_RIGHT;
@@ -318,6 +455,21 @@ export function WellAslStratigraphyChart({
             Matching aquifer only ({matchingWellTotal} well
             {matchingWellTotal === 1 ? "" : "s"})
           </label>
+          <button
+            type="button"
+            onClick={() =>
+              setWellsListMode((prev) => (prev === "all" ? null : "all"))
+            }
+            className={`rounded-md border px-2 py-1 text-[10px] font-semibold sm:text-[11px] ${
+              wellsListMode === "all"
+                ? "border-red-600 bg-red-600 text-white"
+                : "border-red-300 bg-white text-red-800 hover:bg-red-50 dark:border-red-800 dark:bg-zinc-900 dark:text-red-200 dark:hover:bg-red-950/30"
+            }`}
+          >
+            {wellsListMode === "all"
+              ? "Hide shared aquifer wells"
+              : `View all shared aquifer wells (${matchingWellTotal})`}
+          </button>
           {chartLimited ? (
             <span className="text-[10px] text-amber-800 dark:text-amber-200">
               Only {matchingInChart} of {matchingWellTotal} matching wells in chart
@@ -326,6 +478,12 @@ export function WellAslStratigraphyChart({
           ) : null}
         </div>
       ) : null}
+
+      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+        Click a lithology layer or well name to open that well. Use{" "}
+        <strong>View all</strong> / <strong>View wells</strong> for distances to
+        overlapping aquifers.
+      </p>
 
       <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[9px] text-zinc-600 sm:text-[10px] dark:text-zinc-400">
         {LEGEND.map((c) => {
@@ -379,11 +537,19 @@ export function WellAslStratigraphyChart({
                 className="absolute left-0 right-0 px-1"
                 style={{ top: desktopBandTops.get(row.key) ?? row.y - 28 }}
               >
-                <div className="rounded-sm bg-zinc-50/95 px-1 py-0.5 text-[8px] leading-snug text-emerald-950 shadow-sm dark:bg-zinc-900/95 dark:text-emerald-100">
+                <div
+                  className={`rounded-sm px-1 py-0.5 text-[8px] leading-snug text-emerald-950 shadow-sm dark:text-emerald-100 ${
+                    wellsListMode === row.key
+                      ? "bg-red-50/95 ring-1 ring-red-400 dark:bg-red-950/50"
+                      : "bg-zinc-50/95 dark:bg-zinc-900/95"
+                  }`}
+                >
                   <SharedBandLabelContent
                     band={row.band}
                     drillWindow={row.drillWindow}
                     wellsOnChart={row.wellsOnChart}
+                    onViewWells={() => toggleBandWells(row.key)}
+                    isActive={wellsListMode === row.key}
                   />
                 </div>
               </div>
@@ -406,18 +572,35 @@ export function WellAslStratigraphyChart({
                   PADDING_TOP,
                   PADDING_BOTTOM,
                 );
+                const active = wellsListMode === row.key;
                 return (
-                  <line
-                    key={`line-${row.key}`}
-                    x1={0}
-                    x2={chartW - 2}
-                    y1={y}
-                    y2={y}
-                    stroke={SHARED_LINE_STROKE}
-                    strokeWidth={2}
-                    strokeDasharray={SHARED_LINE_DASH}
-                    opacity={0.95}
-                  />
+                  <g key={`line-${row.key}`}>
+                    <line
+                      x1={0}
+                      x2={chartW - 2}
+                      y1={y}
+                      y2={y}
+                      stroke={SHARED_LINE_STROKE}
+                      strokeWidth={active ? 3 : 2}
+                      strokeDasharray={SHARED_LINE_DASH}
+                      opacity={0.95}
+                    />
+                    {/* Invisible hit target — does not change default look */}
+                    <line
+                      x1={0}
+                      x2={chartW - 2}
+                      y1={y}
+                      y2={y}
+                      stroke="transparent"
+                      strokeWidth={14}
+                      className="cursor-pointer"
+                      onClick={() => toggleBandWells(row.key)}
+                    >
+                      <title>
+                        View {row.band.wellCount} wells sharing this aquifer
+                      </title>
+                    </line>
+                  </g>
                 );
               })}
 
@@ -536,14 +719,19 @@ export function WellAslStratigraphyChart({
                           }
                           rx={1}
                           className="cursor-pointer"
+                          role="button"
+                          tabIndex={0}
                           onMouseEnter={() =>
                             setHover({
                               key: col.key,
+                              well: col.well,
+                              label: col.label,
                               formation: s.formation,
                               topAsl: s.topAslFt,
                               bottomAsl: s.bottomAslFt,
                               topDepth: s.topDepthFt,
                               bottomDepth: s.bottomDepthFt,
+                              aquiferMatch,
                             })
                           }
                           onMouseLeave={() =>
@@ -551,8 +739,21 @@ export function WellAslStratigraphyChart({
                               hov?.key === col.key ? null : hov,
                             )
                           }
-                          onClick={() => onSelectWell(col.well)}
-                        />
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectWell(col.well);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              onSelectWell(col.well);
+                            }
+                          }}
+                        >
+                          <title>
+                            {`${col.label}: ${s.formation} (${s.topDepthFt}–${s.bottomDepthFt} ft) — click for well detail`}
+                          </title>
+                        </rect>
                         {showLabel ? (
                           <text
                             x={x + BAR_W / 2}
@@ -573,15 +774,28 @@ export function WellAslStratigraphyChart({
                     );
                   })}
 
+                  {/* Clickable well name under column */}
+                  <rect
+                    x={x}
+                    y={CHART_HEIGHT - 22}
+                    width={BAR_W}
+                    height={20}
+                    fill="transparent"
+                    className="cursor-pointer"
+                    onClick={() => onSelectWell(col.well)}
+                  >
+                    <title>{`Open well ${col.label}`}</title>
+                  </rect>
                   <text
                     x={x + BAR_W / 2}
                     y={CHART_HEIGHT - 8}
                     textAnchor="middle"
-                    className={`text-[8px] font-semibold sm:text-[9px] ${
+                    className={`cursor-pointer text-[8px] font-semibold sm:text-[9px] ${
                       columnInAnyBand(col.key, sharedBands)
                         ? "fill-red-700 dark:fill-red-300"
                         : "fill-zinc-700 dark:fill-zinc-200"
                     } ${selected ? "underline" : ""}`}
+                    onClick={() => onSelectWell(col.well)}
                   >
                     {abbrevFormation(col.label, 7)}
                   </text>
@@ -606,12 +820,18 @@ export function WellAslStratigraphyChart({
             {sharedBandRows.map((row) => (
               <div
                 key={`mobile-${row.key}`}
-                className="rounded-md border border-red-200 bg-red-50/40 px-2 py-1.5 text-[10px] leading-snug text-emerald-950 dark:border-red-900/40 dark:bg-red-950/20 dark:text-emerald-100"
+                className={`rounded-md border px-2 py-1.5 text-[10px] leading-snug text-emerald-950 dark:text-emerald-100 ${
+                  wellsListMode === row.key
+                    ? "border-red-500 bg-red-50/70 dark:border-red-600 dark:bg-red-950/40"
+                    : "border-red-200 bg-red-50/40 dark:border-red-900/40 dark:bg-red-950/20"
+                }`}
               >
                 <SharedBandLabelContent
                   band={row.band}
                   drillWindow={row.drillWindow}
                   wellsOnChart={row.wellsOnChart}
+                  onViewWells={() => toggleBandWells(row.key)}
+                  isActive={wellsListMode === row.key}
                 />
               </div>
             ))}
@@ -620,10 +840,96 @@ export function WellAslStratigraphyChart({
       </div>
 
       {hover ? (
-        <p className="rounded-md bg-zinc-100 px-2.5 py-2 text-[11px] text-zinc-800 sm:px-3 sm:text-xs dark:bg-zinc-800 dark:text-zinc-100">
-          <strong>{hover.formation}</strong> · {hover.topDepth}–{hover.bottomDepth}{" "}
-          ft in hole · {hover.topAsl}–{hover.bottomAsl} ft ASL
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-zinc-100 px-2.5 py-2 text-[11px] text-zinc-800 sm:px-3 sm:text-xs dark:bg-zinc-800 dark:text-zinc-100">
+          <p>
+            <strong>{hover.label}</strong>
+            {hover.aquiferMatch ? (
+              <span className="ml-1 font-semibold text-red-700 dark:text-red-300">
+                · shared aquifer
+              </span>
+            ) : null}
+            <br />
+            <strong>{hover.formation}</strong> · {hover.topDepth}–{hover.bottomDepth}{" "}
+            ft in hole · {hover.topAsl}–{hover.bottomAsl} ft ASL
+            {center ? (
+              <span className="text-zinc-500 dark:text-zinc-400">
+                {" "}
+                · {formatDistMi(distanceMilesToCenter(hover.well, center))} away
+              </span>
+            ) : null}
+          </p>
+          <button
+            type="button"
+            onClick={() => onSelectWell(hover.well)}
+            className="shrink-0 rounded-md bg-emerald-700 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-800 dark:bg-emerald-600"
+          >
+            Open well detail
+          </button>
+        </div>
+      ) : null}
+
+      {wellsListMode && sharedWellsList.length > 0 ? (
+        <div className="rounded-lg border border-red-200 bg-red-50/40 dark:border-red-900/50 dark:bg-red-950/20">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-red-200/80 px-3 py-2 dark:border-red-900/40">
+            <div>
+              <p className="text-xs font-semibold text-red-950 dark:text-red-100">
+                {wellsListMode === "all"
+                  ? `Shared aquifer wells (${sharedWellsList.length})`
+                  : `Wells in this aquifer band (${sharedWellsList.length})`}
+              </p>
+              <p className="text-[10px] text-red-900/80 dark:text-red-200/80">
+                Sorted by distance from your site
+                {center ? "" : " (set map center for distances)"}. Click a row for
+                full well text detail.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setWellsListMode(null)}
+              className="rounded border border-red-300 px-2 py-1 text-[10px] font-semibold text-red-900 hover:bg-red-100 dark:border-red-800 dark:text-red-100 dark:hover:bg-red-950/50"
+            >
+              Close
+            </button>
+          </div>
+          <ul className="max-h-56 divide-y divide-red-100 overflow-y-auto dark:divide-red-900/30">
+            {sharedWellsList.map((row) => {
+              const selected = selectedWellKey === row.key;
+              return (
+                <li key={row.key}>
+                  <button
+                    type="button"
+                    onClick={() => onSelectWell(row.well)}
+                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[11px] transition-colors hover:bg-white/80 dark:hover:bg-zinc-900/50 sm:text-xs ${
+                      selected
+                        ? "bg-emerald-50 dark:bg-emerald-950/30"
+                        : ""
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                        {row.label}
+                      </span>
+                      {row.bandLabel ? (
+                        <span className="block truncate text-[10px] text-red-800 dark:text-red-200">
+                          {row.bandLabel}
+                          {row.groundAslFt != null
+                            ? ` · ground ${row.groundAslFt} ft ASL`
+                            : ""}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="shrink-0 text-right font-mono text-[11px] font-semibold text-zinc-800 dark:text-zinc-100">
+                      {formatDistMi(row.distanceMiles)}
+                      <span className="block text-[9px] font-normal text-emerald-700 dark:text-emerald-300">
+                        Open →
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       ) : null}
 
       {!demElevFtByKey?.size && onRequestElevations ? (

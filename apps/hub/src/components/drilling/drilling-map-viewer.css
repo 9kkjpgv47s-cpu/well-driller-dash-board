@@ -1,10 +1,16 @@
-@import url("/well-viewer/vendor/MarkerCluster.css");
-@import url("/well-viewer/vendor/MarkerCluster.Default.css");
+/* Marker cluster vendor CSS is loaded via <link> in DrillingMap.
+ * Absolute @import url("/well-viewer/...") was dropped here on purpose — it
+ * broke Next CSS bundling so this file never reached production.
+ * Critical marker rules also live in globals.css + runtime inject (est-outline-v4).
+ */
 
-/* Parity with standalone viewer: Leaflet divIcon + combo chips */
-.leaflet-marker-icon.vj-well-dot.leaflet-div-icon {
+/* Parity backup if globals is ever stripped — keep identical to globals.css */
+.leaflet-marker-icon.vj-well-dot.leaflet-div-icon,
+.leaflet-marker-icon.vj-job-pin.leaflet-div-icon {
   background: transparent !important;
   border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
 }
 
 .vj-combo-marker {
@@ -15,11 +21,21 @@
   color: #fff;
   line-height: 1.28;
   white-space: nowrap;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  border: 1px solid #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   overflow: visible;
   box-sizing: border-box;
   max-width: none;
+}
+
+.vj-combo-marker.vj-est-rock {
+  border: 1px solid #dc2626 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-combo-marker.vj-est-gravel {
+  border: 1px solid #2563eb !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 }
 
 .vj-combo-marker .cm-row {
@@ -34,8 +50,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: 1px solid #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.vj-well-marker.vj-est-rock {
+  border: 1px solid #dc2626 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-well-marker.vj-est-gravel {
+  border: 1px solid #2563eb !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 }
 
 .vj-well-depth-label {

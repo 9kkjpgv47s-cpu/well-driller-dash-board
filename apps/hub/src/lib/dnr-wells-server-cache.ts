@@ -4,8 +4,13 @@ import { loadAllDnrChunksFromDisk } from "@/lib/dnr-chunk-server";
 /** Local/dev budget for loading gz chunks from disk. */
 export const DNR_WELLS_SERVER_LOAD_TIMEOUT_MS = 20_000;
 
-/** Shorter budget on Vercel so routes fall back before the platform kills the function. */
-export const DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS = 8_000;
+/**
+ * Budget on Vercel so routes return **503 quickly** for client chunk fallback.
+ * Full registry (~10 gz chunks) often cannot finish on a cold serverless start;
+ * hanging without timeout produced 500/timeout and the UI never fell back.
+ * Warm instances that already have the in-memory cache still serve full API.
+ */
+export const DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS = 4_000;
 
 export function getDnrWellsServerLoadTimeoutMs(): number {
   return process.env.VERCEL

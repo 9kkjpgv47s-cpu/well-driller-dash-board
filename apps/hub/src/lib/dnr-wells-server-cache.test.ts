@@ -40,11 +40,11 @@ describe("dnr-wells-server-cache", () => {
     expect(DNR_WELLS_SERVER_LOAD_TIMEOUT_MS).toBe(20_000);
   });
 
-  it("uses an 8s timeout budget on Vercel", () => {
-    expect(DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS).toBe(8_000);
+  it("uses a short timeout budget on Vercel for fast client-chunk fallback", () => {
+    expect(DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS).toBe(4_000);
     const prev = process.env.VERCEL;
     process.env.VERCEL = "1";
-    expect(getDnrWellsServerLoadTimeoutMs()).toBe(8_000);
+    expect(getDnrWellsServerLoadTimeoutMs()).toBe(4_000);
     delete process.env.VERCEL;
     if (prev !== undefined) process.env.VERCEL = prev;
   });

@@ -1,5 +1,21 @@
 # Agent / Cursor notes — Driller Dashboard
 
+## Every new Hermes session (read first — mandatory)
+
+**Full brief:** `.context/SESSION-START.md` (open it on cold start).
+
+| | |
+|--|--|
+| **Goal** | Stable hub: paste job → map + area insights work in prod (no mystery 500s) |
+| **Mode** | Shared language → diagnose → small MVP tickets. Not full multi-month vision. |
+| **Skills** | `grill-with-docs`/`domain-modeling` → `diagnosing-bugs` (repro first) → `to-tickets` → `implement`/`tdd` → architecture later |
+| **Never** | “Fix wells” by editing `css-website-canonical` or CSS Cloudflare demos |
+| **First move** | Read `.context/NORTH-STAR.md` + `OPEN.md`; if APIs fail, red-capable curl/test before theory |
+
+Matt pack: `~/.hermes/skills/mattpocock/` · portfolio map: `~/Projects/skills-lab/PROJECT-APPROACH-MAP.md`
+
+---
+
 ## What this repository is
 
 - **Next.js hub** (`apps/hub`): scheduling, job views, weather APIs, embedded **static** well viewer under `public/well-viewer/`.
@@ -34,3 +50,20 @@
 - `docs/reference/drilling-page-rendered-snapshot.html` — saved render of `/drilling` (reference only; not served).
 - `apps/hub/public/well-viewer/` — synced static assets + `dnr_wells_chunk_*.csv.gz`.
 - `apps/hub/vendor/dnr-report-local/` — synced from the viewer’s `api/dnr-report.js`.
+
+## Agent context pack
+
+Long-horizon / cold-start context lives under **`.context/`** (not duplicated here).
+
+| Load first | Path |
+|------------|------|
+| **Session brief** | `.context/SESSION-START.md` |
+| Index + load order | `.context/INDEX.md` |
+| Goal / non-goals | `.context/NORTH-STAR.md` |
+| Frozen facts | `.context/LOCKS.md` |
+| Undecided | `.context/OPEN.md` |
+| Next work | `.context/PLAN.md` |
+| Ledger | `.context/PROGRESS.md` |
+| Done criteria | `.context/ACCEPTANCE.md` |
+
+Rules: do not invent LOCKS; mark gaps in OPEN; update PROGRESS after real work; trust disk over chat after compaction.

@@ -74,6 +74,8 @@ export function NearestWellsStrip({
             const id = String(w.id ?? w.refno ?? "?");
             const depth = getWellDisplayDepthFtViewer(w);
             const gpm = getYieldGpmForWellViewer(w);
+            // Single label standard: styled chips from setLabel only.
+            // Do NOT also print plain typeLb (that was dual R/G for the same facts).
             const tagTokens = getOrderedTagTokensViewer(w);
             const typeLb = wellTypeLabelViewer(w);
             const aq = primaryAquiferText(w);
@@ -81,6 +83,10 @@ export function NearestWellsStrip({
             const demFt = demElevFtByKey?.get(k);
             const diff =
               demFt != null && refElevFt != null ? demFt - refElevFt : null;
+            const showPlainFallback =
+              !tagTokens.length &&
+              typeLb &&
+              !/^(Well)$/i.test(typeLb);
 
             return (
               <button
@@ -97,57 +103,95 @@ export function NearestWellsStrip({
                   {id}
                 </p>
                 <p className="mt-0.5 text-[11px] text-zinc-600 dark:text-zinc-400">
-                  {typeLb}
                   {tagTokens.length ? (
-                    <span className="ml-1 inline-flex flex-wrap items-end gap-x-2 text-emerald-800 dark:text-emerald-300">
-                      {tagTokens.map((tok) => {
-                        const mr = /^r(\d+)$/.exec(tok);
+                    <span className="inline-flex flex-wrap items-end gap-x-2">
+                      {tagTokens.map((tok, ti) => {
+                        // Dom 2026-07-22: color code chips like sand yellow —
+                        // R red, G blue, S yellow so they read at a glance.
+                        const mr = /^r(\d+)$/i.exec(tok);
                         if (mr) {
                           return (
-                            <span key={tok} className="inline-flex items-end">
-                              <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">
-                                r
+                            <span
+                              key={`${tok}-${ti}`}
+                              className="inline-flex items-end rounded px-0.5"
+                              title={`Rock top ${mr[1]} ft`}
+                            >
+                              <span className="text-[10px] font-bold text-red-600 dark:text-red-400">
+                                R
                               </span>
-                              <span className="text-[15px] font-extrabold leading-none text-zinc-900 dark:text-zinc-100">
+                              <span className="text-[15px] font-extrabold leading-none text-red-700 dark:text-red-300">
                                 {mr[1]}
                               </span>
                             </span>
                           );
                         }
-                        const mg = /^g(\d+)\s+(\d+)$/.exec(tok);
+                        const mg = /^g(\d+)\s+(\d+)$/i.exec(tok);
                         if (mg) {
                           return (
-                            <span key={tok} className="inline-flex items-end">
-                              <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">
-                                g{mg[1]}
+                            <span
+                              key={`${tok}-${ti}`}
+                              className="inline-flex items-end rounded px-0.5"
+                              title={`Aquifer G${mg[1]} · ${mg[2]} ft thick`}
+                            >
+                              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                                G{mg[1]}
                               </span>
-                              <span className="text-[15px] font-extrabold leading-none text-zinc-900 dark:text-zinc-100">
+                              <span className="text-[15px] font-extrabold leading-none text-blue-700 dark:text-blue-300">
                                 {" "}
                                 {mg[2]}
                               </span>
                             </span>
                           );
                         }
-                        const mf = /^g(\d+)$/.exec(tok);
+                        const ms = /^s(\d+)\s+(\d+)$/i.exec(tok);
+                        if (ms) {
+                          return (
+                            <span
+                              key={`${tok}-${ti}`}
+                              className="inline-flex items-end rounded px-0.5"
+                              title={`Dry sand S${ms[1]} · ${ms[2]} ft thick`}
+                            >
+                              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-300">
+                                S{ms[1]}
+                              </span>
+                              <span className="text-[15px] font-extrabold leading-none text-amber-700 dark:text-amber-200">
+                                {" "}
+                                {ms[2]}
+                              </span>
+                            </span>
+                          );
+                        }
+                        const mf = /^g(\d+)$/i.exec(tok);
                         if (mf) {
                           return (
-                            <span key={tok} className="inline-flex items-end">
-                              <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">
-                                g
+                            <span
+                              key={`${tok}-${ti}`}
+                              className="inline-flex items-end rounded px-0.5"
+                              title={`G ${mf[1]}`}
+                            >
+                              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                                G
                               </span>
-                              <span className="text-[15px] font-extrabold leading-none text-zinc-900 dark:text-zinc-100">
+                              <span className="text-[15px] font-extrabold leading-none text-blue-700 dark:text-blue-300">
                                 {mf[1]}
                               </span>
                             </span>
                           );
                         }
                         return (
-                          <span key={tok} className="inline-flex items-end">
+                          <span
+                            key={`${tok}-${ti}`}
+                            className="inline-flex items-end text-zinc-700 dark:text-zinc-300"
+                          >
                             {tok}
                           </span>
                         );
                       })}
                     </span>
+                  ) : showPlainFallback ? (
+                    <span>{typeLb}</span>
+                  ) : typeLb === "Well" ? (
+                    <span className="text-zinc-500">Well</span>
                   ) : null}
                 </p>
                 <p className="mt-1 text-[11px] text-zinc-700 dark:text-zinc-300">
