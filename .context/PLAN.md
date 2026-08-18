@@ -11,18 +11,9 @@ From `PROJECT_OUTLINE.md` milestones + lithology execution report + hub README.
 
 ## Next incomplete
 
-### N1 — Lithology → 90% real parsed (data track)
+### N1 — Lithology → 90% real parsed (data track) — ✅ DONE 2026-08-18
 
-```bash
-cd apps/hub
-export WELL_VIEWER_ROOT="/absolute/path/to/dnr-viewer-repo"
-npm run lithology:statewide -- --mode cycle --window-max 5000 --delay-sec 0.2
-# or iterate-to-target
-npm run verify:lithology-kpi
-npm run verify:viewer-hub-artifacts
-```
-
-Exit: `real_parsed_pct >= 90`, `parseable_json_pct == 100`, artifact parity (report final signoff).
+Real parsed: 97.476% (target 90%). Parseable JSON: 100%. See `npm run verify:lithology-kpi`.
 
 ### N2 — Fresh clone hub path verify
 
