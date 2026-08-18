@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { computeAreaInsights } from "@/lib/area-well-analytics";
-import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
+import { getDnrWellsFullCachedForApi } from "@/lib/dnr-wells-server-cache";
 import { getWellSpatialIndex } from "@/lib/well-spatial-index";
 
 export const runtime = "nodejs";
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
   let wells;
   try {
-    wells = await getDnrWellsServerCachedForApi();
+    wells = await getDnrWellsFullCachedForApi();
   } catch (e) {
     return NextResponse.json(
       {

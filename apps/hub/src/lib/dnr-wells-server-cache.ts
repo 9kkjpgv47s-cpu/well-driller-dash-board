@@ -1,5 +1,8 @@
 import type { WellRecord } from "@/lib/area-well-analytics";
-import { loadAllDnrChunksFromDisk } from "@/lib/dnr-chunk-server";
+import {
+  loadBaseChunksFromDisk,
+  loadFullChunksFromDisk,
+} from "@/lib/dnr-chunk-server";
 
 /** Local/dev budget for loading gz chunks from disk. */
 export const DNR_WELLS_SERVER_LOAD_TIMEOUT_MS = 20_000;
@@ -18,32 +21,81 @@ export function getDnrWellsServerLoadTimeoutMs(): number {
     : DNR_WELLS_SERVER_LOAD_TIMEOUT_MS;
 }
 
-let wellsCache: WellRecord[] | null = null;
-let wellsCachePromise: Promise<WellRecord[]> | null = null;
+// --- Base cache (no lithology_json — ~46% smaller, for wells-nearby API) ---
 
-/** Single-flight server load of all chunk wells (optimization API + future routes). */
-export function getDnrWellsServerCached(): Promise<WellRecord[]> {
-  if (wellsCache) return Promise.resolve(wellsCache);
-  if (!wellsCachePromise) {
-    wellsCachePromise = loadAllDnrChunksFromDisk()
+let baseWellsCache: WellRecord[] | null = null;
+let baseWellsCachePromise: Promise<WellRecord[]> | null = null;
+
+/** Single-flight server load of base chunks (no lithology_json). */
+export function getDnrWellsBaseCached(): Promise<WellRecord[]> {
+  if (baseWellsCache) return Promise.resolve(baseWellsCache);
+  if (!baseWellsCachePromise) {
+    baseWellsCachePromise = loadBaseChunksFromDisk()
       .then((w) => {
-        wellsCache = w;
+        baseWellsCache = w;
         return w;
       })
       .catch((err) => {
-        wellsCachePromise = null;
+        baseWellsCachePromise = null;
         throw err;
       });
   }
-  return wellsCachePromise;
+  return baseWellsCachePromise;
 }
 
-/**
- * Bounded wait for the server chunk cache. Rejects on timeout so API routes can
- * return mock/fallback JSON before the platform kills the function.
- */
+/** Bounded cache read for base chunks (shorter timeout on Vercel). */
+export function getDnrWellsBaseCachedForApi(): Promise<WellRecord[]> {
+  return getDnrWellsServerCachedWithTimeout(
+    getDnrWellsBaseCached(),
+    getDnrWellsServerLoadTimeoutMs(),
+  );
+}
+
+// --- Full cache (base + lithology_json merged — for area-insights, optimization) ---
+
+let fullWellsCache: WellRecord[] | null = null;
+let fullWellsCachePromise: Promise<WellRecord[]> | null = null;
+
+/** Single-flight server load of full chunks (base + lithology_json merged). */
+export function getDnrWellsFullCached(): Promise<WellRecord[]> {
+  if (fullWellsCache) return Promise.resolve(fullWellsCache);
+  if (!fullWellsCachePromise) {
+    fullWellsCachePromise = loadFullChunksFromDisk()
+      .then((w) => {
+        fullWellsCache = w;
+        return w;
+      })
+      .catch((err) => {
+        fullWellsCachePromise = null;
+        throw err;
+      });
+  }
+  return fullWellsCachePromise;
+}
+
+/** Bounded cache read for full chunks (shorter timeout on Vercel). */
+export function getDnrWellsFullCachedForApi(): Promise<WellRecord[]> {
+  return getDnrWellsServerCachedWithTimeout(
+    getDnrWellsFullCached(),
+    getDnrWellsServerLoadTimeoutMs(),
+  );
+}
+
+// --- Legacy aliases (backward compat) ---
+
+/** @deprecated Use getDnrWellsFullCached for area-insights or getDnrWellsBaseCached for wells-nearby. */
+export function getDnrWellsServerCached(): Promise<WellRecord[]> {
+  return getDnrWellsFullCached();
+}
+
+/** @deprecated Use getDnrWellsBaseCachedForApi or getDnrWellsFullCachedForApi. */
+export function getDnrWellsServerCachedForApi(): Promise<WellRecord[]> {
+  return getDnrWellsFullCachedForApi();
+}
+
 export function getDnrWellsServerCachedWithTimeout(
-  timeoutMs = DNR_WELLS_SERVER_LOAD_TIMEOUT_MS,
+  cachePromise: Promise<WellRecord[]>,
+  timeoutMs: number,
 ): Promise<WellRecord[]> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
@@ -55,17 +107,14 @@ export function getDnrWellsServerCachedWithTimeout(
       );
     }, timeoutMs);
   });
-  return Promise.race([getDnrWellsServerCached(), timeout]).finally(() => {
+  return Promise.race([cachePromise, timeout]).finally(() => {
     if (timer) clearTimeout(timer);
   });
 }
 
-/** Bounded cache read for API routes (shorter timeout on Vercel). */
-export function getDnrWellsServerCachedForApi(): Promise<WellRecord[]> {
-  return getDnrWellsServerCachedWithTimeout(getDnrWellsServerLoadTimeoutMs());
-}
-
 export function resetDnrWellsServerCache(): void {
-  wellsCache = null;
-  wellsCachePromise = null;
+  baseWellsCache = null;
+  baseWellsCachePromise = null;
+  fullWellsCache = null;
+  fullWellsCachePromise = null;
 }

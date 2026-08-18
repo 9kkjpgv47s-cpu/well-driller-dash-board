@@ -26,8 +26,6 @@ export const MAP_WELL_FIELD_KEYS = [
   "static_water",
   "pump_rate",
   "ground_elev",
-  "lithology_json",
-  "lithology_source",
   "gravel_thickness_ft",
   "vein_size_ft",
   "vein_size",

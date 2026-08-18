@@ -15,7 +15,7 @@ import {
 } from "@/lib/area-well-analytics";
 import { appendDrillerJobEntry } from "@/lib/cj-driller-job";
 import type { ChunkLoadProgress } from "@/lib/dnr-chunk-browser";
-import { getDnrWellsCached } from "@/lib/dnr-wells-cache";
+import { getDnrWellsBaseCached, getDnrWellsFullCached } from "@/lib/dnr-wells-cache";
 import { wellRecordToDrillerEntry } from "@/lib/drilling-well-entry";
 import {
   DEFAULT_AREA_RADIUS_MILES,
@@ -355,38 +355,55 @@ export function DrillingHubClient() {
       if (fallbackAttemptedRef.current) return;
       fallbackAttemptedRef.current = true;
       setWellsStatus("Server unavailable — loading registry chunks locally…");
-      void getDnrWellsCached((p) => {
+
+      // Phase 1: Load base chunks (no lithology_json) → render map immediately
+      void getDnrWellsBaseCached((p) => {
         setWellsProgress(p);
         setWellsStatus(p.message);
       })
-        .then((w) => {
-          setAreaWells(w);
-          const inRadius = wellsWithinRadiusIndexed(
-            w,
-            site.lat,
-            site.lon,
-            radiusMiles,
-          );
-          const inDepthRadius = wellsWithinRadiusIndexed(
-            w,
-            site.lat,
-            site.lon,
-            depthRadiusMiles,
-          );
-          setAreaInsights(
-            computeAreaInsights(w, site.lat, site.lon, radiusMiles, {
-              wellsInRadius: inRadius,
-            }),
-          );
-          setAreaInsightsForDepth(
-            computeAreaInsights(w, site.lat, site.lon, depthRadiusMiles, {
-              wellsInRadius: inDepthRadius,
-            }),
-          );
-          setInsightsLoading(false);
+        .then((baseWells) => {
+          // Map renders with base wells right away
+          setAreaWells(baseWells);
           setWellsStatus(null);
           setWellsProgress(null);
           setWellsError(null);
+
+          // Phase 2: Load litho sidecars in background → compute area insights
+          setInsightsLoading(true);
+          void getDnrWellsFullCached(undefined, (p) => {
+            setWellsProgress(p);
+          })
+            .then((fullWells) => {
+              const inRadius = wellsWithinRadiusIndexed(
+                fullWells,
+                site.lat,
+                site.lon,
+                radiusMiles,
+              );
+              const inDepthRadius = wellsWithinRadiusIndexed(
+                fullWells,
+                site.lat,
+                site.lon,
+                depthRadiusMiles,
+              );
+              setAreaInsights(
+                computeAreaInsights(fullWells, site.lat, site.lon, radiusMiles, {
+                  wellsInRadius: inRadius,
+                }),
+              );
+              setAreaInsightsForDepth(
+                computeAreaInsights(fullWells, site.lat, site.lon, depthRadiusMiles, {
+                  wellsInRadius: inDepthRadius,
+                }),
+              );
+              setInsightsLoading(false);
+              setWellsProgress(null);
+            })
+            .catch((e: Error) => {
+              setWellsError(e.message);
+              setInsightsLoading(false);
+              setWellsProgress(null);
+            });
         })
         .catch((e: Error) => {
           setWellsError(e.message);
@@ -427,19 +444,11 @@ export function DrillingHubClient() {
           fetches,
         );
 
-        // 503 = intentional cold-start fallback; 500/502/timeout = treat the same
-        // so the map still fills from public/well-viewer chunks on any site lat/lon.
-        const serverUnavailable =
-          wellsRes.status === 503 ||
-          wellsRes.status === 500 ||
-          wellsRes.status === 502 ||
-          wellsRes.status === 504 ||
-          insightsRes.status === 503 ||
-          insightsRes.status === 500 ||
-          insightsRes.status === 502 ||
-          insightsRes.status === 504;
+        const isServerDown = (r: Response) =>
+          r.status === 503 || r.status === 500 || r.status === 502 || r.status === 504;
 
-        if (serverUnavailable) {
+        // If wells-nearby is down, full fallback to client chunk loading.
+        if (isServerDown(wellsRes)) {
           const errBody = (await wellsRes.json().catch(() => ({}))) as {
             error?: string;
           };
@@ -458,13 +467,63 @@ export function DrillingHubClient() {
             `Wells request failed (${wellsRes.status} ${wellsRes.statusText})`,
           );
         }
+
+        // Wells API succeeded — render map immediately with API wells.
+        const wells = (await wellsRes.json()) as WellRecord[];
+        if (ac.signal.aborted) return;
+        setAreaWells(Array.isArray(wells) ? wells : []);
+        setWellsStatus(null);
+        setWellsError(null);
+
+        // If area-insights is down (common on cold start — needs full chunks),
+        // compute insights client-side from base + litho chunks.
+        if (isServerDown(insightsRes)) {
+          setInsightsLoading(true);
+          void getDnrWellsFullCached(undefined, (p) => {
+            setWellsProgress(p);
+          })
+            .then((fullWells) => {
+              if (ac.signal.aborted) return;
+              const inRadius = wellsWithinRadiusIndexed(
+                fullWells,
+                center.lat,
+                center.lon,
+                radiusMiles,
+              );
+              const inDepthRadius = wellsWithinRadiusIndexed(
+                fullWells,
+                center.lat,
+                center.lon,
+                depthRadiusMiles,
+              );
+              setAreaInsights(
+                computeAreaInsights(fullWells, center.lat, center.lon, radiusMiles, {
+                  wellsInRadius: inRadius,
+                }),
+              );
+              setAreaInsightsForDepth(
+                computeAreaInsights(fullWells, center.lat, center.lon, depthRadiusMiles, {
+                  wellsInRadius: inDepthRadius,
+                }),
+              );
+              setInsightsLoading(false);
+              setWellsProgress(null);
+            })
+            .catch((e: Error) => {
+              if (ac.signal.aborted) return;
+              setWellsError(e.message);
+              setInsightsLoading(false);
+              setWellsProgress(null);
+            });
+          return;
+        }
+
         if (!insightsRes.ok) {
           throw new Error(
             `Insights request failed (${insightsRes.status} ${insightsRes.statusText})`,
           );
         }
 
-        const wells = (await wellsRes.json()) as WellRecord[];
         const insights = (await insightsRes.json()) as AreaInsightsReport;
         let depthInsights: AreaInsightsReport | null = insights;
         if (depthRadiusMiles !== radiusMiles && depthInsightsRes) {
@@ -477,7 +536,6 @@ export function DrillingHubClient() {
         }
 
         if (ac.signal.aborted) return;
-        setAreaWells(Array.isArray(wells) ? wells : []);
         setAreaInsights(insights);
         setAreaInsightsForDepth(depthInsights);
         setWellsStatus(null);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
+import { getDnrWellsBaseCachedForApi } from "@/lib/dnr-wells-server-cache";
 import {
   parseWellsNearbyInput,
   queryWellsNearby,
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
   let allWells;
   try {
-    allWells = await getDnrWellsServerCachedForApi();
+    allWells = await getDnrWellsBaseCachedForApi();
   } catch (e) {
     return NextResponse.json(
       {
