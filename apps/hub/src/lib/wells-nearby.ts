@@ -9,6 +9,8 @@ import {
 } from "@/lib/viewer-well-map";
 
 export const MAX_RADIUS_MILES = 25;
+/** Radius for lat/lon-only deep links that omit `radius`. */
+export const DEFAULT_WELLS_NEARBY_RADIUS_MILES = 5;
 export const DEFAULT_WELLS_NEARBY_LIMIT = 500;
 export const MAX_WELLS_NEARBY_LIMIT = 2000;
 
@@ -25,8 +27,6 @@ export const MAP_WELL_FIELD_KEYS = [
   "static_water",
   "pump_rate",
   "ground_elev",
-  "lithology_json",
-  "lithology_source",
   "gravel_thickness_ft",
   "vein_size_ft",
   "vein_size",
@@ -136,7 +136,11 @@ export function parseHubViewerFiltersFromSearchParams(
 export function parseWellsNearbyInput(
   sp: URLSearchParams,
 ): WellsNearbyInput | { error: string } {
-  const geo = parseLatLonRadiusParams(sp, MAX_RADIUS_MILES);
+  const geo = parseLatLonRadiusParams(
+    sp,
+    MAX_RADIUS_MILES,
+    DEFAULT_WELLS_NEARBY_RADIUS_MILES,
+  );
   if ("error" in geo) return geo;
 
   const limitRaw = parseInt(sp.get("limit") ?? String(DEFAULT_WELLS_NEARBY_LIMIT), 10);

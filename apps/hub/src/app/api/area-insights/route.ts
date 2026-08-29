@@ -3,12 +3,16 @@ import { computeAreaInsights } from "@/lib/area-well-analytics";
 import { parseLatLonRadiusParams } from "@/lib/api/geo-query";
 import {
   cachedJson,
+  clientChunkFallback,
   dnrWellsUnavailable,
   jsonError,
 } from "@/lib/api/responses";
-import { getDnrWellsServerCached } from "@/lib/dnr-wells-server-cache";
+import { getDnrWellsFullCachedForApi } from "@/lib/dnr-wells-server-cache";
 import { getWellSpatialIndex } from "@/lib/well-spatial-index";
 import { MAX_RADIUS_MILES } from "@/lib/wells-nearby";
+
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 /**
  * GET /api/area-insights?lat=&lon=&radius=
@@ -28,19 +32,26 @@ export async function GET(req: NextRequest) {
 
   let wells;
   try {
-    wells = await getDnrWellsServerCached();
+    wells = await getDnrWellsFullCachedForApi();
   } catch (e) {
     return dnrWellsUnavailable(e);
   }
 
-  const inRadius = getWellSpatialIndex(wells).queryRadius(
-    lat,
-    lon,
-    radiusMiles,
-  );
-  const report = computeAreaInsights(wells, lat, lon, radiusMiles, {
-    wellsInRadius: inRadius,
-  });
+  try {
+    const inRadius = getWellSpatialIndex(wells).queryRadius(
+      lat,
+      lon,
+      radiusMiles,
+    );
+    const report = computeAreaInsights(wells, lat, lon, radiusMiles, {
+      wellsInRadius: inRadius,
+    });
 
-  return cachedJson(report, 300);
+    return cachedJson(report, 300);
+  } catch (e) {
+    return clientChunkFallback(
+      e,
+      "Area insights query failed on the server.",
+    );
+  }
 }

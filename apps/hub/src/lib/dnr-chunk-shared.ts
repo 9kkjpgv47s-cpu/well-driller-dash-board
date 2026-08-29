@@ -3,11 +3,20 @@
  * (dnr-chunk-browser.ts) and the Web Worker (dnr-chunk-worker.ts).
  */
 
-import Papa from "papaparse";
 import type { WellRecord } from "@/lib/area-well-analytics";
+
+// Lazily import papaparse only when chunk parsing actually runs, so the main
+// page bundle stays lean (~44KB saved on first load).  All call sites are async.
+let papaPromise: Promise<typeof import("papaparse")> | null = null;
+async function getPapa(): Promise<typeof import("papaparse")> {
+  if (!papaPromise) papaPromise = import("papaparse");
+  return papaPromise;
+}
 
 export const CHUNK_PREFIX = "/well-viewer/dnr_wells_chunk_";
 export const CHUNK_SUFFIX = ".csv.gz";
+export const BASE_CHUNK_PREFIX = "/well-viewer/dnr_wells_base_chunk_";
+export const LITHO_CHUNK_PREFIX = "/well-viewer/dnr_wells_litho_chunk_";
 export const MAX_CHUNK_INDEX = 24;
 
 export const CORE_COLUMN_ALIASES: Record<string, string[]> = {
@@ -17,8 +26,30 @@ export const CORE_COLUMN_ALIASES: Record<string, string[]> = {
   lithology_source: ["lithology_source"],
 };
 
+/** Core columns required in *base* chunks (no lithology_json needed). */
+export const BASE_CORE_COLUMN_ALIASES: Record<string, string[]> = {
+  lat: ["lat", "latitude"],
+  lon: ["lon", "longitude", "lng"],
+};
+
 export function chunkUrl(index: number): string {
   return `${CHUNK_PREFIX}${index}${CHUNK_SUFFIX}`;
+}
+
+export function baseChunkUrl(index: number): string {
+  return `${BASE_CHUNK_PREFIX}${index}${CHUNK_SUFFIX}`;
+}
+
+export function lithoChunkUrl(index: number): string {
+  return `${LITHO_CHUNK_PREFIX}${index}${CHUNK_SUFFIX}`;
+}
+
+export function missingBaseCoreColumns(h: Set<string>): string[] {
+  const missing: string[] = [];
+  for (const [core, aliases] of Object.entries(BASE_CORE_COLUMN_ALIASES)) {
+    if (!aliases.some((a) => h.has(a))) missing.push(core);
+  }
+  return missing;
 }
 
 export function normalizeRow(row: Record<string, string>): WellRecord {
@@ -57,7 +88,8 @@ export type ParsedChunk = {
   fields: string[];
 };
 
-export function parseChunkCsvText(text: string): ParsedChunk {
+export async function parseChunkCsvText(text: string): Promise<ParsedChunk> {
+  const Papa = await getPapa();
   const parsed = Papa.parse<Record<string, string>>(text, {
     header: true,
     skipEmptyLines: true,

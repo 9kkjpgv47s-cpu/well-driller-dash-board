@@ -21,6 +21,54 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "./drilling-map-viewer.css";
 
+/** Runtime style injection — guarantees type rings even if CSS bundling drops map rules. */
+const MAP_MARKER_STYLE_ID = "vj-map-marker-styles-g-before-r";
+const MAP_MARKER_CSS = `
+.leaflet-marker-icon.vj-well-dot.leaflet-div-icon,
+.leaflet-marker-icon.vj-job-pin.leaflet-div-icon{
+  background:transparent!important;border:none!important;box-shadow:none!important;overflow:visible!important;
+}
+.vj-combo-marker{display:block;border-radius:4px;font-weight:700;text-align:center;color:#fff;line-height:1.28;white-space:nowrap;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.35);overflow:visible;box-sizing:border-box;max-width:none}
+.vj-combo-marker.vj-est-rock{border:1px solid #dc2626!important;box-shadow:0 1px 2px rgba(0,0,0,.35)!important}
+.vj-combo-marker.vj-est-gravel{border:1px solid #2563eb!important;box-shadow:0 1px 2px rgba(0,0,0,.35)!important}
+.vj-combo-marker.vj-est-sand{border:1px solid #eab308!important;box-shadow:0 1px 2px rgba(0,0,0,.35)!important}
+.vj-combo-marker .cm-row{padding:1px 4px;color:#fff}
+.vj-well-marker{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.vj-well-marker.vj-est-rock{border:1px solid #dc2626!important;box-shadow:0 1px 2px rgba(0,0,0,.35)!important}
+.vj-well-marker.vj-est-gravel{border:1px solid #2563eb!important;box-shadow:0 1px 2px rgba(0,0,0,.35)!important}
+.vj-well-marker.vj-est-sand{border:1px solid #eab308!important;box-shadow:0 1px 2px rgba(0,0,0,.35)!important}
+`;
+
+function ensureMapMarkerStyles(): void {
+  if (typeof document === "undefined") return;
+  // Replace any prior inject (v3/v4/parity etc.) so thin borders + sand ring + g-before-r win after deploy
+  const prev = document.getElementById(MAP_MARKER_STYLE_ID)
+    || document.getElementById("vj-map-marker-styles-viewer-parity")
+    || document.getElementById("vj-map-marker-styles-est-outline-v4")
+    || document.getElementById("vj-map-marker-styles-est-outline-v3")
+    || document.getElementById("vj-map-marker-styles-est-outline-v2");
+  if (prev?.id === MAP_MARKER_STYLE_ID) return;
+  if (prev) prev.remove();
+  const style = document.createElement("style");
+  style.id = MAP_MARKER_STYLE_ID;
+  style.setAttribute("data-stamp", "2026-07-23-g-before-r");
+  style.textContent = MAP_MARKER_CSS;
+  document.head.appendChild(style);
+  // Cluster CSS via link (avoids broken absolute @import in Next CSS pipeline)
+  for (const href of [
+    "/well-viewer/vendor/MarkerCluster.css",
+    "/well-viewer/vendor/MarkerCluster.Default.css",
+  ]) {
+    const id = `vj-link-${href.replace(/\W+/g, "-")}`;
+    if (document.getElementById(id)) continue;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  }
+}
+
 export type JobsiteLocationFix = {
   lat: number;
   lon: number;
@@ -235,16 +283,23 @@ export function DrillingMap({
   useEffect(() => {
     if (!containerRef.current) return;
     let cancelled = false;
+    ensureMapMarkerStyles();
 
     void import("leaflet")
       .then((L) => loadMarkerCluster(L).then(() => L))
       .then((L) => {
         if (cancelled || !containerRef.current) return;
+        ensureMapMarkerStyles();
         leafletRef.current = L;
-        const map = L.map(containerRef.current).setView(
-          [center.lat, center.lon],
-          13,
-        );
+        // Prefer not to steal keyboard focus — on iOS Safari map focus was
+        // yanking the document scroll back to the top after dispatch load.
+        const map = L.map(containerRef.current, {
+          // Keep default interaction; we only avoid auto-focus scroll.
+        }).setView([center.lat, center.lon], 13, { animate: false });
+        const mapEl = map.getContainer();
+        mapEl.setAttribute("tabindex", "-1");
+        // Leaflet sometimes focuses the map container on create/setView.
+        mapEl.blur();
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
@@ -283,9 +338,13 @@ export function DrillingMap({
     const map = mapRef.current;
     const circle = circleRef.current;
     if (!map || !circle || !mapReady) return;
-    map.setView([center.lat, center.lon], Math.max(map.getZoom(), 12));
+    // animate:false avoids Leaflet focusing/scrolling the page on center change
+    map.setView([center.lat, center.lon], Math.max(map.getZoom(), 12), {
+      animate: false,
+    });
     circle.setLatLng([center.lat, center.lon]);
     circle.setRadius(radiusMiles * 1609.34);
+    map.getContainer().blur();
   }, [center.lat, center.lon, radiusMiles, mapReady]);
 
   useEffect(() => {
@@ -317,37 +376,67 @@ export function DrillingMap({
           .addTo(g);
       }
 
+      // Amber pin = job GPS/coords from dispatch (not phone geolocation).
+      // Dead center of the search radius circle (same lat/lon as map center).
       const src = escapePopupHtml(
         sourceLabel && sourceLabel.trim()
           ? sourceLabel.trim()
-          : "Jobsite position",
+          : "Dispatch GPS / coordinates",
       );
+      const popupHtml = `<strong>Job location</strong><br>${src}<br>${lat.toFixed(5)}, ${lon.toFixed(5)}${
+        accOk ? `<br>~${accRounded} m accuracy` : ""
+      }`;
+
+      // Crosshair ring so the center of the 2 mi circle is obvious among wells.
       L.circleMarker([lat, lon], {
-        radius: 9,
+        radius: 18,
         color: "#9a3412",
-        fillColor: "#fbbf24",
-        fillOpacity: 1,
+        fillColor: "#f59e0b",
+        fillOpacity: 0.15,
         weight: 2,
+        opacity: 0.95,
+        interactive: false,
+      }).addTo(g);
+
+      // Solid amber center pin — always above well markers.
+      L.circleMarker([lat, lon], {
+        radius: 12,
+        color: "#7c2d12",
+        fillColor: "#f59e0b",
+        fillOpacity: 1,
+        weight: 3,
+        opacity: 1,
       })
-        .bindPopup(
-          `<strong>Jobsite</strong><br>${src}<br>${lat.toFixed(5)}, ${lon.toFixed(5)}${
-            accOk ? `<br>~${accRounded} m accuracy` : ""
-          }`,
-        )
+        .bindPopup(popupHtml)
         .addTo(g);
 
-      const b = L.latLngBounds([center.lat, center.lon], [lat, lon]);
-      const ne = b.getNorthEast();
-      const sw = b.getSouthWest();
-      const span = Math.max(
-        Math.abs(ne.lat - sw.lat),
-        Math.abs(ne.lng - sw.lng),
-      );
-      if (span < 0.002) {
-        map.setView([lat, lon], Math.max(map.getZoom(), 15));
+      // DivIcon label so "JOB" reads at a glance (circleMarker alone was easy to miss).
+      L.marker([lat, lon], {
+        interactive: true,
+        zIndexOffset: 2000,
+        icon: L.divIcon({
+          className: "vj-job-pin",
+          html: `<div class="vj-job-pin-inner" title="Job location"><span class="vj-job-pin-dot"></span><span class="vj-job-pin-label">JOB</span></div>`,
+          iconSize: [44, 36],
+          iconAnchor: [22, 18],
+        }),
+      })
+        .bindPopup(popupHtml)
+        .addTo(g);
+
+      // Keep pin dead-center with the radius circle (same coords as center).
+      // Only fitBounds when jobsite is offset from the search center.
+      const dLat = Math.abs(lat - center.lat);
+      const dLon = Math.abs(lon - center.lon);
+      if (dLat < 1e-6 && dLon < 1e-6) {
+        map.setView([lat, lon], Math.max(map.getZoom(), 13), {
+          animate: false,
+        });
       } else {
-        map.fitBounds(b, { padding: [48, 48], maxZoom: 16, animate: true });
+        const b = L.latLngBounds([center.lat, center.lon], [lat, lon]);
+        map.fitBounds(b, { padding: [48, 48], maxZoom: 16, animate: false });
       }
+      map.getContainer().blur();
     });
   }, [jobsiteLocation, center.lat, center.lon, mapReady]);
 
@@ -359,10 +448,19 @@ export function DrillingMap({
 
   return (
     <div className="min-w-0 space-y-1.5">
-      <div
-        ref={containerRef}
-        className="z-0 h-[min(55vh,520px)] min-w-0 w-full max-w-full rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900"
-      />
+      <div className="relative min-w-0 w-full max-w-full">
+        <div
+          ref={containerRef}
+          className="z-0 h-[min(55vh,520px)] min-w-0 w-full max-w-full rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900"
+        />
+      </div>
+      {jobsiteLocation ? (
+        <p className="text-xs text-[var(--muted)]" role="status">
+          Amber JOB pin = dead center of the search circle · job GPS{" "}
+          {jobsiteLocation.lat.toFixed(6)}, {jobsiteLocation.lon.toFixed(6)}. No
+          phone location permission required.
+        </p>
+      ) : null}
       {capNote ? (
         <p className="text-xs text-[var(--muted)]" role="status">
           {capNote}

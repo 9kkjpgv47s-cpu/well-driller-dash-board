@@ -41,70 +41,95 @@ function isValidLatLon(lat: number, lon: number) {
   );
 }
 
-/** Try labeled lat/lon, comma-tight pairs, then looser decimal pairs. */
+/** Prefer IN-ish lon negative when a pair looks swapped / unsigned. */
+function normalizeLatLonPair(a: number, b: number): { lat: number; lon: number } | null {
+  let lat = a;
+  let lon = b;
+  // Swap if first number is clearly a longitude magnitude for US Midwest
+  if (Math.abs(lat) > 90 || (Math.abs(lat) < 20 && Math.abs(lon) > 20 && Math.abs(lon) <= 90)) {
+    const t = lat;
+    lat = lon;
+    lon = t;
+  }
+  // Dispatches often drop the minus on west longitudes (Indiana ~ −84 to −88)
+  if (lat > 30 && lat < 50 && lon > 80 && lon < 95) {
+    lon = -lon;
+  }
+  if (isValidLatLon(lat, lon)) return { lat, lon };
+  return null;
+}
+
+/** Try labeled lat/lon, maps links, comma-tight pairs, then looser decimal pairs. */
 export function extractCoordinates(text: string): { lat: number; lon: number } | null {
-  const normalized = text.replace(/\u00a0/g, " ").replace(/\u202f/g, " ");
+  const normalized = text
+    .replace(/\u00a0/g, " ")
+    .replace(/\u202f/g, " ")
+    .replace(/\t/g, " ");
+
+  // Decimal coords: 1+ places after the point (maps links can be short)
+  const DEG = String.raw`(-?\d{1,2}\.\d+)`;
+  const DEG_LON = String.raw`(-?\d{1,3}\.\d+)`;
+
+  // Google / Apple Maps: @40.100369,-85.789937 or ?q=40.1,-85.7
+  const atMaps = new RegExp(`@${DEG}\\s*,\\s*${DEG_LON}`).exec(normalized);
+  if (atMaps) {
+    const pair = normalizeLatLonPair(parseFloat(atMaps[1]!), parseFloat(atMaps[2]!));
+    if (pair) return pair;
+  }
+  const qMaps = new RegExp(
+    `[?&]q=${DEG}\\s*,\\s*${DEG_LON}`,
+    "i",
+  ).exec(normalized);
+  if (qMaps) {
+    const pair = normalizeLatLonPair(parseFloat(qMaps[1]!), parseFloat(qMaps[2]!));
+    if (pair) return pair;
+  }
 
   const labeled =
-    /(?:lat|latitude|coord)[:\s]+(-?\d+\.?\d*)[^\d.\-]{0,24}(?:lon|lng|long|longitude)[:\s]+(-?\d+\.?\d*)/i.exec(
+    /(?:lat|latitude|coord)[:\s=]+(-?\d+\.?\d*)[^\d.\-]{0,24}(?:lon|lng|long|longitude)[:\s=]+(-?\d+\.?\d*)/i.exec(
       normalized,
     );
   if (labeled) {
-    const lat = parseFloat(labeled[1]!);
-    const lon = parseFloat(labeled[2]!);
-    if (isValidLatLon(lat, lon)) return { lat, lon };
+    const pair = normalizeLatLonPair(parseFloat(labeled[1]!), parseFloat(labeled[2]!));
+    if (pair) return pair;
   }
 
   // Dot-glued: 40.100369.-85.789937 (mobile copy-paste artifact — no comma/space)
-  const dotGlued = /(-?\d{1,2}\.\d{3,})\.(-?\d{1,3}\.\d{3,})/g;
+  const dotGlued = new RegExp(`${DEG}\\.${DEG_LON}`, "g");
   let dm: RegExpExecArray | null;
   while ((dm = dotGlued.exec(normalized)) !== null) {
-    let lat = parseFloat(dm[1]!);
-    let lon = parseFloat(dm[2]!);
-    if (Math.abs(lat) > 90) {
-      const t = lat;
-      lat = lon;
-      lon = t;
-    }
-    if (isValidLatLon(lat, lon)) return { lat, lon };
+    const pair = normalizeLatLonPair(parseFloat(dm[1]!), parseFloat(dm[2]!));
+    if (pair) return pair;
   }
 
   // Tight comma: 39.407951,-85.862947 (no space after comma — common in dispatches)
-  const tight = /(-?\d{1,2}\.\d{4,})\s*,\s*(-?\d{1,3}\.\d{4,})/g;
+  const tight = new RegExp(`${DEG}\\s*,\\s*${DEG_LON}`, "g");
   let tm: RegExpExecArray | null;
   while ((tm = tight.exec(normalized)) !== null) {
-    let lat = parseFloat(tm[1]!);
-    let lon = parseFloat(tm[2]!);
-    if (Math.abs(lat) > 90) {
-      const t = lat;
-      lat = lon;
-      lon = t;
-    }
-    if (isValidLatLon(lat, lon)) return { lat, lon };
+    const pair = normalizeLatLonPair(parseFloat(tm[1]!), parseFloat(tm[2]!));
+    if (pair) return pair;
   }
 
-  const pairRe =
-    /\b(-?\d{1,2}\.\d{3,})\s*[,;\s]\s*(-?\d{1,3}\.\d{3,})\b/g;
+  // Tab or multi-space separated
+  const spaced = new RegExp(`\\b${DEG}\\s{1,}${DEG_LON}\\b`, "g");
+  let sm: RegExpExecArray | null;
+  while ((sm = spaced.exec(normalized)) !== null) {
+    const pair = normalizeLatLonPair(parseFloat(sm[1]!), parseFloat(sm[2]!));
+    if (pair) return pair;
+  }
+
+  const pairRe = new RegExp(`\\b${DEG}\\s*[,;\\s]\\s*${DEG_LON}\\b`, "g");
   let m: RegExpExecArray | null;
   while ((m = pairRe.exec(normalized)) !== null) {
-    let lat = parseFloat(m[1]!);
-    let lon = parseFloat(m[2]!);
-    if (
-      Math.abs(lat) > 90 ||
-      (Math.abs(lat) < 49 && Math.abs(lon) < 49 && Math.abs(lat) < Math.abs(lon))
-    ) {
-      const t = lat;
-      lat = lon;
-      lon = t;
-    }
-    if (isValidLatLon(lat, lon)) return { lat, lon };
+    const pair = normalizeLatLonPair(parseFloat(m[1]!), parseFloat(m[2]!));
+    if (pair) return pair;
   }
 
   return null;
 }
 
 const STREET_HINT =
-  /\d.+\b(?:st|street|rd|road|ave|avenue|dr|drive|ln|lane|hwy|highway|ct|court|blvd|boulevard|way|cir|circle|pkwy|parkway|route|private\s+road|sr)\b|\b\d+\s+SR\s+\d+/i;
+  /\d.+\b(?:st|street|rd|road|ave|avenue|dr|drive|ln|lane|hwy|highway|ct|court|blvd|boulevard|way|cir|circle|pkwy|parkway|route|private\s+road|sr|trl|trail|pl|place|ter|terrace)\b|\b\d+\s+SR\s+\d+|\b\d+\s+[A-Za-z].+\bIN\b/i;
 
 export function extractAddress(text: string): string | null {
   const lines = text

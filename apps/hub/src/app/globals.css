@@ -222,3 +222,120 @@ body {
   color: var(--foreground);
   background: var(--surface-muted);
 }
+
+/*
+ * Leaflet map marker chrome — MUST live in globals so it always ships with layout.
+ * Component CSS (drilling-map-viewer.css) was missing from production bundles, so
+ * Leaflet’s default .leaflet-div-icon white box/border overrode type rings on iPhone.
+ * Build stamp: 2026-07-23-g-before-r
+ * Type ring is 1px minimal — fill (rock/gravel/sand/green) stays full size.
+ */
+.leaflet-marker-icon.vj-well-dot.leaflet-div-icon,
+.leaflet-marker-icon.vj-job-pin.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.vj-combo-marker {
+  display: block;
+  border-radius: 4px;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  line-height: 1.28;
+  white-space: nowrap;
+  /* Default white ring for verified / unknown-type estimated */
+  border: 1px solid #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  overflow: visible;
+  box-sizing: border-box;
+  max-width: none;
+}
+
+/* Unverified green boxes: hairline type ring only (does not shrink fill) */
+.vj-combo-marker.vj-est-rock {
+  border: 1px solid #dc2626 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-combo-marker.vj-est-gravel {
+  border: 1px solid #2563eb !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-combo-marker.vj-est-sand {
+  border: 1px solid #eab308 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-combo-marker .cm-row {
+  padding: 1px 4px;
+  color: #fff;
+}
+
+.vj-well-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.vj-well-marker.vj-est-rock {
+  border: 1px solid #dc2626 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-well-marker.vj-est-gravel {
+  border: 1px solid #2563eb !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-well-marker.vj-est-sand {
+  border: 1px solid #eab308 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.vj-well-depth-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #111827;
+  text-shadow:
+    0 0 2px #ffffff,
+    0 0 3px #ffffff;
+  line-height: 1;
+}
+
+.vj-job-pin-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: auto;
+}
+.vj-job-pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f59e0b;
+  border: 3px solid #7c2d12;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.95),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+}
+.vj-job-pin-label {
+  font: 800 10px/1 "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.04em;
+  color: #7c2d12;
+  background: #fffbeb;
+  border: 1px solid #b45309;
+  border-radius: 3px;
+  padding: 1px 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}

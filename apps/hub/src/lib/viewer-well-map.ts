@@ -10,6 +10,7 @@ import {
   primaryAquiferText,
 } from "@/lib/area-well-analytics";
 import { wellTypeV2 } from "@/lib/lithology-v2";
+import { classifyWellDual } from "@/lib/dnr-well-classify";
 
 export const SHOW_G_VEIN_THICKNESS_FT = true;
 
@@ -439,7 +440,8 @@ function columnSandGravelTopToRockFt(w: WellRecord): number | null {
   return Math.round(g);
 }
 
-function getGravelVeinDisplayFt(w: WellRecord): number | null {
+/** Legacy helper kept for diagnostics; map chips use dual-label layer stack. */
+export function getGravelVeinDisplayFt(w: WellRecord): number | null {
   if (!SHOW_G_VEIN_THICKNESS_FT) return null;
   const depth = getWellDisplayDepthFtViewer(w);
   const vCsv = getVeinSizeFromCsvNumericColumns(w);
@@ -606,6 +608,11 @@ function wellGrRockOverrideKind(w: WellRecord): "bedrock" | "unconsolidated" | n
   return null;
 }
 
+/**
+ * Unconsolidated vs rock for hub map — construction dual-label (formation-class v3).
+ * Manual overrides + lithology_v2 sidecar still can force a side when present.
+ * Old pre-construction path: archive/viewer-well-map-isUnconsolidated-v1.ts
+ */
 export function isUnconsolidatedWellViewer(w: WellRecord): boolean {
   const ov = wellGrRockOverrideKind(w);
   if (ov === "bedrock") return false;
@@ -615,84 +622,72 @@ export function isUnconsolidatedWellViewer(w: WellRecord): boolean {
   if (v2 === true) return true;
   if (v2 === false) return false;
 
-  const layers = getLithLayers(w);
-  const hasRealLitho = layers.length > 0;
-  if (hasRealLitho) {
-    const wb = lastWaterBearingVeinThicknessFt(w);
-    const sg = sumAquiferThicknessAboveRockFt(w);
-    const col = columnSandGravelTopToRockFt(w);
-    if (
-      (wb != null && wb > 0) ||
-      (sg != null && sg > 0) ||
-      (col != null && col > 0)
-    )
-      return true;
-    const rockFromLitho = lithoDepthToRock(w);
-    if (rockFromLitho != null) return false;
+  // Primary: shared construction dual-label (same policy as well-viewer formation-class-v3.js)
+  try {
+    const dual = classifyWellDual(w);
+    if (dual.formationClass === "unconsolidated") return true;
+    if (dual.formationClass === "rock") return false;
+    // Clay-only / unknown with lithology stack: not uncon (no blue G paint)
+    if (dual.formationClass === "unknown") return false;
+  } catch {
+    /* fall through */
   }
 
-  const aq = primaryAquiferText(w).toLowerCase();
-  if (
-    /\b(bedrock|limestone|dolomite|dolostone|shale|sandstone|siltstone|greensand|granite|marble|basalt|quartzite|chert|gneiss|schist|conglomerate)\b/.test(
-      aq,
-    )
-  )
-    return false;
-  if (
-    aq.includes("unconsolidated") ||
-    aq.includes("gravel") ||
-    (aq.includes("sand") && !aq.includes("sandstone"))
-  )
-    return true;
-
-  const db = parseFloat(String(w.depth_bedrock ?? ""));
-  let depth = parseFloat(String(w.depth ?? ""));
-  if (Number.isNaN(depth) || depth <= 0) {
-    const dInf = getWellDisplayDepthFtViewer(w);
-    if (dInf != null) depth = dInf;
-  }
-  if (!Number.isNaN(db) && db > 0 && !Number.isNaN(depth)) {
-    if (depth > db) return false;
-    return true;
-  }
-
-  const lithoRock = lithoDepthToRock(w);
-  if (lithoRock != null && !Number.isNaN(depth) && depth > lithoRock)
-    return false;
-  if (lithoRock != null && !Number.isNaN(depth) && depth <= lithoRock)
-    return true;
-
-  const sd = parseFloat(
-    String((w as WellRecord).screen_diam ?? (w as WellRecord).screen_diameter ?? ""),
-  );
+  // Unknown formation residual: only treat as uncon when screen + no lithology path
+  // (dual classifier already rejected clay+screen without sand/gravel).
   const sl = parseFloat(String(w.screen_length ?? ""));
-  if (!Number.isNaN(sd) && sd > 0) {
-    const deepDiamOnly =
-      !Number.isNaN(depth) &&
-      depth >= 120 &&
-      (!sl || sl <= 0) &&
-      (Number.isNaN(db) || db <= 0);
-    if (!deepDiamOnly) return true;
-  }
-  if (!Number.isNaN(sl) && sl > 0) return true;
+  const sd = parseFloat(
+    String(
+      (w as WellRecord).screen_diam ?? (w as WellRecord).screen_diameter ?? "",
+    ),
+  );
+  if ((Number.isFinite(sl) && sl > 0) || (Number.isFinite(sd) && sd > 0))
+    return true;
   return false;
 }
 
+/**
+ * Single g/r depth chip for map — driven by dual-label classifier (layer stack).
+ * Never invent G from polluted gravel_thickness==rock_start.
+ * Never invent R from completed depth on clay-only logs.
+ */
 export function wellGrRNumberForTagViewer(
   w: WellRecord,
 ): { kind: "g" | "r"; n: number } | null {
-  if (isBucketWellViewer(w) || isDryHoleViewer(w)) return null;
-  /** Baked chunk `vein_size_ft` (registry / corrector) must show as g even when aquifer text = bedrock. */
-  const depth = getWellDisplayDepthFtViewer(w);
-  const csvG = getVeinSizeFromCsvNumericColumns(w);
-  if (
-    csvG != null &&
-    csvG > 0 &&
-    gRegistryVeinSaneVsCompletedDepthFt(csvG, depth)
-  ) {
-    return { kind: "g", n: Math.round(csvG) };
+  try {
+    const dual = classifyWellDual(w);
+    if (dual.special === "dry" || dual.special === "bucket") return null;
+    const set = dual.setLabel ?? "";
+    // Thickness form G1 2·G2 10 — numeric tag uses deepest vein bottom when available
+    if (/^G\d+\s+\d+/i.test(set) || /^G@/i.test(set)) {
+      const veins = dual.formation?.veinBottomsFt ?? [];
+      if (veins.length) return { kind: "g", n: veins[veins.length - 1]! };
+      // Legacy G@bottom or thickness-only without bottoms: last integer in chip
+      const nums = set.match(/\d+/g)?.map((x) => parseInt(x, 10)).filter((n) => n > 0);
+      if (nums?.length) {
+        // For G1 2·G2 10 prefer sum of thicknesses as g-tag depth proxy is wrong;
+        // use last thickness only when no bottoms (screen proxy).
+        return { kind: "g", n: nums[nums.length - 1]! };
+      }
+    }
+    // R20 (or legacy R@20) = rock top only (single number; never dual casing vs rock)
+    const singleR = set.match(/^R@?(\d+)$/i);
+    if (singleR) return { kind: "r", n: parseInt(singleR[1]!, 10) };
+
+    const veins = dual.formation?.veinBottomsFt ?? [];
+    if (veins.length) return { kind: "g", n: veins[veins.length - 1]! };
+
+    if (dual.formationClass === "rock" && dual.rockTopFt != null && dual.rockTopFt > 0) {
+      return { kind: "r", n: Math.round(dual.rockTopFt) };
+    }
+
+    // Clay / unknown — no g or r invent from CSV or total depth
+    return null;
+  } catch {
+    /* fall through to conservative residual */
   }
-  /** Bedrock aquifer + litho rock top: prefer r over sand-only g inference above shale/limestone. */
+
+  // Residual (classifier throw): only lithology rock top, never bare CSV gravel
   const rockFromLitho = getRockTagDepthFt(w);
   if (
     rockFromLitho != null &&
@@ -701,19 +696,24 @@ export function wellGrRNumberForTagViewer(
   ) {
     return { kind: "r", n: Math.round(rockFromLitho) };
   }
-  if (isUnconsolidatedWellViewer(w)) {
-    const gv = getGravelVeinDisplayFt(w);
-    if (gv != null && gv > 0) return { kind: "g", n: Math.round(gv) };
-    return null;
-  }
-  const r = getRockTagDepthFt(w);
-  if (r != null && r > 0) return { kind: "r", n: Math.round(r) };
-  const rdN = getWellDisplayDepthFtViewer(w);
-  if (rdN != null && rdN > 0) return { kind: "r", n: Math.round(rdN) };
   return null;
 }
 
 export function wellMapGrTagViewer(w: WellRecord): string {
+  // Map face: only R / G / S thickness chips — never C layer stack
+  try {
+    const dual = classifyWellDual(w);
+    if (
+      dual.setLabel &&
+      (/^R@?\d+/i.test(dual.setLabel) ||
+        /^[GS]\d+/i.test(dual.setLabel) ||
+        /^G@/i.test(dual.setLabel))
+    ) {
+      return ` ${dual.setLabel}`;
+    }
+  } catch {
+    /* ignore */
+  }
   const t = wellGrRNumberForTagViewer(w);
   return t ? ` ${t.kind}${t.n}` : "";
 }
@@ -777,18 +777,132 @@ export function getGravelLayerTagsViewer(w: WellRecord): string[] {
   return layers.map((n, i) => `g${i + 1} ${n}`);
 }
 
+/**
+ * Parse map-face setLabel into ordered visual chip tokens.
+ * Single source of truth for multi-label UI (no plain text + chips dual).
+ *
+ * Tokens:
+ *   r20          → rock top
+ *   g1 2         → water-bearing aquifer #1 thickness
+ *   s1 10        → dry sand #1 thickness
+ *   g48          → legacy bare G@ set depth
+ */
+export function parseFaceLabelTokens(label: string): string[] {
+  const raw = String(label ?? "").trim();
+  if (!raw) return [];
+  // Split on slash or mid-dot (legacy) separators
+  const parts = raw
+    .split(/\s*[·/]\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const other: string[] = [];
+  const rock: string[] = [];
+  for (const p of parts) {
+    const r = /^R@?(\d+)$/i.exec(p);
+    if (r) {
+      rock.push(`r${r[1]}`);
+      continue;
+    }
+    const gThick = /^G(\d+)\s+(\d+)$/i.exec(p);
+    if (gThick) {
+      other.push(`g${gThick[1]} ${gThick[2]}`);
+      continue;
+    }
+    const sThick = /^S(\d+)\s+(\d+)$/i.exec(p);
+    if (sThick) {
+      other.push(`s${sThick[1]} ${sThick[2]}`);
+      continue;
+    }
+    const gAt = /^G@(\d+)$/i.exec(p);
+    if (gAt) {
+      other.push(`g${gAt[1]}`);
+      continue;
+    }
+    // Unparsed chip — skip rather than double-render as free text
+  }
+  // Dom 2026-07-23: rock always last (gravel before rock)
+  return [...other, ...rock];
+}
+
+/**
+ * Ordered visual chip tokens for list/detail UI.
+ * Prefer classifier setLabel (R / G / S face chips). Never invent a second
+ * parallel R/G series alongside displayLabel — that caused dual labels.
+ */
 export function getOrderedTagTokensViewer(w: WellRecord): string[] {
+  try {
+    const dual = classifyWellDual(w);
+    if (dual.special === "dry" || dual.special === "bucket") return [];
+    if (dual.setLabel) {
+      const fromFace = parseFaceLabelTokens(dual.setLabel);
+      if (fromFace.length) return fromFace;
+    }
+  } catch {
+    /* fall through */
+  }
+
+  // Residual only when classifier has no face chips
   const t = wellGrRNumberForTagViewer(w);
-  const gLayers = getGravelLayerTagsViewer(w);
-  const out: string[] = [];
-  const aqBed = /bedrock/i.test(String(w.aquifer ?? ""));
-  const rDepth = getRockTagDepthFt(w);
-  if (rDepth != null && rDepth > 0 && (t?.kind === "r" || aqBed)) out.push(`r${Math.round(rDepth)}`);
-  else if (t?.kind === "r") out.push(`r${t.n}`);
-  if (gLayers.length) out.push(...gLayers);
-  if (!out.length && t?.kind === "g") out.push(`g${t.n}`);
-  if (!out.length && t?.kind === "r") out.push(`r${t.n}`);
-  return out;
+  if (t?.kind === "r") return [`r${t.n}`];
+  if (t?.kind === "g") return [`g${t.n}`];
+  return [];
+}
+
+/**
+ * Face-chip colors on the map combo row.
+ * Dom 2026-07-22 evening: revert R/G to flat white-on-fill (no white box +
+ * colored underline). Keep S yellow so dry sand still pops.
+ */
+export const FACE_CHIP_COLORS = {
+  /** White on blue/red/green fill (original flat chip look). */
+  r: "#ffffff",
+  g: "#ffffff",
+  s: "#fde047",
+  sep: "rgba(255,255,255,0.75)",
+} as const;
+
+/**
+ * Build HTML for map face labels (R/G/S) drawn on a flat-color combo row.
+ * R and G are white; S is yellow. Returns null when not a face-chip set.
+ */
+export function formatFaceLabelHtml(label: string): string | null {
+  const tokens = parseFaceLabelTokens(label);
+  if (!tokens.length) return null;
+  const parts: string[] = [];
+  for (const tok of tokens) {
+    const r = /^r(\d+)$/i.exec(tok);
+    if (r) {
+      parts.push(
+        `<span style="color:${FACE_CHIP_COLORS.r};font-weight:800">R${escAttr(r[1])}</span>`,
+      );
+      continue;
+    }
+    const g = /^g(\d+)\s+(\d+)$/i.exec(tok);
+    if (g) {
+      parts.push(
+        `<span style="color:${FACE_CHIP_COLORS.g};font-weight:800">G${escAttr(g[1])} ${escAttr(g[2])}</span>`,
+      );
+      continue;
+    }
+    const s = /^s(\d+)\s+(\d+)$/i.exec(tok);
+    if (s) {
+      parts.push(
+        `<span style="color:${FACE_CHIP_COLORS.s};font-weight:800">S${escAttr(s[1])} ${escAttr(s[2])}</span>`,
+      );
+      continue;
+    }
+    const gBare = /^g(\d+)$/i.exec(tok);
+    if (gBare) {
+      parts.push(
+        `<span style="color:${FACE_CHIP_COLORS.g};font-weight:800">G${escAttr(gBare[1])}</span>`,
+      );
+      continue;
+    }
+  }
+  if (!parts.length) return null;
+  return parts.join(
+    `<span style="color:${FACE_CHIP_COLORS.sep};font-weight:700"> / </span>`,
+  );
 }
 
 export function getWellBottomElevViewer(w: WellRecord): number | null {
@@ -842,29 +956,110 @@ export function yieldRangeViewer(gpm: number | null): "blue" | "green" | "orange
   return "red";
 }
 
-export function wellTypeColorViewer(w: WellRecord): string {
-  if (isDryHoleViewer(w)) return "#111827";
-  if (isBucketWellViewer(w)) return "#f97316";
+function isEstimatedLocationViewer(w: WellRecord): boolean {
   const aq = primaryAquiferText(w).toLowerCase();
   const locType = String(
     (w as WellRecord).location_type ?? w.loc_type ?? "",
   ).toLowerCase();
-  if (aq.includes("estimated") || locType.includes("estimated"))
-    return "#16a34a";
-  if (isUnconsolidatedWellViewer(w)) return "#2563eb";
-  return "#dc2626";
+  return aq.includes("estimated") || locType.includes("estimated");
 }
 
+/**
+ * Marker color: estimated/unverified locations stay green; formation is separate
+ * (face text is R@ / G only — never Est· prefix; green color = estimated).
+ * Prefer dual special (aquifer dry / text bucket) over yield-missing heuristics.
+ */
+export function wellTypeColorViewer(w: WellRecord): string {
+  try {
+    const dual = classifyWellDual(w);
+    if (dual.special === "dry") return "#111827";
+    if (dual.special === "bucket") return "#f97316";
+    if (dual.locationQuality === "estimated") return "#16a34a";
+    if (dual.formationClass === "unconsolidated") return "#2563eb";
+    if (dual.formationClass === "rock") return "#dc2626";
+    // Clay-only / unknown: neutral slate (not fake rock red, not gravel blue)
+    return "#64748b";
+  } catch {
+    if (isDryHoleViewer(w)) return "#111827";
+    if (isBucketWellViewer(w)) return "#f97316";
+    if (isEstimatedLocationViewer(w)) return "#16a34a";
+    if (isUnconsolidatedWellViewer(w)) return "#2563eb";
+    return "#dc2626";
+  }
+}
+
+/**
+ * Outline color for estimated/unverified (green-fill) markers.
+ * Dom 2026-07-22: replace the default white outline with a type ring —
+ * blue = gravel/uncon, red = rock — so glance reads type without changing box size.
+ * Verified wells keep the default white ring (return null).
+ * v3: also infer from face label when formationClass is unknown but R/G text shows.
+ */
+export function estimatedTypeBorderColorViewer(w: WellRecord): string | null {
+  try {
+    const dual = classifyWellDual(w);
+    if (dual.locationQuality !== "estimated") return null;
+    if (dual.formationClass === "rock") return "#dc2626";
+    if (dual.formationClass === "unconsolidated") return "#2563eb";
+    // Face-label fallback (R20 / G1 2 / S1 5) when class is unknown
+    const face = String(dual.displayLabel || "").trim();
+    if (/^R\d/i.test(face) || /\bR\d/i.test(face)) return "#dc2626";
+    if (/^G\d/i.test(face) || /\bG\d/i.test(face) || /^G@/i.test(face))
+      return "#2563eb";
+    // Dry sand face → yellow ring so sand reads at a glance on green boxes
+    if (/^S\d/i.test(face) || /\bS\d/i.test(face)) return "#eab308";
+    // Unknown/clay-only estimated: keep default white ring
+    return null;
+  } catch {
+    if (!isEstimatedLocationViewer(w)) return null;
+    if (isUnconsolidatedWellViewer(w)) return "#2563eb";
+    // Estimated + not uncon: red ring only when face is clearly rock
+    try {
+      const face = wellTypeLabelViewer(w);
+      if (/^R\d/i.test(face) || /\bR\d/i.test(face)) return "#dc2626";
+      if (/^G/i.test(face) || /^S\d/i.test(face)) return "#2563eb";
+    } catch {
+      /* fall through */
+    }
+    return null;
+  }
+}
+
+/** Inline border CSS for estimated type rings (self-contained; no CSS file required). */
+export function estimatedTypeBorderInlineStyle(borderColor: string | null): string {
+  if (!borderColor) return "";
+  // Minimal 1px type ring only — do not eat into fill (rock/gravel/sand/green). Soft shadow for map edge, no fat outer halo.
+  return `border:1px solid ${borderColor};box-shadow:0 1px 2px rgba(0,0,0,0.35);`;
+}
+
+/** CSS class for estimated type ring (rock / gravel). Empty string = default white. */
+export function estimatedTypeRingClassViewer(w: WellRecord): string {
+  const c = estimatedTypeBorderColorViewer(w);
+  if (c === "#dc2626") return "vj-est-rock";
+  if (c === "#2563eb") return "vj-est-gravel";
+  if (c === "#eab308") return "vj-est-sand";
+  return "";
+}
+
+/**
+ * Map/home face label: R@ rock top + G aquifer thickness only.
+ * Estimated = green marker color, never "Est·" text.
+ * C/layer stacks stay in dual.layerStackLabel for well-detail popup.
+ * Do NOT short-circuit on yield-missing “dry hole” heuristics — those false-flag
+ * many registry wells that simply lack pump_rate/static and hide real lithology.
+ */
 export function wellTypeLabelViewer(w: WellRecord): string {
-  if (isDryHoleViewer(w)) return "Dry";
-  if (isBucketWellViewer(w)) return "Bucket";
-  const aq = primaryAquiferText(w).toLowerCase();
-  const locType = String(
-    (w as WellRecord).location_type ?? w.loc_type ?? "",
-  ).toLowerCase();
-  if (aq.includes("estimated") || locType.includes("estimated")) return "Est";
-  if (isUnconsolidatedWellViewer(w)) return "Gravel";
-  return "Rock";
+  try {
+    const dual = classifyWellDual(w);
+    if (dual.special === "dry") return "Dry";
+    if (dual.special === "bucket") return "Bucket";
+    return dual.displayLabel;
+  } catch {
+    // Only use aggressive dry/bucket heuristics when dual classifier throws
+    if (isDryHoleViewer(w)) return "Dry";
+    if (isBucketWellViewer(w)) return "Bucket";
+    return "Well";
+  }
 }
 
 function checkedIds(f: ViewerMapFilters, ids: (keyof ViewerMapFilters)[]): string[] {
@@ -926,6 +1121,14 @@ function getYieldRanges(f: ViewerMapFilters): ("blue" | "green" | "orange" | "re
     .map((id) => map[id]);
 }
 
+/**
+ * Dual-axis type filter (v2):
+ * - Estimated/unverified keeps green markers but is NOT exclusive of uncon/rock.
+ * - A well matches if ANY checked type applies (OR):
+ *   estimated location, unconsolidated formation, rock formation, bucket, dry.
+ * - v1 short-circuited estimated before formation; that hid estimated rock/uncon
+ *   when only uncon or rock toggles were on.
+ */
 export function passesTypeFilterViewer(w: WellRecord, f: ViewerMapFilters): boolean {
   const showUncon = f.typeUncon;
   const showRock = f.typeRock;
@@ -940,16 +1143,14 @@ export function passesTypeFilterViewer(w: WellRecord, f: ViewerMapFilters): bool
   if (dry) return showDry;
   const bucket = isBucketWellViewer(w);
   if (bucket) return showBucket;
-  const aq = primaryAquiferText(w).toLowerCase();
-  const locType = String(
-    (w as WellRecord).location_type ?? w.loc_type ?? "",
-  ).toLowerCase();
-  const estimated =
-    aq.includes("estimated") || locType.includes("estimated");
-  if (estimated) return showEst;
+
+  const estimated = isEstimatedLocationViewer(w);
   const uncon = isUnconsolidatedWellViewer(w);
-  if (uncon) return showUncon;
-  return showRock;
+
+  if (showEst && estimated) return true;
+  if (showUncon && uncon) return true;
+  if (showRock && !uncon) return true;
+  return false;
 }
 
 function passesElevFilterViewer(
@@ -1136,7 +1337,6 @@ export function buildViewerWellMarker(
 
   const depthVal = getWellDisplayDepthFtViewer(w);
   const depthStr = depthVal != null ? `${Math.round(depthVal)}'` : "–";
-  const depthFtPlain = depthVal != null ? String(Math.round(depthVal)) : "–";
   const extraTag = wellMapGrTagViewer(w);
 
   const popupLines: string[] = [
@@ -1154,24 +1354,52 @@ export function buildViewerWellMarker(
   if (rowCount >= 1 && mode) {
     const rows: string[] = [];
     let gROnCombo = false;
+    // Estimated green boxes: subtle type-colored outline (blue gravel / red rock).
+    const estBorder = estimatedTypeBorderColorViewer(w);
     if (showType) {
       const tc = wellTypeColorViewer(w);
       const tl = wellTypeLabelViewer(w);
-      const grn = wellGrRNumberForTagViewer(w);
-      const typeRowInner = grn
-        ? `${depthFtPlain} ${grn.kind}${grn.n}`
-        : `${tl} ${depthStr}${extraTag}`;
-      rows.push(
-        `<div class="cm-row" style="background:${tc};color:#fff">${escAttr(typeRowInner)}</div>`,
-      );
+      // Flat fill = marker color (blue gravel / red rock / green estimated).
+      // Face text = same R/G/S line on every type, including green unverified.
+      // Dom 2026-07-22 evening: no white box + underline; S stays yellow.
+      const faceHtml = formatFaceLabelHtml(tl);
+      if (faceHtml) {
+        rows.push(
+          `<div class="cm-row" style="background:${tc};color:#fff">${faceHtml}<span style="color:#fff;font-weight:700"> ${escAttr(depthStr)}</span></div>`,
+        );
+      } else {
+        const typeRowInner = `${tl} ${depthStr}`;
+        rows.push(
+          `<div class="cm-row" style="background:${tc};color:#fff">${escAttr(typeRowInner)}</div>`,
+        );
+      }
+      // Layer stack (C/G/R) only in the opened popup detail — not on map face
+      let stackNote = "";
+      let locNote = "";
+      try {
+        const dual = classifyWellDual(w);
+        if (
+          dual.layerStackLabel &&
+          dual.layerStackLabel !== tl &&
+          !tl.includes(dual.layerStackLabel)
+        ) {
+          stackNote = ` · stack ${dual.layerStackLabel}`;
+        }
+        if (dual.locationQuality === "estimated") {
+          locNote =
+            dual.formationClass === "rock"
+              ? " · estimated location · rock"
+              : dual.formationClass === "unconsolidated"
+                ? " · estimated location · gravel/uncon"
+                : " · estimated location";
+        }
+      } catch {
+        /* ignore */
+      }
       popupLines.push(
-        escAttr(
-          grn
-            ? `${tl} · ${depthFtPlain} ft · ${grn.kind}${grn.n}`
-            : `${tl} · ${depthStr}${extraTag ? ` · ${extraTag.trim()}` : ""}`,
-        ),
+        escAttr(`${tl} · ${depthStr}${locNote}${stackNote}`),
       );
-      if (extraTag || grn) gROnCombo = true;
+      if (extraTag) gROnCombo = true;
     }
     if (showElev) {
       const be = getWellBottomElevViewer(w);
@@ -1229,7 +1457,14 @@ export function buildViewerWellMarker(
     const padB = 4;
     const iconW = innerW + padB * 2;
     const iconH = innerH + padB * 2;
-    const markerHtml = `<div class="vj-combo-marker" style="font-size:${comboFs}px;width:${innerW}px;min-width:${innerW}px;max-width:${innerW}px">${rows.join("")}</div>`;
+    // Phone-readable type ring on green unverified boxes (CSS class + inline).
+    // v3: 3px type color + dark hairline; inline so it works even if map CSS fails to ship.
+    const estRingClass = estimatedTypeRingClassViewer(w);
+    const borderStyle = estimatedTypeBorderInlineStyle(estBorder);
+    const classAttr = estRingClass
+      ? `vj-combo-marker ${estRingClass}`
+      : "vj-combo-marker";
+    const markerHtml = `<div class="${classAttr}" data-est-type="${estRingClass || "none"}" data-est-border="${estBorder || "none"}" style="font-size:${comboFs}px;width:${innerW}px;min-width:${innerW}px;max-width:${innerW}px;${borderStyle}">${rows.join("")}</div>`;
 
     return {
       html: markerHtml,
@@ -1242,6 +1477,7 @@ export function buildViewerWellMarker(
   }
 
   const color = wellTypeColorViewer(w);
+  const estBorderDot = estimatedTypeBorderColorViewer(w);
   popupLines.push(
     escAttr(
       `${depthVal != null ? depthVal : "—"} ft${extraTag ? ` · ${extraTag.trim()}` : ""}`,
@@ -1252,17 +1488,36 @@ export function buildViewerWellMarker(
   );
   const depthTxt = depthVal != null ? String(Math.round(depthVal)) : "–";
   const tagFs = Math.max(5, Math.round(7 * zScale));
+  // Under-dot path: plain dark face text (formatFaceLabelHtml is for flat-fill rows).
+  const facePlain = wellTypeLabelViewer(w);
+  const faceIsChip =
+    facePlain &&
+    facePlain !== "Well" &&
+    facePlain !== "Dry" &&
+    facePlain !== "Bucket";
   const tagEsc = extraTag
     ? String(extraTag)
         .trim()
         .replace(/</g, "")
         .replace(/>/g, "")
     : "";
-  const dotBlock = `<div style="display:flex;flex-direction:column;align-items:center;"><div class="vj-well-marker" style="background:${color};width:${dotSize}px;height:${dotSize}px;flex-shrink:0;"><span class="vj-well-depth-label" style="font-size:${Math.max(6, Math.round(9 * zScale))}px">${escAttr(depthTxt)}</span></div>${tagEsc ? `<div style="margin-top:1px;font-size:${tagFs}px;font-weight:800;color:#0f172a;text-shadow:0 0 3px #fff,0 0 4px #fff;line-height:1.1;white-space:nowrap">${escAttr(tagEsc)}</div>` : ""}</div>`;
-  const bw = tagEsc
-    ? Math.max(dotSize, Math.min(130, Math.round(6 + tagEsc.length * tagFs * 0.52)))
+  const underDotText = faceIsChip ? facePlain : tagEsc;
+  const tagHtml = underDotText
+    ? `<span style="color:#0f172a;font-weight:800">${escAttr(underDotText)}</span>`
+    : "";
+  const tagLen = underDotText ? underDotText.length : 0;
+  const dotRingClass = estimatedTypeRingClassViewer(w);
+  const dotClass = dotRingClass
+    ? `vj-well-marker ${dotRingClass}`
+    : "vj-well-marker";
+  const dotBorderStyle = estBorderDot
+    ? estimatedTypeBorderInlineStyle(estBorderDot)
+    : "border:2px solid #fff;";
+  const dotBlock = `<div style="display:flex;flex-direction:column;align-items:center;"><div class="${dotClass}" data-est-type="${dotRingClass || "none"}" data-est-border="${estBorderDot || "none"}" style="background:${color};width:${dotSize}px;height:${dotSize}px;flex-shrink:0;${dotBorderStyle}"><span class="vj-well-depth-label" style="font-size:${Math.max(6, Math.round(9 * zScale))}px">${escAttr(depthTxt)}</span></div>${tagHtml ? `<div style="margin-top:1px;font-size:${tagFs}px;font-weight:800;text-shadow:0 0 3px #fff,0 0 4px #fff;line-height:1.1;white-space:nowrap">${tagHtml}</div>` : ""}</div>`;
+  const bw = tagHtml
+    ? Math.max(dotSize, Math.min(130, Math.round(6 + tagLen * tagFs * 0.52)))
     : dotSize;
-  const bh = tagEsc ? dotSize + Math.round(tagFs + 8) : dotSize;
+  const bh = tagHtml ? dotSize + Math.round(tagFs + 8) : dotSize;
 
   return {
     html: dotBlock,

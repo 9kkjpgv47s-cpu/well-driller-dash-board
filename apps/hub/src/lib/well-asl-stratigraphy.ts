@@ -38,14 +38,38 @@ export type AslStratigraphyLayout = {
   skippedNoLithology: number;
 };
 
-const GRAVEL_RE =
-  /\bgravel\b|\bgrav\b|pea\s*stone|outwash|esker|kame|glacial\s*drift/i;
+/**
+ * Shared-aquifer materials (Dom 2026-07-23):
+ * water-bearing zones, sand, gravel, S&G / S AND G and similar abbreviations.
+ * Not clay/till/rock-only; not sandstone family.
+ */
+const SHARED_AQUIFER_RE =
+  /\bgravel\b|\bgrav\b|pea\s*stone|outwash|esker|kame|glacial\s*drift|\bdrift\b|water\s*b\.?|water\s*bearing|\bwet\b|producing|water\s*vein|gravel\s*vein|sand\s*vein|water\s*sand|\bs\s*&\s*g\b|\bs\s+and\s+g\b|\bsg\b|sand\s*\/\s*g|sand\s*&\s*g|sand\s*grav|sand\s+and\s+grav|\bsand\b|\bsa\b|fine\s+sand|coarse\s+sand|medium\s+sand|alluv|terrace|unconsolidated|\baquifer\b/i;
 
-/** Shared-aquifer matching uses gravel-bearing formations only (not sand-only). */
+const SANDSTONE_FAMILY_RE =
+  /sand\s*rock|sandrock|sandstone|ss\b|lime\s*sand|silty\s*sand\s*rock/i;
+
+/** @deprecated name kept for callers — means shared-aquifer material (sand/gravel/S&G/water-bearing). */
 export function isGravelFormation(name: string): boolean {
+  return isSharedAquiferFormation(name);
+}
+
+/** True when a lithology name should participate in ASL shared-aquifer bands. */
+export function isSharedAquiferFormation(name: string): boolean {
   const l = name.toLowerCase().trim();
   if (!l) return false;
-  if (GRAVEL_RE.test(l)) return true;
+  if (SANDSTONE_FAMILY_RE.test(l)) return false;
+  // Pure clay/till without sand/gravel wording stays out
+  if (
+    /^(brown|gray|grey|red|yellow|blue|light|dark|\s)*(clay|till|hard\s*pan|hardpan|silt|muck|topsoil|loam|soil|dirt|shale|lime|limestone|dolomite|bedrock|granite)s?$/i.test(
+      l,
+    )
+  ) {
+    return false;
+  }
+  if (SHARED_AQUIFER_RE.test(l)) return true;
+  // Compact field abbreviations: "S&G", "S AND G", "RED S & G", "S&G WATER"
+  if (/\bs\s*&\s*g\b/i.test(l) || /\bs\s+and\s+g\b/i.test(l)) return true;
   if (/sand/.test(l) && /grav/.test(l)) return true;
   return false;
 }
@@ -276,7 +300,7 @@ export type SharedAquiferBand = {
   topAslFt: number;
   bottomAslFt: number;
   wellKeys: string[];
-  /** Gravel layers that share ASL footage with at least one other well. */
+  /** Sand / gravel / S&G / water-bearing layers that share ASL with another well. */
   contributors: SharedAquiferContributor[];
 };
 
@@ -284,7 +308,7 @@ function gravelSpans(columns: AslWellColumn[]): SharedAquiferContributor[] {
   const spans: SharedAquiferContributor[] = [];
   for (const col of columns) {
     for (const s of col.strata) {
-      if (!isGravelFormation(s.formation)) continue;
+      if (!isSharedAquiferFormation(s.formation)) continue;
       spans.push({
         wellKey: col.key,
         formation: s.formation,
@@ -347,7 +371,7 @@ export function stratumContributesToBand(
   wellKey: string,
   band: SharedAquiferBand,
 ): boolean {
-  if (!isGravelFormation(stratum.formation)) return false;
+  if (!isSharedAquiferFormation(stratum.formation)) return false;
   return band.contributors.some(
     (c) =>
       c.wellKey === wellKey &&
@@ -396,7 +420,7 @@ export function formatSharedAquiferDrillAdvice(
   return `Drill ${startDepthFt}–${endDepthFt} ft to hit this aquifer. Below ~${endDepthFt} ft you've likely passed it.`;
 }
 
-/** ASL bands where multiple wells share gravel layers at the same ASL footage. */
+/** ASL bands where multiple wells share sand/gravel/water-bearing layers at the same ASL. */
 export function findSharedAquiferBands(
   columns: AslWellColumn[],
 ): SharedAquiferBand[] {

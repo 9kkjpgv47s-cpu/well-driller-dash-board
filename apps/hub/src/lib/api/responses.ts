@@ -22,12 +22,27 @@ export function cachedJson(
   });
 }
 
-/** 503 for a failed server-side DNR chunk load, preserving the loader message. */
+/**
+ * 503 telling the client to fall back to browser-side chunk load, preserving
+ * the thrown message when there is one.
+ */
+export function clientChunkFallback(
+  e: unknown,
+  defaultMessage: string,
+): NextResponse {
+  return NextResponse.json(
+    {
+      error: e instanceof Error ? e.message : defaultMessage,
+      fallback: "client-chunks",
+    },
+    { status: 503 },
+  );
+}
+
+/** 503 for a failed server-side DNR chunk load. */
 export function dnrWellsUnavailable(e: unknown): NextResponse {
-  return jsonError(
-    e instanceof Error
-      ? e.message
-      : "Failed to load DNR chunk data on the server.",
-    503,
+  return clientChunkFallback(
+    e,
+    "Failed to load DNR chunk data on the server.",
   );
 }

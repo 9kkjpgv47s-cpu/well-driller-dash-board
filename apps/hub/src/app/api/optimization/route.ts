@@ -1,5 +1,5 @@
 import { cachedJson, jsonError } from "@/lib/api/responses";
-import { getDnrWellsServerCachedForApi } from "@/lib/dnr-wells-server-cache";
+import { getDnrWellsFullCachedForApi } from "@/lib/dnr-wells-server-cache";
 import {
   computeOptimizationFromWells,
   computeOptimizationMock,
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
   let body;
   try {
-    const wells = await getDnrWellsServerCachedForApi();
+    const wells = await getDnrWellsFullCachedForApi();
     body = computeOptimizationFromWells(input, wells);
   } catch {
     body = computeOptimizationMock(input);

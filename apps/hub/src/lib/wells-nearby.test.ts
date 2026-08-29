@@ -96,7 +96,8 @@ describe("wells-nearby", () => {
     const compact = compactWellForMap(wells[0]!);
     expect(compact.id).toBe("near");
     expect(compact.depth).toBe("120");
-    expect(compact.lithology_json).toBe("[]");
+    // lithology_json is NOT in MAP_WELL_FIELD_KEYS — loaded on-demand from litho sidecars
+    expect(compact.lithology_json).toBeUndefined();
     expect(compact.extra_col).toBeUndefined();
   });
 });
