@@ -28,8 +28,8 @@ function openMeteoWindowForAnchor(anchorDate: string, timezone: string) {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const lat = Number(searchParams.get("lat"));
-  const lon = Number(searchParams.get("lon"));
+  const lat = parseFloat(searchParams.get("lat") ?? "");
+  const lon = parseFloat(searchParams.get("lon") ?? "");
   const timezone =
     searchParams.get("timezone") ?? "America/Indiana/Indianapolis";
   const rawDate = searchParams.get("date");
