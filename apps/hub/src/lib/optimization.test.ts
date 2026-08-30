@@ -2,9 +2,29 @@ import { describe, expect, it } from "vitest";
 import {
   computeOptimizationFromWells,
   computeOptimizationMock,
+  parseOptimizationSearchParams,
 } from "./optimization";
 
 describe("optimization", () => {
+  it("rejects out-of-range coordinates and radius", () => {
+    expect(
+      parseOptimizationSearchParams({ lat: "39.7", lon: "-86.1", radius: "5" }),
+    ).toMatchObject({ radiusMiles: 5 });
+    expect(
+      parseOptimizationSearchParams({
+        lat: "39.7",
+        lon: "-86.1",
+        radius: "5000",
+      }),
+    ).toBeNull();
+    expect(
+      parseOptimizationSearchParams({ lat: "91", lon: "-86.1", radius: "5" }),
+    ).toBeNull();
+    expect(
+      parseOptimizationSearchParams({ lat: "39.7", lon: "-86.1", radius: "0" }),
+    ).toBeNull();
+  });
+
   it("mock path returns deterministic illustrative stats", () => {
     const a = computeOptimizationMock({
       lat: 39.7684,
