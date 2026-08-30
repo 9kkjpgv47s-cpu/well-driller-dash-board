@@ -1,0 +1,63 @@
+{
+  "ruleset_id": "formation-class-v2-2026-07-21",
+  "finished_at": "2026-07-21T21:35:59.887431+00:00",
+  "wells": 3000,
+  "layers_seen": 17414,
+  "elapsed_sec": 0.37,
+  "wells_per_sec": 8094.3,
+  "location_quality": {
+    "verified": 2181,
+    "estimated": 819
+  },
+  "formation_class": {
+    "unconsolidated": 2344,
+    "unknown": 256,
+    "rock": 400
+  },
+  "confidence": {
+    "high": 1977,
+    "medium": 767,
+    "low": 256
+  },
+  "location_x_formation": {
+    "verified|unconsolidated": 1728,
+    "estimated|unconsolidated": 616,
+    "verified|unknown": 162,
+    "estimated|unknown": 94,
+    "verified|rock": 291,
+    "estimated|rock": 109
+  },
+  "rule_hits": {
+    "shale_slate": 5017,
+    "sand": 2916,
+    "clay_silt": 2652,
+    "none": 1727,
+    "limestone_dolomite": 1370,
+    "topsoil_fill": 801,
+    "gravel": 670,
+    "sandrock": 525,
+    "sandstone_siltstone": 489,
+    "sand_gravel_explicit": 365,
+    "igneous_metamorphic": 289,
+    "bedrock_abbrev": 268,
+    "placeholder": 220,
+    "generic_rock_word": 64,
+    "water_bearing_uncons": 15,
+    "hard_rock": 14,
+    "dry": 7,
+    "drift_outwash": 5
+  },
+  "sources": [
+    "apps/hub/public/well-viewer/dnr_wells_chunk_0.csv.gz"
+  ],
+  "outputs": {
+    "wells": "scripts/lithology_classify_v3/out/well_dual_label.jsonl.gz",
+    "layers": "scripts/lithology_classify_v3/out/layer_labels.jsonl.gz",
+    "log": "scripts/lithology_classify_v3/out/reprocess.log"
+  },
+  "notes": [
+    "Source chunks/CSV not modified",
+    "Estimated location is separate from formation_class",
+    "Rock top alone does not force rock well when thick uncon aquifer present"
+  ]
+}

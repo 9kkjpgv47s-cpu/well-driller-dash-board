@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DNR_WELLS_SERVER_LOAD_TIMEOUT_MS,
   DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS,
+  getDnrWellsBaseCachedForApi,
   getDnrWellsServerCachedWithTimeout,
   getDnrWellsServerLoadTimeoutMs,
   resetDnrWellsServerCache,
@@ -16,22 +17,21 @@ describe("dnr-wells-server-cache", () => {
 
   it("returns wells when load finishes before timeout", async () => {
     const wells = [{ lat: 40, lon: -85, depth: "120" }];
-    vi.spyOn(chunkServer, "loadAllDnrChunksFromDisk").mockResolvedValue(wells);
+    vi.spyOn(chunkServer, "loadBaseChunksFromDisk").mockResolvedValue(wells);
 
-    await expect(getDnrWellsServerCachedWithTimeout(500)).resolves.toEqual(
-      wells,
-    );
+    await expect(getDnrWellsBaseCachedForApi()).resolves.toEqual(wells);
   });
 
   it("rejects when load exceeds timeout", async () => {
-    vi.spyOn(chunkServer, "loadAllDnrChunksFromDisk").mockImplementation(
+    vi.spyOn(chunkServer, "loadBaseChunksFromDisk").mockImplementation(
       () =>
         new Promise((resolve) => {
           setTimeout(() => resolve([{ lat: 40, lon: -85 }]), 200);
         }),
     );
 
-    await expect(getDnrWellsServerCachedWithTimeout(50)).rejects.toThrow(
+    const slowPromise = new Promise<never>(() => {}); // never resolves
+    await expect(getDnrWellsServerCachedWithTimeout(slowPromise, 50)).rejects.toThrow(
       /timed out after 50ms/,
     );
   });
@@ -40,11 +40,11 @@ describe("dnr-wells-server-cache", () => {
     expect(DNR_WELLS_SERVER_LOAD_TIMEOUT_MS).toBe(20_000);
   });
 
-  it("uses an 8s timeout budget on Vercel", () => {
-    expect(DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS).toBe(8_000);
+  it("uses a short timeout budget on Vercel for fast client-chunk fallback", () => {
+    expect(DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS).toBe(4_000);
     const prev = process.env.VERCEL;
     process.env.VERCEL = "1";
-    expect(getDnrWellsServerLoadTimeoutMs()).toBe(8_000);
+    expect(getDnrWellsServerLoadTimeoutMs()).toBe(4_000);
     delete process.env.VERCEL;
     if (prev !== undefined) process.env.VERCEL = prev;
   });

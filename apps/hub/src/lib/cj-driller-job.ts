@@ -1,4 +1,4 @@
-import { logWarning } from "@/lib/errors";
+import { readStoredJson, writeStoredJson } from "@/lib/browser-storage";
 
 /** Same storage key as the static C&J well viewer — shared when hub + viewer are same origin. */
 export const CJ_DRILLER_JOB_KEY = "cjDrillerJobV1";
@@ -30,34 +30,19 @@ export type CjDrillerJobEntry = {
 };
 
 export function loadDrillerJob(): CjDrillerJobEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(CJ_DRILLER_JOB_KEY);
-    if (!raw) return [];
-    const p = JSON.parse(raw) as unknown;
-    if (!Array.isArray(p)) return [];
-    return p.filter(
-      (x): x is CjDrillerJobEntry =>
-        x != null &&
-        typeof x === "object" &&
-        typeof (x as CjDrillerJobEntry).wellId === "string",
-    );
-  } catch (e) {
-    logWarning("cj-driller-job", "stored job list unreadable", e);
-    return [];
-  }
+  const parsed = readStoredJson<unknown>(CJ_DRILLER_JOB_KEY);
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter(
+    (x): x is CjDrillerJobEntry =>
+      x != null &&
+      typeof x === "object" &&
+      typeof (x as CjDrillerJobEntry).wellId === "string",
+  );
 }
 
 /** False when the write failed (quota, blocked storage) — the job list is unchanged. */
 export function saveDrillerJob(entries: CjDrillerJobEntry[]): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    localStorage.setItem(CJ_DRILLER_JOB_KEY, JSON.stringify(entries));
-    return true;
-  } catch (e) {
-    logWarning("cj-driller-job", "job list write failed", e);
-    return false;
-  }
+  return writeStoredJson(CJ_DRILLER_JOB_KEY, entries);
 }
 
 export type AppendDrillerJobResult =

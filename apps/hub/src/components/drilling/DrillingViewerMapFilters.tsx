@@ -136,7 +136,7 @@ export function DrillingViewerMapFilters({ value, onChange }: Props) {
           <Row
             checked={value.typeEstimated}
             onChange={(typeEstimated) => patch({ typeEstimated })}
-            label="● Estimated / Unverified Location"
+            label="● Estimated / Unverified Location (green; also in gravel/rock when known)"
             labelClass="text-green-700 dark:text-green-400"
           />
         </FilterBand>

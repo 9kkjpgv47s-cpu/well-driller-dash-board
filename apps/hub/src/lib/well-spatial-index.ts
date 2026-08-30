@@ -6,7 +6,11 @@
  * whole array. Works in the browser and on the server (no DOM usage).
  */
 
-import { haversineMiles, type WellRecord } from "@/lib/area-well-analytics";
+import {
+  haversineMiles,
+  wellsWithinRadius,
+  type WellRecord,
+} from "@/lib/area-well-analytics";
 
 export const GRID_CELL_DEG = 0.05;
 
@@ -149,12 +153,7 @@ export function wellsWithinRadiusIndexed(
   radiusMiles: number,
 ): WellRecord[] {
   if (wells.length < LINEAR_SCAN_THRESHOLD) {
-    return wells.filter((w) => {
-      const la = Number(w.lat);
-      const lo = Number(w.lon);
-      if (!Number.isFinite(la) || !Number.isFinite(lo)) return false;
-      return haversineMiles(lat, lon, la, lo) <= radiusMiles;
-    });
+    return wellsWithinRadius(wells, lat, lon, radiusMiles);
   }
   return getWellSpatialIndex(wells).queryRadius(lat, lon, radiusMiles);
 }

@@ -24,7 +24,7 @@ ctx.onmessage = (e: MessageEvent<ChunkWorkerRequest>) => {
   void (async () => {
     try {
       const text = await gunzipText(buf);
-      const { rows, fields } = parseChunkCsvText(text);
+      const { rows, fields } = await parseChunkCsvText(text);
       ctx.postMessage({ id, rows, fields } satisfies ChunkWorkerResponse);
     } catch (err) {
       ctx.postMessage({

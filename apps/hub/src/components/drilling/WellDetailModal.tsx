@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { errorMessage } from "@/lib/errors";
 import type { WellRecord } from "@/lib/area-well-analytics";
 import { getLithLayers } from "@/lib/area-well-analytics";
+import { fetchJson, isAbortError } from "@/lib/http/fetch-json";
 import { resolveWellRefNo } from "@/lib/well-identity";
 import { getWellDisplayDepthFtViewer } from "@/lib/viewer-well-map";
 
@@ -149,24 +150,14 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
 
     (async () => {
       try {
-        const res = await fetch(
+        const apiDnr = await fetchJson<DnrApi>(
           `/api/dnr-report?refNo=${encodeURIComponent(refNo)}`,
           { signal: ac.signal },
         );
-        const payload = (await res.json().catch(() => null)) as
-          | (DnrApi & { error?: string })
-          | null;
-        if (!res.ok) {
-          throw new Error(
-            typeof payload?.error === "string"
-              ? payload.error
-              : `DNR report request failed (HTTP ${res.status})`,
-          );
-        }
-        setDnr({ ...mergeDnr(base, payload ?? {}), loading: false });
+        setDnr({ ...mergeDnr(base, apiDnr), loading: false });
         setDnrError(lithParseError);
       } catch (e) {
-        if (ac.signal.aborted) return;
+        if (ac.signal.aborted || isAbortError(e)) return;
         setDnr({ ...base, loading: false });
         setDnrError(
           [lithParseError, errorMessage(e, "DNR report lookup failed.")]

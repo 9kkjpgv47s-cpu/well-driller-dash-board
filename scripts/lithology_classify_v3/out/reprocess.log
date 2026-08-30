@@ -1,0 +1,5 @@
+2026-07-21T21:35:59.516459+00:00 START ruleset=formation-class-v2-2026-07-21 sources=1 out=scripts/lithology_classify_v3/out
+2026-07-21T21:35:59.516937+00:00 source apps/hub/public/well-viewer/dnr_wells_chunk_0.csv.gz
+2026-07-21T21:35:59.759135+00:00 progress n=2000 layers=10773 rate=8253.3/s matrix={'verified|unconsolidated': 1169, 'estimated|unconsolidated': 407, 'verified|unknown': 150, 'estimated|unknown': 69, 'verified|rock': 150, 'estimated|rock': 55}
+2026-07-21T21:35:59.886974+00:00 hit --max-wells 3000
+2026-07-21T21:35:59.887576+00:00 DONE wells=3000 layers=17414 elapsed=0.4s summary=scripts/lithology_classify_v3/out/summary.json
