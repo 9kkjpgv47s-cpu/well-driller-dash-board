@@ -1,3 +1,4 @@
+import { upstreamJsonHeaders } from "@/lib/http/upstream";
 import type { WeatherHourly, WeatherSourceBundle } from "./types";
 
 type PointsResponse = {
@@ -27,10 +28,7 @@ export async function fetchNwsHourly(
   lat: number,
   lon: number,
 ): Promise<WeatherSourceBundle | null> {
-  const headers = {
-    Accept: "application/geo+json",
-    "User-Agent": "DrillerDashboardHub/1.0 (https://github.com/9kkjpgv47s-cpu/well-driller-dash-board)",
-  };
+  const headers = upstreamJsonHeaders("application/geo+json");
 
   try {
     const pt = await fetch(

@@ -9,11 +9,23 @@ import { JobWeatherPanel } from "@/components/scheduling/JobWeatherPanel";
 import {
   computeAreaInsights,
   getLithLayers,
-  haversineMiles,
   type AreaInsightsReport,
   type WellRecord,
 } from "@/lib/area-well-analytics";
+import {
+  readStoredJson,
+  readStoredNumber,
+  readStoredString,
+  writeStoredJson,
+  writeStoredString,
+} from "@/lib/browser-storage";
 import { appendDrillerJobEntry } from "@/lib/cj-driller-job";
+import { fetchJson } from "@/lib/http/fetch-json";
+import {
+  nearestWells,
+  shallowestWellsByDepth,
+  wellOrderKey,
+} from "@/lib/well-ordering";
 import type { ChunkLoadProgress } from "@/lib/dnr-chunk-browser";
 import { getDnrWellsBaseCached, getDnrWellsFullCached } from "@/lib/dnr-wells-cache";
 import { wellRecordToDrillerEntry } from "@/lib/drilling-well-entry";
@@ -37,7 +49,6 @@ import { type DrillJob } from "@/lib/scheduling-data";
 import { syntheticDrillJobForWeather } from "@/lib/synthetic-drill-job";
 import {
   DEFAULT_VIEWER_MAP_FILTERS,
-  getWellDisplayDepthFtViewer,
   type ViewerMapFilters,
   wellPassesHubViewerFilters,
 } from "@/lib/viewer-well-map";
@@ -61,9 +72,7 @@ const DrillingMap = dynamic(
   },
 );
 
-function wellDemKey(w: WellRecord): string {
-  return String(w.id ?? w.refno ?? `${w.lat},${w.lon}`);
-}
+const wellDemKey = wellOrderKey;
 
 const RADIUS_OPTIONS = [0.25, 0.5, 1, 1.5, 2, 3, 4, 5] as const;
 type RadiusMilesChoice = (typeof RADIUS_OPTIONS)[number];
@@ -92,15 +101,13 @@ function isDepthRadiusChoice(n: number): n is DepthRadiusMilesChoice {
 }
 
 function readStoredRadiusMiles(): RadiusMilesChoice | null {
-  if (typeof window === "undefined") return null;
-  const v = parseFloat(localStorage.getItem(LS_RADIUS_MILES) ?? "");
-  return isRadiusChoice(v) ? v : null;
+  const v = readStoredNumber(LS_RADIUS_MILES);
+  return v != null && isRadiusChoice(v) ? v : null;
 }
 
 function readStoredDepthRadiusMiles(): DepthRadiusMilesChoice | null {
-  if (typeof window === "undefined") return null;
-  const v = parseFloat(localStorage.getItem(LS_DEPTH_RADIUS_MILES) ?? "");
-  return isDepthRadiusChoice(v) ? v : null;
+  const v = readStoredNumber(LS_DEPTH_RADIUS_MILES);
+  return v != null && isDepthRadiusChoice(v) ? v : null;
 }
 
 function normalizeFieldSectionOrder(
@@ -118,22 +125,16 @@ function normalizeFieldSectionOrder(
 }
 
 function readStoredFieldWorkspaceView(): FieldWorkspaceView {
-  if (typeof window === "undefined") return "map";
-  const v = localStorage.getItem(LS_FIELD_WORKSPACE_VIEW);
+  const v = readStoredString(LS_FIELD_WORKSPACE_VIEW);
   if (v === "depth") return "depth";
   if (v === "asl") return "asl";
   return "map";
 }
 
 function readStoredFieldOrder(): FieldSectionId[] | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(LS_FIELD_SECTION_ORDER);
-    if (!raw) return null;
-    return normalizeFieldSectionOrder(JSON.parse(raw));
-  } catch {
-    return null;
-  }
+  return normalizeFieldSectionOrder(
+    readStoredJson<unknown>(LS_FIELD_SECTION_ORDER),
+  );
 }
 
 /** Short label for the map heading (uppercase mi). */
@@ -161,6 +162,9 @@ function formatRadiusMiShort(mi: number): string {
   if (mi === 1.5) return "1½ mi";
   return `${mi} mi`;
 }
+
+/** Wells shown in the depth / nearest workspace lists (and DEM lookups). */
+const WORKSPACE_WELL_LIMIT = 25;
 
 type DispatchContext = {
   title?: string | null;
@@ -247,19 +251,19 @@ export function DrillingHubClient() {
     const n = parseFloat(value);
     if (!isRadiusChoice(n)) return;
     setRadiusMiles(n);
-    localStorage.setItem(LS_RADIUS_MILES, String(n));
+    writeStoredString(LS_RADIUS_MILES, String(n));
   }, []);
 
   const onDepthRadiusSelect = useCallback((value: string) => {
     const n = parseFloat(value);
     if (!isDepthRadiusChoice(n)) return;
     setDepthRadiusMiles(n);
-    localStorage.setItem(LS_DEPTH_RADIUS_MILES, String(n));
+    writeStoredString(LS_DEPTH_RADIUS_MILES, String(n));
   }, []);
 
   const setFieldWorkspaceView = useCallback((view: FieldWorkspaceView) => {
     setWorkspaceView(view);
-    localStorage.setItem(LS_FIELD_WORKSPACE_VIEW, view);
+    writeStoredString(LS_FIELD_WORKSPACE_VIEW, view);
     setWellsListMode(view === "map" ? "nearest" : "byDepth");
   }, []);
 
@@ -274,7 +278,7 @@ export function DrillingHubClient() {
         const b = next[j]!;
         next[i] = b;
         next[j] = a;
-        localStorage.setItem(LS_FIELD_SECTION_ORDER, JSON.stringify(next));
+        writeStoredJson(LS_FIELD_SECTION_ORDER, next);
         return next;
       });
     },
@@ -589,66 +593,26 @@ export function DrillingHubClient() {
     [wellsInDepthRadius, mapFilters],
   );
 
-  const nearestWellsForElev = useMemo(() => {
-    if (!center) return [];
-    const withD = wellsInRadius
-      .filter(
-        (w) =>
-          w.lat != null &&
-          w.lon != null &&
-          Number.isFinite(Number(w.lat)) &&
-          Number.isFinite(Number(w.lon)),
-      )
-      .map((w) => ({
-        w,
-        d: haversineMiles(
-          center.lat,
-          center.lon,
-          Number(w.lat),
-          Number(w.lon),
-        ),
-      }))
-      .sort((a, b) => a.d - b.d);
-    return withD.slice(0, 25).map((x) => x.w);
-  }, [wellsInRadius, center]);
+  const nearestWellsForElev = useMemo(
+    () =>
+      center
+        ? nearestWells(wellsInRadius, center.lat, center.lon, WORKSPACE_WELL_LIMIT)
+        : [],
+    [wellsInRadius, center],
+  );
 
   const selectedWellKey = detailWell ? wellDemKey(detailWell) : null;
 
-  const mapWellsByDepth = useMemo(() => {
-    return wellsMatchingMapFilters
-      .map((w) => ({ w, depthFt: getWellDisplayDepthFtViewer(w) }))
-      .filter(
-        (x): x is { w: WellRecord; depthFt: number } =>
-          x.depthFt != null && Number.isFinite(x.depthFt),
-      )
-      .sort(
-        (a, b) =>
-          a.depthFt - b.depthFt ||
-          String(a.w.id ?? a.w.refno).localeCompare(
-            String(b.w.id ?? b.w.refno),
-          ),
-      )
-      .slice(0, 25)
-      .map((x) => x.w);
-  }, [wellsMatchingMapFilters]);
+  const mapWellsByDepth = useMemo(
+    () => shallowestWellsByDepth(wellsMatchingMapFilters, WORKSPACE_WELL_LIMIT),
+    [wellsMatchingMapFilters],
+  );
 
-  const depthViewWellsByDepth = useMemo(() => {
-    return wellsMatchingDepthFilters
-      .map((w) => ({ w, depthFt: getWellDisplayDepthFtViewer(w) }))
-      .filter(
-        (x): x is { w: WellRecord; depthFt: number } =>
-          x.depthFt != null && Number.isFinite(x.depthFt),
-      )
-      .sort(
-        (a, b) =>
-          a.depthFt - b.depthFt ||
-          String(a.w.id ?? a.w.refno).localeCompare(
-            String(b.w.id ?? b.w.refno),
-          ),
-      )
-      .slice(0, 25)
-      .map((x) => x.w);
-  }, [wellsMatchingDepthFilters]);
+  const depthViewWellsByDepth = useMemo(
+    () =>
+      shallowestWellsByDepth(wellsMatchingDepthFilters, WORKSPACE_WELL_LIMIT),
+    [wellsMatchingDepthFilters],
+  );
 
   const workspaceWells = useMemo(() => {
     if (wellsListMode === "nearest") return nearestWellsForElev;
@@ -683,20 +647,14 @@ export function DrillingHubClient() {
         })),
       ];
       try {
-        const res = await fetch("/api/elevation", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ locations }),
-        });
-        const data = (await res.json()) as {
-          elevationsFt?: (number | null)[];
-          error?: string;
-        };
-        if (!res.ok) {
-          throw new Error(
-            typeof data.error === "string" ? data.error : res.statusText,
-          );
-        }
+        const data = await fetchJson<{ elevationsFt?: (number | null)[] }>(
+          "/api/elevation",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ locations }),
+          },
+        );
         const arr = data.elevationsFt;
         if (!Array.isArray(arr) || arr.length !== locations.length) {
           throw new Error("Unexpected elevation response");
@@ -830,18 +788,9 @@ export function DrillingHubClient() {
     setGeocoding(true);
     setGeocodeError(null);
     try {
-      const res = await fetch(
-        `/api/geocode?q=${encodeURIComponent(geocodableAddress)}`,
-      );
-      const data = (await res.json()) as {
+      const data = await fetchJson<{
         results?: { lat: number; lon: number; label: string }[];
-        error?: string;
-      };
-      if (!res.ok) {
-        throw new Error(
-          typeof data.error === "string" ? data.error : res.statusText,
-        );
-      }
+      }>(`/api/geocode?q=${encodeURIComponent(geocodableAddress)}`);
       const hit = data.results?.find(
         (r) => Number.isFinite(r.lat) && Number.isFinite(r.lon),
       );

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonError } from "@/lib/api/responses";
+import { upstreamJsonHeaders } from "@/lib/http/upstream";
 
 /**
  * DEM ground elevation at lat/lon (meters), same sources as the standalone viewer:
@@ -32,10 +34,7 @@ async function fetchOpenTopoDataM(locations: Loc[]): Promise<number[] | null> {
   const qs = locations.map((p) => `${p.lat},${p.lon}`).join("|");
   const url = `https://api.opentopodata.org/v1/srtm90m?locations=${encodeURIComponent(qs)}`;
   const res = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "DrillerDashboardHub/1.0 (elevation; field planning)",
-    },
+    headers: upstreamJsonHeaders(),
     next: { revalidate: 86400 },
   });
   const text = await res.text();
@@ -50,9 +49,8 @@ async function fetchOpenElevationM(locations: Loc[]): Promise<(number | null)[]>
   const res = await fetch("https://api.open-elevation.com/api/v1/lookup", {
     method: "POST",
     headers: {
+      ...upstreamJsonHeaders(),
       "Content-Type": "application/json",
-      Accept: "application/json",
-      "User-Agent": "DrillerDashboardHub/1.0 (elevation; field planning)",
     },
     body: JSON.stringify({
       locations: locations.map((p) => ({
@@ -82,30 +80,21 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    return jsonError("Invalid JSON body.", 400);
   }
   const locations = (body as { locations?: Loc[] }).locations;
   if (!Array.isArray(locations) || locations.length === 0) {
-    return NextResponse.json(
-      { error: "Provide `locations`: [{ lat, lon }, ...]." },
-      { status: 400 },
-    );
+    return jsonError("Provide `locations`: [{ lat, lon }, ...].", 400);
   }
   if (locations.length > 50) {
-    return NextResponse.json(
-      { error: "At most 50 locations per request." },
-      { status: 400 },
-    );
+    return jsonError("At most 50 locations per request.", 400);
   }
   const normalized: Loc[] = [];
   for (const p of locations) {
     const lat = Number(p.lat);
     const lon = Number(p.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return NextResponse.json(
-        { error: "Each location needs numeric lat and lon." },
-        { status: 400 },
-      );
+      return jsonError("Each location needs numeric lat and lon.", 400);
     }
     normalized.push({ lat, lon });
   }

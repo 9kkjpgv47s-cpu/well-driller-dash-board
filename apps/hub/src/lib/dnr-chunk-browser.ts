@@ -1,6 +1,7 @@
 "use client";
 
 import type { WellRecord } from "@/lib/area-well-analytics";
+import { readStoredJson, writeStoredJson } from "@/lib/browser-storage";
 import {
   baseChunkUrl,
   chunkUrl,
@@ -162,33 +163,25 @@ const CHUNK_COUNT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const DISCOVERY_BATCH_SIZE = 4;
 
 function readCachedChunkCount(): number | null {
-  try {
-    const raw = window.localStorage.getItem(CHUNK_COUNT_CACHE_KEY);
-    if (!raw) return null;
-    const { count, at } = JSON.parse(raw) as { count: number; at: number };
-    if (
-      typeof count !== "number" ||
-      count < 1 ||
-      count > MAX_CHUNK_INDEX + 1 ||
-      Date.now() - at > CHUNK_COUNT_CACHE_TTL_MS
-    ) {
-      return null;
-    }
-    return count;
-  } catch {
+  const cached = readStoredJson<{ count?: unknown; at?: unknown }>(
+    CHUNK_COUNT_CACHE_KEY,
+  );
+  if (!cached) return null;
+  const { count, at } = cached;
+  if (
+    typeof count !== "number" ||
+    count < 1 ||
+    count > MAX_CHUNK_INDEX + 1 ||
+    typeof at !== "number" ||
+    Date.now() - at > CHUNK_COUNT_CACHE_TTL_MS
+  ) {
     return null;
   }
+  return count;
 }
 
 function writeCachedChunkCount(count: number): void {
-  try {
-    window.localStorage.setItem(
-      CHUNK_COUNT_CACHE_KEY,
-      JSON.stringify({ count, at: Date.now() }),
-    );
-  } catch {
-    /* private mode etc. — discovery just reruns next load */
-  }
+  writeStoredJson(CHUNK_COUNT_CACHE_KEY, { count, at: Date.now() });
 }
 
 /**

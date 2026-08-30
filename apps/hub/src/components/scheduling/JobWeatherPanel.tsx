@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { fetchJson, isAbortError } from "@/lib/http/fetch-json";
 import type { DrillJob } from "@/lib/scheduling-data";
 import { primaryOpenMeteo } from "@/lib/weather/aggregate";
 import {
@@ -61,20 +62,13 @@ export function JobWeatherPanel({
       timezone: tz,
     });
     if (job.date) q.set("date", job.date);
-    fetch(`/api/weather?${q}`, {
+    fetchJson<WeatherApiResponse>(`/api/weather?${q}`, {
       signal: ctrl.signal,
       cache: weatherRefreshKey > 0 ? "no-store" : "default",
     })
-      .then(async (r) => {
-        if (!r.ok) {
-          const j = await r.json().catch(() => ({}));
-          throw new Error((j as { error?: string }).error ?? r.statusText);
-        }
-        return r.json() as Promise<WeatherApiResponse>;
-      })
       .then(setData)
       .catch((e: Error) => {
-        if (e.name === "AbortError") return;
+        if (isAbortError(e)) return;
         setErr(e.message);
         setData(null);
       })
@@ -117,17 +111,10 @@ export function JobWeatherPanel({
       lon: String(nearMeCoords.lon),
       timezone: tz,
     });
-    fetch(`/api/weather?${q}`, { signal: ctrl.signal })
-      .then(async (r) => {
-        if (!r.ok) {
-          const j = await r.json().catch(() => ({}));
-          throw new Error((j as { error?: string }).error ?? r.statusText);
-        }
-        return r.json() as Promise<WeatherApiResponse>;
-      })
+    fetchJson<WeatherApiResponse>(`/api/weather?${q}`, { signal: ctrl.signal })
       .then(setNearMeData)
       .catch((e: Error) => {
-        if (e.name === "AbortError") return;
+        if (isAbortError(e)) return;
         setNearMeErr(e.message);
         setNearMeData(null);
       })

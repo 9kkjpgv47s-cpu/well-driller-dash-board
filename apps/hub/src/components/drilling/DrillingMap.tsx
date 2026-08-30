@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  haversineMiles,
-  type WellRecord,
-} from "@/lib/area-well-analytics";
+import type { WellRecord } from "@/lib/area-well-analytics";
+import { nearestWells, wellOrderKey } from "@/lib/well-ordering";
 import {
   buildViewerWellMarker,
   type ViewerMapFilters,
@@ -152,9 +150,7 @@ function escapePopupHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function wellMarkerKey(w: WellRecord): string {
-  return String(w.id ?? w.refno ?? `${w.lat},${w.lon}`);
-}
+const wellMarkerKey = wellOrderKey;
 
 export function DrillingMap({
   center,
@@ -241,14 +237,7 @@ export function DrillingMap({
     let visible = candidates;
     if (candidates.length > MAX_MARKERS) {
       const c = centerRef.current;
-      visible = candidates
-        .map((w) => ({
-          w,
-          d: haversineMiles(c.lat, c.lon, Number(w.lat), Number(w.lon)),
-        }))
-        .sort((a, b2) => a.d - b2.d || wellMarkerKey(a.w).localeCompare(wellMarkerKey(b2.w)))
-        .slice(0, MAX_MARKERS)
-        .map((x) => x.w);
+      visible = nearestWells(candidates, c.lat, c.lon, MAX_MARKERS);
       setCapNote(
         `Showing ${MAX_MARKERS.toLocaleString()} nearest of ${candidates.length.toLocaleString()} matching wells in view — zoom in or tighten filters to see the rest.`,
       );
