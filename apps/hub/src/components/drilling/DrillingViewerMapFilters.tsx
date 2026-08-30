@@ -107,7 +107,7 @@ export function DrillingViewerMapFilters({ value, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
         <FilterBand title="Well Type Filter">
           <Row
             checked={value.typeUncon}

@@ -1185,47 +1185,49 @@ export function DrillingHubClient() {
                         )}
                       </div>
 
-                      <NearestWellsStrip
-                        wells={workspaceWells}
-                        onSelectWell={setDetailWell}
-                        demElevFtByKey={
-                          wellsListMode === "nearest"
-                            ? demGroundElevFtByKey
-                            : undefined
-                        }
-                        refElevFt={
-                          wellsListMode === "nearest"
-                            ? demRefGroundElevFt
-                            : undefined
-                        }
-                        selectedKey={selectedWellKey}
-                        listMode={wellsListMode}
-                        onListModeChange={setWellsListMode}
-                        title={
-                          wellsListMode === "nearest"
-                            ? "Nearest registry wells (up to 25)"
-                          : workspaceView === "map"
-                            ? `Wells by depth · map ${formatRadiusMiShort(radiusMiles)}`
-                            : workspaceView === "asl"
-                              ? `Wells with logs · ASL ${formatRadiusMiShort(depthRadiusMiles)}`
-                              : `Wells by depth · ${formatRadiusMiShort(depthRadiusMiles)}`
-                        }
-                        hint={
-                          workspaceWells.length
-                            ? `${workspaceWells.length} shown · scroll · tap for detail`
-                            : undefined
-                        }
-                        emptyMessage={
-                          wellsListMode === "nearest"
-                            ? "No wells to show."
-                            : workspaceView === "map"
-                              ? "No wells with depth in map radius matching current filters."
-                              : workspaceView === "asl"
-                                ? "No wells with lithology logs in radius matching current filters."
-                                : "No wells with depth in radius matching current filters."
-                        }
-                        maxHeightClass="max-h-[13rem] md:max-h-[15rem]"
-                      />
+                      <div className="min-w-0 lg:col-span-12">
+                        <NearestWellsStrip
+                          wells={workspaceWells}
+                          onSelectWell={setDetailWell}
+                          demElevFtByKey={
+                            wellsListMode === "nearest"
+                              ? demGroundElevFtByKey
+                              : undefined
+                          }
+                          refElevFt={
+                            wellsListMode === "nearest"
+                              ? demRefGroundElevFt
+                              : undefined
+                          }
+                          selectedKey={selectedWellKey}
+                          listMode={wellsListMode}
+                          onListModeChange={setWellsListMode}
+                          title={
+                            wellsListMode === "nearest"
+                              ? "Nearest registry wells (up to 25)"
+                              : workspaceView === "map"
+                                ? `Wells by depth · map ${formatRadiusMiShort(radiusMiles)}`
+                                : workspaceView === "asl"
+                                  ? `Wells with logs · ASL ${formatRadiusMiShort(depthRadiusMiles)}`
+                                  : `Wells by depth · ${formatRadiusMiShort(depthRadiusMiles)}`
+                          }
+                          hint={
+                            workspaceWells.length
+                              ? `${workspaceWells.length} shown · scroll · tap for detail`
+                              : undefined
+                          }
+                          emptyMessage={
+                            wellsListMode === "nearest"
+                              ? "No wells to show."
+                              : workspaceView === "map"
+                                ? "No wells with depth in map radius matching current filters."
+                                : workspaceView === "asl"
+                                  ? "No wells with lithology logs in radius matching current filters."
+                                  : "No wells with depth in radius matching current filters."
+                          }
+                          maxHeightClass="max-h-[13rem] md:max-h-[15rem]"
+                        />
+                      </div>
                     </div>
                   </section>
                 );
