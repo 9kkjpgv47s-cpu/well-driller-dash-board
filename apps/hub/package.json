@@ -21,7 +21,7 @@
   "dependencies": {
     "dnr-report-local": "file:./vendor/dnr-report-local",
     "leaflet": "^1.9.4",
-    "next": "15.5.14",
+    "next": "15.5.23",
     "papaparse": "^5.4.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
@@ -38,7 +38,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^9",
-    "eslint-config-next": "15.5.14",
+    "eslint-config-next": "15.5.23",
     "happy-dom": "^20.9.0",
     "tailwindcss": "^4",
     "typescript": "^5",

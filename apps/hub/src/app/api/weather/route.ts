@@ -26,12 +26,27 @@ function openMeteoWindowForAnchor(anchorDate: string, timezone: string) {
   };
 }
 
+const DEFAULT_TIMEZONE = "America/Indiana/Indianapolis";
+
+/** IANA-style zone names only — the value is forwarded to upstream weather APIs. */
+function safeTimezone(raw: string | null): string {
+  if (!raw) return DEFAULT_TIMEZONE;
+  if (!/^[A-Za-z][A-Za-z0-9+_-]*(\/[A-Za-z0-9+_-]+){0,2}$/.test(raw)) {
+    return DEFAULT_TIMEZONE;
+  }
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: raw });
+    return raw;
+  } catch {
+    return DEFAULT_TIMEZONE;
+  }
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const lat = parseFloat(searchParams.get("lat") ?? "");
   const lon = parseFloat(searchParams.get("lon") ?? "");
-  const timezone =
-    searchParams.get("timezone") ?? "America/Indiana/Indianapolis";
+  const timezone = safeTimezone(searchParams.get("timezone"));
   const rawDate = searchParams.get("date");
   const today = todayIsoDateInTimeZone(timezone);
   const anchorDate =

@@ -4,6 +4,7 @@ import { errorMessage, logError } from "@/lib/errors";
 import {
   computeOptimizationFromWells,
   computeOptimizationMock,
+  MAX_OPTIMIZATION_RADIUS_MILES,
   parseOptimizationSearchParams,
 } from "@/lib/optimization";
 
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
   const input = parseOptimizationSearchParams(raw);
   if (!input) {
     return jsonError(
-      "Missing or invalid query. Required: lat, lon, radiusMiles (or radius). Optional: priority=depth|yield|balanced.",
+      `Missing or invalid query. Required: lat in [-90, 90], lon in [-180, 180], radiusMiles (or radius) in (0, ${MAX_OPTIMIZATION_RADIUS_MILES}]. Optional: priority=depth|yield|balanced.`,
       400,
     );
   }

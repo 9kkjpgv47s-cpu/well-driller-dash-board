@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   computeAreaInsights,
+  formatNarrativeHtml,
   getLithLayers,
   getLithParseError,
   lithologyLayerTopBottomFt,
@@ -55,6 +56,14 @@ describe("area-well-analytics", () => {
     );
     expect(report.insightQuality.grade).toBe("low");
     expect(report.insightQuality.score).toBeLessThan(45);
+  });
+
+  it("escapes markup in narrative html and keeps bold", () => {
+    expect(
+      formatNarrativeHtml("<img src=x onerror=alert(1)> **sand** & gravel"),
+    ).toBe(
+      "&lt;img src=x onerror=alert(1)&gt; <strong>sand</strong> &amp; gravel",
+    );
   });
 });
 
