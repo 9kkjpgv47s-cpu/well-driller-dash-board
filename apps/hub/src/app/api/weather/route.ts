@@ -1,5 +1,9 @@
 import { cachedJson, jsonError } from "@/lib/api/responses";
-import { INVALID_LAT_LON_ERROR, isValidLatLon } from "@/lib/api/geo-query";
+import {
+  INVALID_LAT_LON_ERROR,
+  isValidLatLon,
+  parseNumericParam,
+} from "@/lib/api/geo-query";
 import {
   buildExplanations,
   mergeDaySummaryWithSpread,
@@ -44,8 +48,8 @@ function safeTimezone(raw: string | null): string {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const lat = parseFloat(searchParams.get("lat") ?? "");
-  const lon = parseFloat(searchParams.get("lon") ?? "");
+  const lat = parseNumericParam(searchParams.get("lat"));
+  const lon = parseNumericParam(searchParams.get("lon"));
   const timezone = safeTimezone(searchParams.get("timezone"));
   const rawDate = searchParams.get("date");
   const today = todayIsoDateInTimeZone(timezone);
