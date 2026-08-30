@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeAreaInsights,
   getLithLayers,
+  getLithParseError,
   lithologyLayerTopBottomFt,
 } from "./area-well-analytics";
 
@@ -54,5 +55,22 @@ describe("area-well-analytics", () => {
     );
     expect(report.insightQuality.grade).toBe("low");
     expect(report.insightQuality.score).toBeLessThan(45);
+  });
+});
+
+describe("getLithParseError", () => {
+  it("reports unreadable well logs instead of an empty log", () => {
+    const row = { lithology_json: "{not json" };
+    expect(getLithLayers(row)).toEqual([]);
+    expect(getLithParseError(row)).toBeTruthy();
+  });
+
+  it("stays null for records with no log and for valid logs", () => {
+    expect(getLithParseError({ lithology_json: "" })).toBeNull();
+    expect(
+      getLithParseError({
+        lithology_json: JSON.stringify([{ top: 0, bottom: 10, formation: "sand" }]),
+      }),
+    ).toBeNull();
   });
 });

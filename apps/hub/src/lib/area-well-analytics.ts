@@ -4,6 +4,7 @@
  * chunk `lithology_json` stays raw for the embedded well viewer.
  */
 
+import { errorMessage } from "./errors";
 import { finalizeLithologyLayersForHub } from "./hub-lithology-normalize";
 
 export type WellRecord = Record<string, string | number | undefined>;
@@ -162,6 +163,18 @@ function lithologyArrayFromParsed(j: unknown): unknown[] {
  */
 const lithLayersCache = new WeakMap<WellRecord, unknown[]>();
 
+/** Why a record's stored well log could not be parsed, so callers can say so. */
+const lithParseErrors = new WeakMap<WellRecord, string>();
+
+/**
+ * Non-null when the record carries a well log that failed to parse, i.e. its
+ * empty layer list means "unreadable" rather than "none recorded".
+ */
+export function getLithParseError(w: WellRecord): string | null {
+  getLithLayers(w);
+  return lithParseErrors.get(w) ?? null;
+}
+
 export function getLithLayers(w: WellRecord): unknown[] {
   const cached = lithLayersCache.get(w);
   if (cached) return cached;
@@ -185,8 +198,10 @@ function parseLithLayersUncached(w: WellRecord): unknown[] {
       if (inner.startsWith("[") || inner.startsWith("{"))
         j = JSON.parse(inner) as unknown;
     }
+    lithParseErrors.delete(w);
     return lithologyArrayFromParsed(j);
-  } catch {
+  } catch (e) {
+    lithParseErrors.set(w, errorMessage(e, "unparseable lithology payload"));
     return [];
   }
 }

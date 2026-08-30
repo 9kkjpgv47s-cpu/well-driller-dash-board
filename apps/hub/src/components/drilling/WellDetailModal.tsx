@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { errorMessage } from "@/lib/errors";
 import type { WellRecord } from "@/lib/area-well-analytics";
-import { getLithLayers } from "@/lib/area-well-analytics";
+import { getLithLayers, getLithParseError } from "@/lib/area-well-analytics";
 import { fetchJson, isAbortError } from "@/lib/http/fetch-json";
 import { resolveWellRefNo } from "@/lib/well-identity";
 import { getWellDisplayDepthFtViewer } from "@/lib/viewer-well-map";
@@ -135,13 +135,11 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
       setDnrError(null);
       return;
     }
-    let hasLithCsv = false;
-    let lithParseError: string | null = null;
-    try {
-      hasLithCsv = getLithLayers(well).length > 0;
-    } catch (e) {
-      lithParseError = `Chunk well log could not be read: ${errorMessage(e, "unparseable lithology payload")}`;
-    }
+    const hasLithCsv = getLithLayers(well).length > 0;
+    const lithReadError = getLithParseError(well);
+    const lithParseError = lithReadError
+      ? `Chunk well log could not be read: ${lithReadError}`
+      : null;
 
     const base: DnrApi = hasLithCsv ? {} : { lithology: [] };
     setDnr({ loading: true });

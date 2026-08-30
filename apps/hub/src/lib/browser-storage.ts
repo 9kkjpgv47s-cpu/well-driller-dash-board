@@ -49,7 +49,12 @@ export function readStoredJson<T>(key: string): T | null {
 export function writeStoredJson(key: string, value: unknown): boolean {
   let serialized: string;
   try {
-    serialized = JSON.stringify(value);
+    const json = JSON.stringify(value);
+    if (json === undefined) {
+      logWarning("browser-storage", `${key} value is unserializable`);
+      return false;
+    }
+    serialized = json;
   } catch (e) {
     logWarning("browser-storage", `${key} value is unserializable`, e);
     return false;

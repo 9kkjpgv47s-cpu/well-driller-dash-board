@@ -70,7 +70,9 @@ async function fetchOpenElevationM(locations: Loc[]): Promise<(number | null)[]>
     results?: { elevation?: number | null }[];
   };
   if (!data?.results || data.results.length !== locations.length) {
-    return locations.map(() => null);
+    throw new Error(
+      `Open-Elevation returned ${data?.results?.length ?? "no"} results for ${locations.length} locations`,
+    );
   }
   return data.results.map((r) =>
     r.elevation != null && Number.isFinite(Number(r.elevation))
