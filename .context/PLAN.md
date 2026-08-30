@@ -15,27 +15,22 @@ From `PROJECT_OUTLINE.md` milestones + lithology execution report + hub README.
 
 Real parsed: 97.476% (target 90%). Parseable JSON: 100%. See `npm run verify:lithology-kpi`.
 
-### N2 — Fresh clone hub path verify
+### N2 — Fresh clone hub path verify — ✅ DONE 2026-08-30
 
-```bash
-python3 scripts/build_canonical_jsonl.py --from-full
-cd apps/hub && npm install && npm test && npm run dev
-```
+414,953 records built; 139/139 tests; build clean; `/` 200; both 503-prone APIs serve 200 w/ data. Evidence in PROGRESS.md.
 
-Exit: `/` loads; jobsite unlocks map/weather/insights.
+### N3 — Outline milestone: analytics service — PARTIAL
 
-### N3 — Outline milestone: analytics service
+- Neighborhood summaries: ✅ covered by `scripts/precompute_area_grid.py` (8/18)
+- Outlier flags: ❌ not covered — needs spec, Dom approval before implementation
 
-- Precompute neighborhood summaries + outlier flags  
-- Outline still future vs mock/cached optimization  
+### N4 — Trip context expansion — PARKED
 
-### N4 — Trip context expansion
+- Weather exists; traffic/routing still later (confirmed 2026-08-30)
 
-- Weather exists; traffic/routing later  
+### N5 — Community notes — BLOCKED
 
-### N5 — Community notes
-
-- Auth + storage + moderation hooks (blocked on Dom policy)
+- Auth + storage + moderation hooks (blocked on Dom policy — confirmed 2026-08-30)
 
 ## Non-work during `/ce`
 
