@@ -8,8 +8,8 @@ import { upstreamJsonHeaders } from "@/lib/http/upstream";
  */
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
-  if (!q || q.length < 3) {
-    return jsonError("Query `q` must be at least 3 characters.", 400);
+  if (!q || q.length < 3 || q.length > 200) {
+    return jsonError("Query `q` must be 3–200 characters.", 400);
   }
 
   const url = new URL("https://nominatim.openstreetmap.org/search");

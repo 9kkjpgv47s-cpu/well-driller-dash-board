@@ -24,6 +24,16 @@ function parseWindMph(raw: string): number | null {
   return m ? Number(m[1]) : null;
 }
 
+/** The follow-up forecast URL comes from the upstream payload — keep it on api.weather.gov. */
+function isWeatherGovUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    return u.protocol === "https:" && u.hostname === "api.weather.gov";
+  } catch {
+    return false;
+  }
+}
+
 export async function fetchNwsHourly(
   lat: number,
   lon: number,
@@ -38,7 +48,7 @@ export async function fetchNwsHourly(
     if (!pt.ok) return null;
     const pj = (await pt.json()) as PointsResponse;
     const hourlyUrl = pj.properties?.forecastHourly;
-    if (!hourlyUrl) return null;
+    if (!hourlyUrl || !isWeatherGovUrl(hourlyUrl)) return null;
 
     const fh = await fetch(hourlyUrl, { headers, next: { revalidate: 900 } });
     if (!fh.ok) return null;

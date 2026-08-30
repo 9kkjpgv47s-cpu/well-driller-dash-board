@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isValidLatLon } from "@/lib/api/geo-query";
 import { jsonError } from "@/lib/api/responses";
 import { upstreamJsonHeaders } from "@/lib/http/upstream";
 
@@ -93,8 +94,11 @@ export async function POST(req: NextRequest) {
   for (const p of locations) {
     const lat = Number(p.lat);
     const lon = Number(p.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return jsonError("Each location needs numeric lat and lon.", 400);
+    if (!isValidLatLon(lat, lon)) {
+      return jsonError(
+        "Each location needs lat in [-90, 90] and lon in [-180, 180].",
+        400,
+      );
     }
     normalized.push({ lat, lon });
   }
