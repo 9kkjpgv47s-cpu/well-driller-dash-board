@@ -1,7 +1,7 @@
 import type { WellRecord } from "@/lib/area-well-analytics";
 import { parseLatLonRadiusParams } from "@/lib/api/geo-query";
 import { getWellSpatialIndex } from "@/lib/well-spatial-index";
-import { sortWellsByDistance } from "@/lib/well-ordering";
+import { sortWellsByDistance, wellOrderKey } from "@/lib/well-ordering";
 import {
   DEFAULT_VIEWER_MAP_FILTERS,
   type ViewerMapFilters,
@@ -13,6 +13,8 @@ export const MAX_RADIUS_MILES = 25;
 export const DEFAULT_WELLS_NEARBY_RADIUS_MILES = 5;
 export const DEFAULT_WELLS_NEARBY_LIMIT = 500;
 export const MAX_WELLS_NEARBY_LIMIT = 2000;
+/** Lithology logs are bulky, so `lithology=1` responses stay small. */
+export const MAX_WELLS_NEARBY_LITHOLOGY_LIMIT = 200;
 
 /** Fields needed by map markers, depth/ASL views, and well detail. */
 export const MAP_WELL_FIELD_KEYS = [
@@ -43,11 +45,18 @@ export const MAP_WELL_FIELD_KEYS = [
   "report",
 ] as const;
 
+/** Extra fields returned only for `lithology=1` requests (ASL stratigraphy). */
+export const LITHOLOGY_WELL_FIELD_KEYS = [
+  "lithology_json",
+  "lithology_source",
+] as const;
+
 export type WellsNearbyInput = {
   lat: number;
   lon: number;
   radiusMiles: number;
   limit: number;
+  includeLithology?: boolean;
   filters?: ViewerMapFilters;
 };
 
@@ -59,7 +68,7 @@ export type WellsNearbyResult = {
 
 function parseBoolParam(
   sp: URLSearchParams,
-  key: keyof ViewerMapFilters,
+  key: string,
   fallback: boolean,
 ): boolean {
   const raw = sp.get(key);
@@ -143,25 +152,70 @@ export function parseWellsNearbyInput(
   );
   if ("error" in geo) return geo;
 
+  const includeLithology = parseBoolParam(sp, "lithology", false);
+  const maxLimit = includeLithology
+    ? MAX_WELLS_NEARBY_LITHOLOGY_LIMIT
+    : MAX_WELLS_NEARBY_LIMIT;
+
   const limitRaw = parseInt(sp.get("limit") ?? String(DEFAULT_WELLS_NEARBY_LIMIT), 10);
   const limit = Number.isFinite(limitRaw)
-    ? Math.min(MAX_WELLS_NEARBY_LIMIT, Math.max(1, limitRaw))
-    : DEFAULT_WELLS_NEARBY_LIMIT;
+    ? Math.min(maxLimit, Math.max(1, limitRaw))
+    : Math.min(maxLimit, DEFAULT_WELLS_NEARBY_LIMIT);
 
   return {
     ...geo,
     limit,
+    includeLithology,
     filters: parseHubViewerFiltersFromSearchParams(sp),
   };
 }
 
-export function compactWellForMap(w: WellRecord): WellRecord {
+export function compactWellForMap(
+  w: WellRecord,
+  includeLithology = false,
+): WellRecord {
   const out: WellRecord = {};
-  for (const key of MAP_WELL_FIELD_KEYS) {
+  const keys = includeLithology
+    ? [...MAP_WELL_FIELD_KEYS, ...LITHOLOGY_WELL_FIELD_KEYS]
+    : MAP_WELL_FIELD_KEYS;
+  for (const key of keys) {
     const v = w[key];
     if (v != null && v !== "") out[key] = v;
   }
   return out;
+}
+
+/**
+ * Copies lithology columns from a `lithology=1` response onto already-loaded
+ * well rows, matched on well identity. Rows that already carry a log and rows
+ * with no match are returned untouched; `wells` is returned as-is when nothing
+ * changes so React state stays referentially stable.
+ */
+export function mergeLithologyIntoWells(
+  wells: WellRecord[],
+  lithoRows: WellRecord[],
+): WellRecord[] {
+  const byKey = new Map<string, WellRecord>();
+  for (const row of lithoRows) {
+    if (hasLithologyJson(row)) byKey.set(wellOrderKey(row), row);
+  }
+  if (!byKey.size) return wells;
+
+  let changed = false;
+  const merged = wells.map((w) => {
+    if (hasLithologyJson(w)) return w;
+    const row = byKey.get(wellOrderKey(w));
+    if (!row) return w;
+    changed = true;
+    const next: WellRecord = { ...w, lithology_json: row.lithology_json };
+    if (row.lithology_source != null) next.lithology_source = row.lithology_source;
+    return next;
+  });
+  return changed ? merged : wells;
+}
+
+function hasLithologyJson(w: WellRecord): boolean {
+  return w.lithology_json != null && String(w.lithology_json).trim() !== "";
 }
 
 export function queryWellsNearby(
@@ -185,7 +239,9 @@ export function queryWellsNearby(
   }
 
   const truncated = candidates.length > input.limit;
-  const wells = candidates.slice(0, input.limit).map(compactWellForMap);
+  const wells = candidates
+    .slice(0, input.limit)
+    .map((w) => compactWellForMap(w, input.includeLithology === true));
 
   return { wells, totalInRadius, truncated };
 }

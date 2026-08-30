@@ -5,7 +5,10 @@ import {
   dnrWellsUnavailable,
   jsonError,
 } from "@/lib/api/responses";
-import { getDnrWellsBaseCachedForApi } from "@/lib/dnr-wells-server-cache";
+import {
+  getDnrWellsBaseCachedForApi,
+  getDnrWellsFullCachedForApi,
+} from "@/lib/dnr-wells-server-cache";
 import {
   parseWellsNearbyInput,
   queryWellsNearby,
@@ -16,10 +19,14 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 /**
- * GET /api/wells-nearby?lat=&lon=&radius=&limit=
+ * GET /api/wells-nearby?lat=&lon=&radius=&limit=&lithology=
  *
  * Radius-limited well rows for map markers and field views — avoids shipping
  * the full ~415k registry to the browser.
+ *
+ * `lithology=1` serves from the full (base + litho) cache and adds the
+ * lithology columns, for the ASL stratigraphy view. Those responses are capped
+ * at a smaller limit because the logs are bulky.
  *
  * On Vercel cold start, loading all gz chunks can exceed the platform budget.
  * We use a bounded cache load and return **503** so the client falls back to
@@ -31,7 +38,9 @@ export async function GET(req: NextRequest) {
 
   let allWells;
   try {
-    allWells = await getDnrWellsBaseCachedForApi();
+    allWells = input.includeLithology
+      ? await getDnrWellsFullCachedForApi()
+      : await getDnrWellsBaseCachedForApi();
   } catch (e) {
     return dnrWellsUnavailable(e);
   }
