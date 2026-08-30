@@ -569,12 +569,11 @@ function yieldBreakdownText(values: number[], label: string): string | null {
 }
 
 /**
- * When registry aquifer text is blank, infer a bucket from lithology, completed
- * depth vs rock top, and location type (Illinois / multi-state exports often omit aquifer).
+ * When registry aquifer text is blank, infer a **formation** bucket from lithology,
+ * completed depth vs rock top. Location "estimated" is NOT a formation class —
+ * estimated wells still need rock vs uncon for mix / filters (dual-label).
  */
 function inferAquiferForMix(w: WellRecord): string {
-  const loc = String(w.loc_type ?? w.location_type ?? "").toLowerCase();
-  if (loc.includes("estimated")) return "estimated";
   const gt = chunkGravelThicknessFt(w);
   if (gt != null && gt >= 1) return "unconsolidated";
   const rockTop = lithoDepthToRockFt(w);
@@ -583,7 +582,12 @@ function inferAquiferForMix(w: WellRecord): string {
   const thin = Math.min(AREA_INSIGHTS_GRAVEL_MIN_THICK_FT, 0.5);
   if (countGravelLikeIntervals(w, thin) >= 1) return "unconsolidated";
   const lay = lithologyLayersForStats(w);
-  if (!lay.length) return "";
+  if (!lay.length) {
+    // No lithology: only then fall back to location-estimated as soft bucket
+    const loc = String(w.loc_type ?? w.location_type ?? "").toLowerCase();
+    if (loc.includes("estimated")) return "estimated";
+    return "";
+  }
   const last = formationName(lay[lay.length - 1]).toLowerCase();
   const hasSand =
     /sand|grav|drift|fill|till|outwash|alluv|esker|kame|muck|topsoil|loess|silty|loam/i.test(
@@ -596,6 +600,8 @@ function inferAquiferForMix(w: WellRecord): string {
   if (hasSand && (!hasRock || /sand|grav|drift/i.test(last)))
     return "unconsolidated";
   if (hasRock && !/sand|grav|drift|fill|till/i.test(last)) return "bedrock";
+  const loc = String(w.loc_type ?? w.location_type ?? "").toLowerCase();
+  if (loc.includes("estimated")) return "estimated";
   return "";
 }
 
@@ -675,10 +681,26 @@ export function computeAreaInsights(
     const aqTrim = aqText.trim();
     if (aqTrim) covAq++;
     const aqLower = aqText.toLowerCase();
-    const mixLower = aqTrim ? aqLower : inferAquiferForMix(w);
+    const locEstimated =
+      aqLower.includes("estimated") ||
+      String(w.loc_type ?? w.location_type ?? "")
+        .toLowerCase()
+        .includes("estimated");
+    // Formation mix: prefer lithology inference when registry only says "estimated"
+    // so unverified wells still land in unconsolidated vs bedrock.
+    const registryIsEstimatedOnly =
+      aqTrim &&
+      aqLower.includes("estimated") &&
+      !/\bunconsolidated\b|\bsand\b|\bgravel\b|\bbedrock\b|\blimestone\b|\bdolomite\b/i.test(
+        aqLower.replace(/estimated/gi, ""),
+      );
+    const mixLower =
+      !aqTrim || registryIsEstimatedOnly
+        ? inferAquiferForMix(w) || (registryIsEstimatedOnly ? "estimated" : "")
+        : aqLower;
     if (
       mixLower.includes("unconsolidated") ||
-      mixLower.includes("sand") ||
+      (mixLower.includes("sand") && !mixLower.includes("sandstone")) ||
       mixLower.includes("gravel")
     )
       aquiferMix.unconsolidated++;
@@ -688,10 +710,12 @@ export function computeAreaInsights(
       mixLower.includes("dolomite")
     )
       aquiferMix.bedrock++;
-    else if (mixLower.includes("estimated")) aquiferMix.estimated++;
+    else if (mixLower.includes("estimated") || locEstimated)
+      aquiferMix.estimated++;
     else if (mixLower.trim()) aquiferMix.other++;
     else aquiferMix.blank++;
 
+    // Registry text as published (estimated stays exclusive here — location quality).
     if (!aqTrim) registryAquifer.blank++;
     else if (aqLower.includes("estimated")) registryAquifer.estimated++;
     else if (

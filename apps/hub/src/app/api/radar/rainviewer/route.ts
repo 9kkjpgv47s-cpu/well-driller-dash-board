@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { cachedJson, jsonError } from "@/lib/api/responses";
 
 const UPSTREAM = "https://api.rainviewer.com/public/weather-maps.json";
 
@@ -6,15 +6,8 @@ const UPSTREAM = "https://api.rainviewer.com/public/weather-maps.json";
 export async function GET() {
   const res = await fetch(UPSTREAM, { next: { revalidate: 60 } });
   if (!res.ok) {
-    return NextResponse.json(
-      { error: "RainViewer map index unavailable" },
-      { status: 502 },
-    );
+    return jsonError("RainViewer map index unavailable", 502);
   }
   const data: unknown = await res.json();
-  return NextResponse.json(data, {
-    headers: {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-    },
-  });
+  return cachedJson(data, 60);
 }

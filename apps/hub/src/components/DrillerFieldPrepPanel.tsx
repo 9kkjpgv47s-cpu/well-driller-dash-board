@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { fetchJson, isAbortError } from "@/lib/http/fetch-json";
 import { DEFAULT_AREA_RADIUS_MILES } from "@/lib/hub-area-defaults";
 import type { OptimizationResult } from "@/lib/optimization";
 
@@ -32,19 +33,12 @@ export function DrillerFieldPrepPanel({
     });
     setLoading(true);
     setError(null);
-    fetch(`/api/optimization?${q}`, { signal: ctrl.signal })
-      .then(async (r) => {
-        const data = (await r.json()) as { error?: string };
-        if (!r.ok) {
-          throw new Error(
-            typeof data.error === "string" ? data.error : r.statusText,
-          );
-        }
-        return data as OptimizationResult;
-      })
+    fetchJson<OptimizationResult>(`/api/optimization?${q}`, {
+      signal: ctrl.signal,
+    })
       .then(setResult)
       .catch((e: Error) => {
-        if (e.name === "AbortError") return;
+        if (isAbortError(e)) return;
         setError(e.message);
         setResult(null);
       })

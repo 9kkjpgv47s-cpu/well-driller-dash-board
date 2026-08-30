@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonError } from "@/lib/api/responses";
+import { upstreamJsonHeaders } from "@/lib/http/upstream";
 
 /**
  * Server-side forward geocode (Nominatim). Indiana jobsites — no browser CORS.
@@ -7,10 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
   if (!q || q.length < 3 || q.length > 200) {
-    return NextResponse.json(
-      { error: "Query `q` must be 3–200 characters." },
-      { status: 400 },
-    );
+    return jsonError("Query `q` must be 3–200 characters.", 400);
   }
 
   const url = new URL("https://nominatim.openstreetmap.org/search");
@@ -19,18 +18,12 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("limit", "5");
 
   const res = await fetch(url.toString(), {
-    headers: {
-      "User-Agent": "DrillerDashboardHub/1.0 (field planning; contact: local)",
-      Accept: "application/json",
-    },
+    headers: upstreamJsonHeaders(),
     next: { revalidate: 86400 },
   });
 
   if (!res.ok) {
-    return NextResponse.json(
-      { error: `Geocoder returned ${res.status}` },
-      { status: 502 },
-    );
+    return jsonError(`Geocoder returned ${res.status}`, 502);
   }
 
   const data = (await res.json()) as {

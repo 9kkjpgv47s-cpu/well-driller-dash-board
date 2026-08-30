@@ -1,9 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { computeAreaInsights } from "@/lib/area-well-analytics";
-import { getDnrWellsServerCached } from "@/lib/dnr-wells-server-cache";
+import { parseLatLonRadiusParams } from "@/lib/api/geo-query";
+import {
+  cachedJson,
+  clientChunkFallback,
+  dnrWellsUnavailable,
+  jsonError,
+} from "@/lib/api/responses";
+import { getDnrWellsFullCachedForApi } from "@/lib/dnr-wells-server-cache";
 import { getWellSpatialIndex } from "@/lib/well-spatial-index";
+import { MAX_RADIUS_MILES } from "@/lib/wells-nearby";
 
-const MAX_RADIUS_MILES = 25;
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 /**
  * GET /api/area-insights?lat=&lon=&radius=
@@ -14,54 +23,35 @@ const MAX_RADIUS_MILES = 25;
  * Foundation for moving heavy analytics off low-power field devices.
  */
 export async function GET(req: NextRequest) {
-  const sp = req.nextUrl.searchParams;
-  const lat = parseFloat(sp.get("lat") ?? "");
-  const lon = parseFloat(sp.get("lon") ?? "");
-  const radius = parseFloat(sp.get("radius") ?? sp.get("radiusMiles") ?? "");
-
-  if (
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lon) ||
-    lat < -90 ||
-    lat > 90 ||
-    lon < -180 ||
-    lon > 180
-  ) {
-    return NextResponse.json(
-      { error: "Invalid or missing `lat` / `lon` query parameters." },
-      { status: 400 },
-    );
-  }
-  if (!Number.isFinite(radius) || radius <= 0 || radius > MAX_RADIUS_MILES) {
-    return NextResponse.json(
-      { error: `Invalid \`radius\` — expected miles in (0, ${MAX_RADIUS_MILES}].` },
-      { status: 400 },
-    );
-  }
+  const params = parseLatLonRadiusParams(
+    req.nextUrl.searchParams,
+    MAX_RADIUS_MILES,
+  );
+  if ("error" in params) return jsonError(params.error, 400);
+  const { lat, lon, radiusMiles } = params;
 
   let wells;
   try {
-    wells = await getDnrWellsServerCached();
+    wells = await getDnrWellsFullCachedForApi();
   } catch (e) {
-    return NextResponse.json(
-      {
-        error:
-          e instanceof Error
-            ? e.message
-            : "Failed to load DNR chunk data on the server.",
-      },
-      { status: 503 },
-    );
+    return dnrWellsUnavailable(e);
   }
 
-  const inRadius = getWellSpatialIndex(wells).queryRadius(lat, lon, radius);
-  const report = computeAreaInsights(wells, lat, lon, radius, {
-    wellsInRadius: inRadius,
-  });
+  try {
+    const inRadius = getWellSpatialIndex(wells).queryRadius(
+      lat,
+      lon,
+      radiusMiles,
+    );
+    const report = computeAreaInsights(wells, lat, lon, radiusMiles, {
+      wellsInRadius: inRadius,
+    });
 
-  return NextResponse.json(report, {
-    headers: {
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
-    },
-  });
+    return cachedJson(report, 300);
+  } catch (e) {
+    return clientChunkFallback(
+      e,
+      "Area insights query failed on the server.",
+    );
+  }
 }

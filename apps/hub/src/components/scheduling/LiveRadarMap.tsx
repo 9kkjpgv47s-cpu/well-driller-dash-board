@@ -2,6 +2,7 @@
 
 import type { CircleMarker, Map as LeafletMap, TileLayer } from "leaflet";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fetchJson, isAbortError } from "@/lib/http/fetch-json";
 import "leaflet/dist/leaflet.css";
 
 type RainViewerFrame = { time: number; path: string };
@@ -52,14 +53,7 @@ export function LiveRadarMap({ lat, lon, className = "h-72" }: Props) {
     const ctrl = new AbortController();
     setMetaErr(null);
     setMaps(null);
-    fetch("/api/radar/rainviewer", { signal: ctrl.signal })
-      .then(async (r) => {
-        if (!r.ok) {
-          const j = await r.json().catch(() => ({}));
-          throw new Error((j as { error?: string }).error ?? r.statusText);
-        }
-        return r.json() as Promise<RainViewerMaps>;
-      })
+    fetchJson<RainViewerMaps>("/api/radar/rainviewer", { signal: ctrl.signal })
       .then((m) => {
         const merged = mergeFrames(m);
         if (!m.host || !merged.length) {
@@ -69,7 +63,7 @@ export function LiveRadarMap({ lat, lon, className = "h-72" }: Props) {
         setFrameIndex(merged.length - 1);
       })
       .catch((e: Error) => {
-        if (e.name === "AbortError") return;
+        if (isAbortError(e)) return;
         setMetaErr(e.message);
         setMaps(null);
       });

@@ -55,6 +55,20 @@ describe("extractCoordinates", () => {
       lon: -85.789937,
     });
   });
+
+  it("parses Google Maps @lat,lon", () => {
+    expect(extractCoordinates("https://maps.google.com/?q=@40.1,-85.79")).toEqual({
+      lat: 40.1,
+      lon: -85.79,
+    });
+  });
+
+  it("adds minus for unsigned Indiana west longitudes", () => {
+    expect(extractCoordinates("39.76, 86.45")).toEqual({
+      lat: 39.76,
+      lon: -86.45,
+    });
+  });
 });
 
 describe("extractAddress", () => {

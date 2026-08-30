@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { WellRecord } from "@/lib/area-well-analytics";
 import { getLithLayers } from "@/lib/area-well-analytics";
+import { fetchJsonOrFallback } from "@/lib/http/fetch-json";
 import { resolveWellRefNo } from "@/lib/well-identity";
 import { getWellDisplayDepthFtViewer } from "@/lib/viewer-well-map";
 
@@ -142,22 +143,14 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
     setDnr({ loading: true });
     const api = `/api/dnr-report?refNo=${encodeURIComponent(refNo)}`;
 
-    if (hasLithCsv) {
-      fetch(api)
-        .then((r) => (r.ok ? r.json() : {}))
-        .then((apiDnr: DnrApi) => {
-          setDnr({ ...mergeDnr({}, apiDnr), loading: false });
-        })
-        .catch(() => setDnr({ loading: false }));
-      return;
-    }
+    /** Wells without CSV lithology fall back to an empty lithology list. */
+    const base: DnrApi = hasLithCsv ? {} : { lithology: [] };
 
-    fetch(api)
-      .then((r) => (r.ok ? r.json() : {}))
-      .then((apiDnr: DnrApi) => {
-        setDnr({ ...mergeDnr({ lithology: [] }, apiDnr), loading: false });
+    fetchJsonOrFallback<DnrApi>(api, {})
+      .then((apiDnr) => {
+        setDnr({ ...mergeDnr(base, apiDnr), loading: false });
       })
-      .catch(() => setDnr({ loading: false, lithology: [] }));
+      .catch(() => setDnr({ ...base, loading: false }));
   }, [well]);
 
   if (!well) return null;
