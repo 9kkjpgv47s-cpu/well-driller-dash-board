@@ -26,6 +26,10 @@ import {
   shallowestWellsByDepth,
   wellOrderKey,
 } from "@/lib/well-ordering";
+import {
+  MAX_WELLS_NEARBY_LITHOLOGY_LIMIT,
+  mergeLithologyIntoWells,
+} from "@/lib/wells-nearby";
 import type { ChunkLoadProgress } from "@/lib/dnr-chunk-browser";
 import { getDnrWellsBaseCached, getDnrWellsFullCached } from "@/lib/dnr-wells-cache";
 import { wellRecordToDrillerEntry } from "@/lib/drilling-well-entry";
@@ -200,6 +204,9 @@ export function DrillingHubClient() {
   const [detailWell, setDetailWell] = useState<WellRecord | null>(null);
 
   const [areaWells, setAreaWells] = useState<WellRecord[]>([]);
+  /** Lithology rows hydrated for the ASL view (see effect below). */
+  const [lithoRows, setLithoRows] = useState<WellRecord[]>([]);
+  const lithoHydrateKeyRef = useRef<string | null>(null);
   const [areaInsights, setAreaInsights] = useState<AreaInsightsReport | null>(
     null,
   );
@@ -562,15 +569,20 @@ export function DrillingHubClient() {
     return () => ac.abort();
   }, [center, radiusMiles, depthRadiusMiles, loadWellsFallback]);
 
+  const wellsWithLithology = useMemo(
+    () => mergeLithologyIntoWells(areaWells, lithoRows),
+    [areaWells, lithoRows],
+  );
+
   const wellsInRadius = useMemo(() => {
     if (!center) return [];
     return wellsWithinRadiusIndexed(
-      areaWells,
+      wellsWithLithology,
       center.lat,
       center.lon,
       radiusMiles,
     );
-  }, [areaWells, center, radiusMiles]);
+  }, [wellsWithLithology, center, radiusMiles]);
 
   const wellsMatchingMapFilters = useMemo(
     () => wellsInRadius.filter((w) => wellPassesHubViewerFilters(w, mapFilters)),
@@ -580,12 +592,12 @@ export function DrillingHubClient() {
   const wellsInDepthRadius = useMemo(() => {
     if (!center) return [];
     return wellsWithinRadiusIndexed(
-      areaWells,
+      wellsWithLithology,
       center.lat,
       center.lon,
       depthRadiusMiles,
     );
-  }, [areaWells, center, depthRadiusMiles]);
+  }, [wellsWithLithology, center, depthRadiusMiles]);
 
   const wellsMatchingDepthFilters = useMemo(
     () =>
@@ -631,6 +643,8 @@ export function DrillingHubClient() {
     setDemGroundElevFtByKey(null);
     setElevError(null);
     aslElevAutoKeyRef.current = null;
+    setLithoRows([]);
+    lithoHydrateKeyRef.current = null;
   }, [center?.lat, center?.lon]);
 
   const fetchGroundElevations = useCallback(
@@ -683,6 +697,33 @@ export function DrillingHubClient() {
     },
     [center, nearestWellsForElev],
   );
+
+  /**
+   * `/api/wells-nearby` serves base chunks without lithology, so the ASL view
+   * hydrates logs for the depth radius from the lithology-bearing endpoint.
+   */
+  useEffect(() => {
+    if (workspaceView !== "asl" || !center) return;
+    const hydrateKey = `${center.lat},${center.lon},${depthRadiusMiles}`;
+    if (lithoHydrateKeyRef.current === hydrateKey) return;
+    lithoHydrateKeyRef.current = hydrateKey;
+
+    const ac = new AbortController();
+    const url = `/api/wells-nearby?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(depthRadiusMiles))}&limit=${MAX_WELLS_NEARBY_LITHOLOGY_LIMIT}&lithology=1`;
+
+    void (async () => {
+      try {
+        const rows = await fetchJson<WellRecord[]>(url, { signal: ac.signal });
+        if (ac.signal.aborted || !Array.isArray(rows)) return;
+        setLithoRows(rows);
+      } catch {
+        // Lithology stays unavailable; the ASL panel shows its own empty state.
+        if (!ac.signal.aborted) lithoHydrateKeyRef.current = null;
+      }
+    })();
+
+    return () => ac.abort();
+  }, [workspaceView, center, depthRadiusMiles]);
 
   const aslElevTargetWells = useMemo(() => {
     return wellsMatchingDepthFilters.filter((w) => getLithLayers(w).length > 0);
