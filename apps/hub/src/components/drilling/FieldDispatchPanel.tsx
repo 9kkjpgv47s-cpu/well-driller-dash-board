@@ -356,7 +356,11 @@ export function FieldDispatchPanel({
     setGeocodeBusy(true);
     setGeocodeError(null);
     try {
-      setGeocodeError(await geocodeAddressToJobsite(parsed, retryAddress));
+      const failure = await geocodeAddressToJobsite(parsed, retryAddress);
+      setGeocodeError(failure);
+      setGenerateHint(
+        failure ? failure : "Jobsite set from geocoded street address.",
+      );
     } finally {
       setGeocodeBusy(false);
     }
