@@ -18,7 +18,7 @@ import {
   buildJobShareUrl,
 } from "@/lib/job-share";
 import { directionsLinksForDispatch } from "@/lib/navigation-links";
-import { logWarning } from "@/lib/errors";
+import { errorMessage, logWarning } from "@/lib/errors";
 
 type Props = {
   /** Called when dispatch paste includes GPS coordinates (not address stubs). */
@@ -208,12 +208,85 @@ export function FieldDispatchPanel({
 
   const [generateBusy, setGenerateBusy] = useState(false);
   const [generateHint, setGenerateHint] = useState<string | null>(null);
+  const [geocodeBusy, setGeocodeBusy] = useState(false);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
+
+  /**
+   * Resolves an address to a jobsite through /api/geocode and applies it to the
+   * brief and the map. Returns null on success, otherwise the reason to show.
+   */
+  const geocodeAddressToJobsite = useCallback(
+    async (
+      result: DispatchParseResult,
+      address: string,
+    ): Promise<string | null> => {
+      type GeocodeBody = {
+        results?: { lat: number; lon: number; label?: string }[];
+        error?: string;
+      };
+      let data: GeocodeBody;
+      try {
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(address)}`);
+        data = (await res.json().catch(() => ({}))) as GeocodeBody;
+        if (!res.ok) {
+          return (
+            data.error ||
+            "Could not geocode that address — paste GPS coordinates if you have them."
+          );
+        }
+      } catch (e) {
+        logWarning("FieldDispatchPanel", "geocode request failed", e);
+        return `Address lookup failed — ${errorMessage(e, "network error")}.`;
+      }
+
+      const hit = data.results?.find(
+        (r) => Number.isFinite(r.lat) && Number.isFinite(r.lon),
+      );
+      if (!hit) {
+        return "No map match for that address — try a simpler street line or paste lat/lon.";
+      }
+
+      const applied: DispatchParseResult = {
+        ...result,
+        lat: hit.lat,
+        lon: hit.lon,
+        locationSource: "coordinates",
+        warnings: result.warnings.filter(
+          (w) => !/stub|latitude|longitude/i.test(w),
+        ),
+      };
+      setParsed(applied);
+      onParsed?.(applied);
+
+      const feet = parseDistanceOffDriveFt(applied.distanceOffDrive);
+      const title = applied.title ?? applied.address ?? hit.label ?? null;
+      onApplyToFieldMap({
+        lat: hit.lat,
+        lon: hit.lon,
+        title,
+        distanceOffDriveFt: feet,
+      });
+      saveDispatchSession({
+        raw,
+        lat: hit.lat,
+        lon: hit.lon,
+        title,
+        feetOffDrive: feet,
+      });
+      setSavedHint(
+        "Saved on this phone/browser — survives refresh until you paste a new dispatch.",
+      );
+      return null;
+    },
+    [onApplyToFieldMap, onParsed, raw],
+  );
 
   const generate = useCallback(async () => {
     setGenerateBusy(true);
     setGenerateHint(null);
+    setGeocodeError(null);
     try {
-      let result = parseDispatchEmail(raw);
+      const result = parseDispatchEmail(raw);
       setParsed(result);
       onParsed?.(result);
 
@@ -245,57 +318,17 @@ export function FieldDispatchPanel({
       // Address without GPS: geocode so wells still load around the real street.
       if (result.address && result.address.trim().length >= 5) {
         setGenerateHint("Looking up address on the map…");
-        const res = await fetch(
-          `/api/geocode?q=${encodeURIComponent(result.address.trim())}`,
+        const failure = await geocodeAddressToJobsite(
+          result,
+          result.address.trim(),
         );
-        const data = (await res.json().catch(() => ({}))) as {
-          results?: { lat: number; lon: number; label?: string }[];
-          error?: string;
-        };
-        if (!res.ok) {
+        if (failure) {
           saveDispatchSession({ raw, title: result.title });
-          setGenerateHint(
-            data.error ||
-              "Could not geocode that address — paste GPS coordinates if you have them.",
-          );
+          setGeocodeError(failure);
+          setGenerateHint(failure);
           return;
         }
-        const hit = data.results?.find(
-          (r) => Number.isFinite(r.lat) && Number.isFinite(r.lon),
-        );
-        if (!hit) {
-          saveDispatchSession({ raw, title: result.title });
-          setGenerateHint(
-            "No map match for that address — try a simpler street line or paste lat/lon.",
-          );
-          return;
-        }
-        result = {
-          ...result,
-          lat: hit.lat,
-          lon: hit.lon,
-          locationSource: "coordinates",
-          warnings: result.warnings.filter(
-            (w) => !/stub|latitude|longitude/i.test(w),
-          ),
-        };
-        setParsed(result);
-        onParsed?.(result);
-        const feet = parseDistanceOffDriveFt(result.distanceOffDrive);
-        onApplyToFieldMap({
-          lat: hit.lat,
-          lon: hit.lon,
-          title: result.title ?? result.address,
-          distanceOffDriveFt: feet,
-        });
-        saveDispatchSession({
-          raw,
-          lat: hit.lat,
-          lon: hit.lon,
-          title: result.title ?? result.address,
-          feetOffDrive: feet,
-        });
-        setSavedHint("Saved on this phone/browser — survives refresh until you paste a new dispatch.");
+        setGeocodeError(null);
         setGenerateHint("Jobsite set from geocoded street address.");
         return;
       }
@@ -307,7 +340,27 @@ export function FieldDispatchPanel({
     } finally {
       setGenerateBusy(false);
     }
-  }, [raw, onApplyToFieldMap, onParsed]);
+  }, [raw, geocodeAddressToJobsite, onApplyToFieldMap, onParsed]);
+
+  /** Address parsed but still no jobsite (geocoder down, or paste predates it). */
+  const retryAddress =
+    !jobsiteCoords &&
+    parsed?.locationSource === "address_only" &&
+    parsed.address &&
+    parsed.address.trim().length >= 3
+      ? parsed.address.trim()
+      : null;
+
+  const retryGeocodeAddress = useCallback(async () => {
+    if (!parsed || !retryAddress) return;
+    setGeocodeBusy(true);
+    setGeocodeError(null);
+    try {
+      setGeocodeError(await geocodeAddressToJobsite(parsed, retryAddress));
+    } finally {
+      setGeocodeBusy(false);
+    }
+  }, [geocodeAddressToJobsite, parsed, retryAddress]);
 
   const clearSaved = useCallback(() => {
     if (persistTimerRef.current != null) {
@@ -319,6 +372,7 @@ export function FieldDispatchPanel({
     setParsed(null);
     setSavedHint(null);
     setGenerateHint(null);
+    setGeocodeError(null);
     onClearSaved?.();
   }, [onClearSaved]);
 
@@ -407,6 +461,31 @@ export function FieldDispatchPanel({
           <p className="mt-2 text-xs text-[var(--muted)]" role="status">
             {savedHint}
           </p>
+        ) : null}
+        {retryAddress ? (
+          <div className="mt-4 space-y-2 rounded-lg border border-emerald-300 bg-emerald-50/80 p-4 dark:border-emerald-800 dark:bg-emerald-950/40">
+            <p className="text-sm text-emerald-950 dark:text-emerald-100">
+              We have an address but no GPS coordinates for the map yet:
+              <br />
+              <strong>{retryAddress}</strong>
+            </p>
+            <button
+              type="button"
+              onClick={() => void retryGeocodeAddress()}
+              disabled={geocodeBusy}
+              className="btn-primary disabled:opacity-50"
+            >
+              {geocodeBusy ? "Geocoding…" : "Geocode address"}
+            </button>
+            {geocodeError ? (
+              <p
+                className="text-sm text-red-600 dark:text-red-400"
+                role="alert"
+              >
+                {geocodeError}
+              </p>
+            ) : null}
+          </div>
         ) : null}
 
       </section>

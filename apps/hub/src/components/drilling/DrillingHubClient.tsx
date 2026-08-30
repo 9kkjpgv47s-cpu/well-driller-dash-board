@@ -34,10 +34,7 @@ import {
   DEFAULT_AREA_RADIUS_MILES,
   DEFAULT_DEPTH_VIEW_RADIUS_MILES,
 } from "@/lib/hub-area-defaults";
-import type {
-  DispatchJobsiteApply,
-  DispatchParseResult,
-} from "@/lib/dispatch-parse";
+import type { DispatchJobsiteApply } from "@/lib/dispatch-parse";
 import { parseDispatchEmail } from "@/lib/dispatch-parse";
 import {
   clearDispatchSession,
@@ -213,11 +210,6 @@ export function DrillingHubClient() {
   const [insightsLoading, setInsightsLoading] = useState(false);
   const fallbackAttemptedRef = useRef(false);
 
-  const [lastParsedDispatch, setLastParsedDispatch] =
-    useState<DispatchParseResult | null>(null);
-  const [geocoding, setGeocoding] = useState(false);
-  const [geocodeError, setGeocodeError] = useState<string | null>(null);
-
   const [toast, setToast] = useState<string | null>(null);
 
   const [demRefGroundElevFt, setDemRefGroundElevFt] = useState<number | null>(
@@ -345,7 +337,6 @@ export function DrillingHubClient() {
     sharedJobLoadedRef.current = true;
     const parsed = parseDispatchEmail(cached.raw);
     setDispatchHydrate({ raw: cached.raw, parsed });
-    setLastParsedDispatch(parsed);
     if (
       cached.lat != null &&
       cached.lon != null &&
@@ -764,73 +755,16 @@ export function DrillingHubClient() {
     }
   }, []);
 
-  const handleDispatchParsed = useCallback((parsed: DispatchParseResult) => {
-    setLastParsedDispatch(parsed);
-    setGeocodeError(null);
-  }, []);
-
   const handleClearSavedDispatch = useCallback(() => {
     clearDispatchSession();
     setCenter(null);
     setDispatchContext(null);
     setDispatchHydrate(null);
-    setLastParsedDispatch(null);
     setAreaWells([]);
     setAreaInsights(null);
     setAreaInsightsForDepth(null);
-    setGeocodeError(null);
     sharedJobLoadedRef.current = false;
   }, []);
-
-  /** Address parsed but no GPS in the paste — offer server-side geocoding. */
-  const geocodableAddress =
-    !center &&
-    lastParsedDispatch?.locationSource === "address_only" &&
-    lastParsedDispatch.address
-      ? lastParsedDispatch.address
-      : null;
-
-  const geocodeDispatchAddress = useCallback(async () => {
-    if (!geocodableAddress) return;
-    setGeocoding(true);
-    setGeocodeError(null);
-    try {
-      const data = await fetchJson<{
-        results?: { lat: number; lon: number; label: string }[];
-      }>(`/api/geocode?q=${encodeURIComponent(geocodableAddress)}`);
-      const hit = data.results?.find(
-        (r) => Number.isFinite(r.lat) && Number.isFinite(r.lon),
-      );
-      if (!hit) {
-        throw new Error(
-          "No geocoder match for that address. Try simplifying it or paste GPS coordinates.",
-        );
-      }
-      setCenter({ lat: hit.lat, lon: hit.lon });
-      const title =
-        lastParsedDispatch?.title ?? lastParsedDispatch?.address ?? hit.label;
-      setDispatchContext({
-        title,
-        feetOffDrive: undefined,
-      });
-      setMapFilters({ ...DEFAULT_VIEWER_MAP_FILTERS });
-      const cached = loadDispatchSession();
-      if (cached?.raw) {
-        saveDispatchSession({
-          raw: cached.raw,
-          lat: hit.lat,
-          lon: hit.lon,
-          title,
-        });
-      }
-    } catch (e) {
-      setGeocodeError(
-        e instanceof Error ? e.message : "Geocoding failed — try again.",
-      );
-    } finally {
-      setGeocoding(false);
-    }
-  }, [geocodableAddress, lastParsedDispatch]);
 
   const wellsForMap = useMemo(() => {
     if (!demGroundElevFtByKey?.size) return wellsInRadius;
@@ -887,7 +821,6 @@ export function DrillingHubClient() {
     <div className="field-hub-scope space-y-8">
       <FieldDispatchPanel
         onApplyToFieldMap={applyDispatchJobsite}
-        onParsed={handleDispatchParsed}
         jobsiteCoords={center}
         feetOffDrive={dispatchContext?.feetOffDrive}
         initialRaw={dispatchHydrate?.raw}
@@ -1276,31 +1209,6 @@ export function DrillingHubClient() {
               analysis once a jobsite location is known.
             </li>
           </ol>
-          {geocodableAddress ? (
-            <div className="space-y-2 rounded-lg border border-emerald-300 bg-emerald-50/80 p-4 dark:border-emerald-800 dark:bg-emerald-950/40">
-              <p className="text-sm text-emerald-950 dark:text-emerald-100">
-                We found an address but no GPS coordinates in the paste:
-                <br />
-                <strong>{geocodableAddress}</strong>
-              </p>
-              <button
-                type="button"
-                onClick={() => void geocodeDispatchAddress()}
-                disabled={geocoding}
-                className="btn-primary disabled:opacity-50"
-              >
-                {geocoding ? "Geocoding…" : "Geocode address"}
-              </button>
-              {geocodeError ? (
-                <p
-                  className="text-sm text-red-600 dark:text-red-400"
-                  role="alert"
-                >
-                  {geocodeError}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
         </section>
       )}
 
