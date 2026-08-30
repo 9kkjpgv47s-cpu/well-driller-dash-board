@@ -3,7 +3,21 @@ import {
   INVALID_LAT_LON_ERROR,
   isValidLatLon,
   parseLatLonRadiusParams,
+  parseNumericParam,
 } from "./geo-query";
+
+describe("parseNumericParam", () => {
+  it("parses fully numeric values", () => {
+    expect(parseNumericParam(" -85.7 ")).toBe(-85.7);
+    expect(parseNumericParam("1e2")).toBe(100);
+  });
+
+  it("rejects missing, blank, and partially numeric values", () => {
+    expect(parseNumericParam(null)).toBeNaN();
+    expect(parseNumericParam("   ")).toBeNaN();
+    expect(parseNumericParam("40junk")).toBeNaN();
+  });
+});
 
 describe("isValidLatLon", () => {
   it("accepts in-range finite coordinates", () => {
@@ -37,6 +51,15 @@ describe("parseLatLonRadiusParams", () => {
   it("reports invalid coordinates", () => {
     expect(parse("lon=-85&radius=5")).toEqual({
       error: INVALID_LAT_LON_ERROR,
+    });
+    expect(parse("lat=40junk&lon=-85&radius=5")).toEqual({
+      error: INVALID_LAT_LON_ERROR,
+    });
+  });
+
+  it("rejects a partially numeric radius", () => {
+    expect(parse("lat=40&lon=-85&radius=5junk")).toEqual({
+      error: "Invalid `radius` — expected miles in (0, 25].",
     });
   });
 

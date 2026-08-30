@@ -1,5 +1,9 @@
 import { cachedJson, jsonError } from "@/lib/api/responses";
-import { INVALID_LAT_LON_ERROR, isValidLatLon } from "@/lib/api/geo-query";
+import {
+  INVALID_LAT_LON_ERROR,
+  isValidLatLon,
+  parseNumericParam,
+} from "@/lib/api/geo-query";
 import {
   buildExplanations,
   mergeDaySummaryWithSpread,
@@ -28,8 +32,8 @@ function openMeteoWindowForAnchor(anchorDate: string, timezone: string) {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const lat = parseFloat(searchParams.get("lat") ?? "");
-  const lon = parseFloat(searchParams.get("lon") ?? "");
+  const lat = parseNumericParam(searchParams.get("lat"));
+  const lon = parseNumericParam(searchParams.get("lon"));
   const timezone =
     searchParams.get("timezone") ?? "America/Indiana/Indianapolis";
   const rawDate = searchParams.get("date");
