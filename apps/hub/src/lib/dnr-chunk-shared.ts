@@ -58,10 +58,11 @@ export function normalizeRow(row: Record<string, string>): WellRecord {
     const nk = k.replace(/^\ufeff/, "").toLowerCase().trim();
     out[nk] = row[k];
   }
-  const lat = parseFloat(String(out.lat ?? out.latitude ?? ""));
-  const lon = parseFloat(String(out.lon ?? out.longitude ?? ""));
-  out.lat = lat;
-  out.lon = lon;
+  const rawLat = out.lat ?? out.latitude;
+  const rawLon = out.lon ?? out.longitude ?? out.lng;
+  // Sidecar chunks (lithology) carry no coordinates — leave them absent.
+  if (rawLat != null) out.lat = parseFloat(String(rawLat));
+  if (rawLon != null) out.lon = parseFloat(String(rawLon));
   return out;
 }
 
@@ -82,11 +83,20 @@ export function missingCoreColumns(h: Set<string>): string[] {
 }
 
 export type ParsedChunk = {
-  /** Normalized rows with finite lat/lon only. */
+  /** Normalized rows; well chunks keep only rows with finite lat/lon. */
   rows: WellRecord[];
   /** Raw header fields as reported by the CSV parser. */
   fields: string[];
 };
+
+/** True when a chunk's header declares coordinate columns. */
+export function chunkHasCoordinateColumns(fields: string[] | undefined): boolean {
+  const h = normalizeHeaderSet(fields);
+  return (
+    CORE_COLUMN_ALIASES.lat!.some((a) => h.has(a)) &&
+    CORE_COLUMN_ALIASES.lon!.some((a) => h.has(a))
+  );
+}
 
 export async function parseChunkCsvText(text: string): Promise<ParsedChunk> {
   const Papa = await getPapa();
@@ -94,14 +104,22 @@ export async function parseChunkCsvText(text: string): Promise<ParsedChunk> {
     header: true,
     skipEmptyLines: true,
   });
+  const fields = parsed.meta.fields ?? [];
+  // Well chunks are dropped when unmappable; coordinate-less sidecar chunks
+  // (id + lithology columns) are kept so they can be merged by well id.
+  const requireCoords = chunkHasCoordinateColumns(fields);
   const rows: WellRecord[] = [];
   for (const row of parsed.data ?? []) {
     const w = normalizeRow(row);
-    if (Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon))) {
-      rows.push(w);
+    if (
+      requireCoords &&
+      !(Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon)))
+    ) {
+      continue;
     }
+    rows.push(w);
   }
-  return { rows, fields: parsed.meta.fields ?? [] };
+  return { rows, fields };
 }
 
 /** Gunzip an ArrayBuffer to text (works on the main thread and in workers). */
