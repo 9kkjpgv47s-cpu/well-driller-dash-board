@@ -28,7 +28,9 @@ const CHART_HEIGHT = 440;
 const PADDING_TOP = 28;
 const PADDING_BOTTOM = 40;
 /** Minimal left gutter — labels share the chart Y axis. */
-const SHARED_PANEL_W = 82;
+const SHARED_PANEL_W = 108;
+/** Vertical room reserved per shared-band label in the side panel. */
+const SHARED_LABEL_SLOT_H = 96;
 const Y_AXIS_W = 48;
 const BAR_W = 52;
 const BAR_GAP = 8;
@@ -66,7 +68,7 @@ function layoutBandLabelTops(
   for (const row of sorted) {
     const top = Math.max(row.y - 28, lastBottom + 4, 40);
     tops.set(row.key, top);
-    lastBottom = top + 68;
+    lastBottom = top + SHARED_LABEL_SLOT_H;
   }
   return tops;
 }
@@ -289,6 +291,15 @@ export function WellAslStratigraphyChart({
       ),
     [sharedBandRows],
   );
+
+  /** Tall enough for the last label; the side panel scrolls when it exceeds the chart. */
+  const sharedPanelInnerH = useMemo(() => {
+    let maxBottom = CHART_HEIGHT;
+    for (const top of desktopBandTops.values()) {
+      maxBottom = Math.max(maxBottom, top + SHARED_LABEL_SLOT_H + 8);
+    }
+    return maxBottom;
+  }, [desktopBandTops]);
 
   const matchingWellTotal = matchingWellKeys.size;
   const matchingInChart = useMemo(
@@ -519,41 +530,43 @@ export function WellAslStratigraphyChart({
       <div className="rounded-lg border border-zinc-200 bg-white/80 dark:border-zinc-700 dark:bg-zinc-900/40">
         <div className="flex min-w-0">
           <aside
-            className="relative hidden shrink-0 border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/60 sm:block"
+            className="hidden shrink-0 overflow-y-auto border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/60 sm:block"
             style={{ width: SHARED_PANEL_W, height: CHART_HEIGHT }}
             aria-label="Shared aquifer labels"
           >
-            <div className="border-b border-zinc-200 px-1.5 py-1 text-[8px] font-semibold leading-tight text-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
-              Shared aquifers
-              {drillReferenceElevFt != null ? (
-                <span className="block font-normal text-zinc-600 dark:text-zinc-400">
-                  at your site · {drillReferenceElevFt} ft ground
-                </span>
-              ) : null}
-            </div>
-            {sharedBandRows.map((row) => (
-              <div
-                key={`aside-${row.key}`}
-                className="absolute left-0 right-0 px-1"
-                style={{ top: desktopBandTops.get(row.key) ?? row.y - 28 }}
-              >
-                <div
-                  className={`rounded-sm px-1 py-0.5 text-[8px] leading-snug text-emerald-950 shadow-sm dark:text-emerald-100 ${
-                    wellsListMode === row.key
-                      ? "bg-red-50/95 ring-1 ring-red-400 dark:bg-red-950/50"
-                      : "bg-zinc-50/95 dark:bg-zinc-900/95"
-                  }`}
-                >
-                  <SharedBandLabelContent
-                    band={row.band}
-                    drillWindow={row.drillWindow}
-                    wellsOnChart={row.wellsOnChart}
-                    onViewWells={() => toggleBandWells(row.key)}
-                    isActive={wellsListMode === row.key}
-                  />
-                </div>
+            <div className="relative" style={{ minHeight: sharedPanelInnerH }}>
+              <div className="border-b border-zinc-200 px-1.5 py-1 text-[8px] font-semibold leading-tight text-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
+                Shared aquifers
+                {drillReferenceElevFt != null ? (
+                  <span className="block font-normal text-zinc-600 dark:text-zinc-400">
+                    at your site · {drillReferenceElevFt} ft ground
+                  </span>
+                ) : null}
               </div>
-            ))}
+              {sharedBandRows.map((row) => (
+                <div
+                  key={`aside-${row.key}`}
+                  className="absolute left-0 right-0 px-1"
+                  style={{ top: desktopBandTops.get(row.key) ?? row.y - 28 }}
+                >
+                  <div
+                    className={`rounded-sm px-1 py-0.5 text-[8px] leading-snug text-emerald-950 shadow-sm dark:text-emerald-100 ${
+                      wellsListMode === row.key
+                        ? "bg-red-50/95 ring-1 ring-red-400 dark:bg-red-950/50"
+                        : "bg-zinc-50/95 dark:bg-zinc-900/95"
+                    }`}
+                  >
+                    <SharedBandLabelContent
+                      band={row.band}
+                      drillWindow={row.drillWindow}
+                      wellsOnChart={row.wellsOnChart}
+                      onViewWells={() => toggleBandWells(row.key)}
+                      isActive={wellsListMode === row.key}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </aside>
 
           <div className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain">

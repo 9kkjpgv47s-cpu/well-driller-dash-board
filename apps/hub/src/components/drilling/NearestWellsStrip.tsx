@@ -40,7 +40,7 @@ export function NearestWellsStrip({
   return (
     <div className="rounded-lg border border-zinc-200 bg-zinc-50/80 dark:border-zinc-600 dark:bg-zinc-900/50">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 px-3 py-2 dark:border-zinc-600">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+        <h3 className="min-w-0 break-words text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
           {title}
         </h3>
         <div className="flex flex-wrap items-center gap-2">
@@ -93,13 +93,13 @@ export function NearestWellsStrip({
                 key={`${k}-${idx}`}
                 type="button"
                 onClick={() => onSelectWell(w)}
-                className={`rounded-lg border bg-white p-2.5 text-left text-xs shadow-sm transition dark:bg-zinc-950 ${
+                className={`min-w-0 rounded-lg border bg-white p-2.5 text-left text-xs shadow-sm transition dark:bg-zinc-950 ${
                   selectedKey === k
                     ? "border-sky-500 bg-sky-50/70 ring-1 ring-sky-400 dark:border-sky-500 dark:bg-sky-950/40"
                     : "border-zinc-200 hover:border-sky-400 hover:bg-sky-50/50 dark:border-zinc-600 dark:hover:border-sky-600 dark:hover:bg-sky-950/20"
                 }`}
               >
-                <p className="font-mono font-semibold text-zinc-900 dark:text-zinc-50">
+                <p className="break-words font-mono font-semibold text-zinc-900 dark:text-zinc-50">
                   {id}
                 </p>
                 <p className="mt-0.5 text-[11px] text-zinc-600 dark:text-zinc-400">
@@ -199,7 +199,7 @@ export function NearestWellsStrip({
                   {gpm != null ? ` · ${gpm} gpm` : ""}
                 </p>
                 {aq ? (
-                  <p className="mt-1 line-clamp-2 text-[10px] text-zinc-500 dark:text-zinc-400">
+                  <p className="mt-1 line-clamp-2 break-words text-[10px] text-zinc-500 dark:text-zinc-400">
                     {aq}
                   </p>
                 ) : null}
