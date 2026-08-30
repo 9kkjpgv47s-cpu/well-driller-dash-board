@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isValidLatLon } from "@/lib/api/geo-query";
 import { jsonError } from "@/lib/api/responses";
+import { errorMessage, logWarning } from "@/lib/errors";
 import { upstreamJsonHeaders } from "@/lib/http/upstream";
 
 /**
@@ -38,6 +39,9 @@ async function fetchOpenTopoDataM(locations: Loc[]): Promise<number[] | null> {
     headers: upstreamJsonHeaders(),
     next: { revalidate: 86400 },
   });
+  if (!res.ok) {
+    throw new Error(`OpenTopoData returned HTTP ${res.status}`);
+  }
   const text = await res.text();
   const arr = parseOpenTopoData(text);
   if (!arr || arr.length !== locations.length) return null;
@@ -60,12 +64,16 @@ async function fetchOpenElevationM(locations: Loc[]): Promise<(number | null)[]>
       })),
     }),
   });
-  if (!res.ok) return locations.map(() => null);
+  if (!res.ok) {
+    throw new Error(`Open-Elevation returned HTTP ${res.status}`);
+  }
   const data = (await res.json()) as {
     results?: { elevation?: number | null }[];
   };
   if (!data?.results || data.results.length !== locations.length) {
-    return locations.map(() => null);
+    throw new Error(
+      `Open-Elevation returned ${data?.results?.length ?? "no"} results for ${locations.length} locations`,
+    );
   }
   return data.results.map((r) =>
     r.elevation != null && Number.isFinite(Number(r.elevation))
@@ -103,16 +111,31 @@ export async function POST(req: NextRequest) {
     normalized.push({ lat, lon });
   }
 
+  const failures: string[] = [];
+
   let elevationsM: (number | null)[] | null = null;
   try {
     const ot = await fetchOpenTopoDataM(normalized);
     if (ot) elevationsM = ot;
-  } catch {
-    elevationsM = null;
+    else failures.push("OpenTopoData: unusable response payload");
+  } catch (e) {
+    const msg = errorMessage(e, "OpenTopoData request failed");
+    logWarning("api/elevation", `OpenTopoData lookup failed: ${msg}`, e);
+    failures.push(`OpenTopoData: ${msg}`);
   }
 
   if (!elevationsM) {
-    elevationsM = await fetchOpenElevationM(normalized);
+    try {
+      elevationsM = await fetchOpenElevationM(normalized);
+    } catch (e) {
+      const msg = errorMessage(e, "Open-Elevation request failed");
+      logWarning("api/elevation", `Open-Elevation lookup failed: ${msg}`, e);
+      failures.push(`Open-Elevation: ${msg}`);
+      return jsonError(
+        `Elevation lookup failed — ${failures.join("; ")}.`,
+        502,
+      );
+    }
   }
 
   const elevationsFt = elevationsM.map((m) =>

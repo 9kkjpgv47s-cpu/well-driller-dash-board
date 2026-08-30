@@ -40,14 +40,22 @@ export function loadDrillerJob(): CjDrillerJobEntry[] {
   );
 }
 
-export function saveDrillerJob(entries: CjDrillerJobEntry[]) {
-  writeStoredJson(CJ_DRILLER_JOB_KEY, entries);
+/** False when the write failed (quota, blocked storage) — the job list is unchanged. */
+export function saveDrillerJob(entries: CjDrillerJobEntry[]): boolean {
+  return writeStoredJson(CJ_DRILLER_JOB_KEY, entries);
 }
 
-/** Returns false if this wellId is already on the job. */
-export function appendDrillerJobEntry(entry: CjDrillerJobEntry): boolean {
+export type AppendDrillerJobResult =
+  | { status: "added" }
+  | { status: "duplicate" }
+  | { status: "not-saved" };
+
+/** Appends unless the wellId is already on the job or the write is rejected. */
+export function appendDrillerJobEntry(
+  entry: CjDrillerJobEntry,
+): AppendDrillerJobResult {
   const cur = loadDrillerJob();
-  if (cur.some((e) => e.wellId === entry.wellId)) return false;
-  saveDrillerJob([...cur, entry]);
-  return true;
+  if (cur.some((e) => e.wellId === entry.wellId)) return { status: "duplicate" };
+  if (!saveDrillerJob([...cur, entry])) return { status: "not-saved" };
+  return { status: "added" };
 }

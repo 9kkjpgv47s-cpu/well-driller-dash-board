@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { errorMessage, logError, logWarning } from "@/lib/errors";
 // Local CommonJS bundle (Indiana DNR HTML parser) — see vendor/dnr-report-local
 import handler from "dnr-report-local";
 
@@ -34,7 +35,52 @@ export async function GET(request: NextRequest) {
     query: { refNo: refNo ?? "" },
   };
 
-  const response = await new Promise<NextResponse>((resolve, reject) => {
+  let response: NextResponse;
+  try {
+    response = await runVendorHandler(req);
+  } catch (e) {
+    logError("api/dnr-report", e);
+    response = NextResponse.json(
+      {
+        error: `DNR report lookup failed — ${errorMessage(e, "upstream parser error")}.`,
+        refNo: refNo ?? null,
+      },
+      { status: 502 },
+    );
+  }
+
+  const allowOrigin = allowedOrigin(request.headers.get("origin"));
+  if (allowOrigin) {
+    response.headers.set("Access-Control-Allow-Origin", allowOrigin);
+    response.headers.set("Vary", "Origin");
+  }
+  return response;
+}
+
+/**
+ * The vendor bundle answers its own upstream failures with terse bodies like
+ * `{ error: "fetch failed" }`; expand them so the modal alert says what broke.
+ */
+function describeVendorError(body: unknown, code: number): unknown {
+  if (code < 400) return body;
+  const raw =
+    body && typeof body === "object"
+      ? (body as { error?: unknown }).error
+      : undefined;
+  const detail =
+    typeof raw === "string" && raw.trim() ? raw.trim() : `HTTP ${code}`;
+  logWarning("api/dnr-report", `vendor handler returned ${code}: ${detail}`);
+  return {
+    ...(body && typeof body === "object" ? body : {}),
+    error: `DNR report lookup failed — ${detail}.`,
+  };
+}
+
+function runVendorHandler(req: {
+  method: string;
+  query: Record<string, string | string[] | undefined>;
+}): Promise<NextResponse> {
+  return new Promise<NextResponse>((resolve, reject) => {
     let settled = false;
     const res: DnrRes = {
       setHeader() {},
@@ -46,7 +92,7 @@ export async function GET(request: NextRequest) {
         if (settled) return;
         settled = true;
         const code = res._code ?? 200;
-        resolve(NextResponse.json(body, { status: code }));
+        resolve(NextResponse.json(describeVendorError(body, code), { status: code }));
       },
       end() {
         if (settled) return;
@@ -61,13 +107,6 @@ export async function GET(request: NextRequest) {
       reject(e);
     });
   });
-
-  const allowOrigin = allowedOrigin(request.headers.get("origin"));
-  if (allowOrigin) {
-    response.headers.set("Access-Control-Allow-Origin", allowOrigin);
-    response.headers.set("Vary", "Origin");
-  }
-  return response;
 }
 
 /**

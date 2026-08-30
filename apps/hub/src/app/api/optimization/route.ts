@@ -1,5 +1,6 @@
 import { cachedJson, jsonError } from "@/lib/api/responses";
 import { getDnrWellsFullCachedForApi } from "@/lib/dnr-wells-server-cache";
+import { errorMessage, logError } from "@/lib/errors";
 import {
   computeOptimizationFromWells,
   computeOptimizationMock,
@@ -30,8 +31,12 @@ export async function GET(request: Request) {
   try {
     const wells = await getDnrWellsFullCachedForApi();
     body = computeOptimizationFromWells(input, wells);
-  } catch {
-    body = computeOptimizationMock(input);
+  } catch (e) {
+    logError("api/optimization", e);
+    body = computeOptimizationMock(
+      input,
+      errorMessage(e, "Registry chunk load failed on the server."),
+    );
   }
 
   return cachedJson(body, 60);

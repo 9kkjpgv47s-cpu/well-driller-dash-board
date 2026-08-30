@@ -3,6 +3,7 @@ import {
   computeAreaInsights,
   formatNarrativeHtml,
   getLithLayers,
+  getLithParseError,
   lithologyLayerTopBottomFt,
 } from "./area-well-analytics";
 
@@ -63,5 +64,22 @@ describe("area-well-analytics", () => {
     ).toBe(
       "&lt;img src=x onerror=alert(1)&gt; <strong>sand</strong> &amp; gravel",
     );
+  });
+});
+
+describe("getLithParseError", () => {
+  it("reports unreadable well logs instead of an empty log", () => {
+    const row = { lithology_json: "{not json" };
+    expect(getLithLayers(row)).toEqual([]);
+    expect(getLithParseError(row)).toBeTruthy();
+  });
+
+  it("stays null for records with no log and for valid logs", () => {
+    expect(getLithParseError({ lithology_json: "" })).toBeNull();
+    expect(
+      getLithParseError({
+        lithology_json: JSON.stringify([{ top: 0, bottom: 10, formation: "sand" }]),
+      }),
+    ).toBeNull();
   });
 });

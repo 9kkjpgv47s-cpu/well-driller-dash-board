@@ -1,23 +1,31 @@
 /**
  * `localStorage` access that is safe during SSR and in private-mode browsers
- * where reads/writes can throw.
+ * where reads/writes can throw. Failures are best-effort but never silent:
+ * writes report whether the value was persisted, and every swallowed throw is
+ * logged so blocked storage is diagnosable from the console.
  */
+
+import { logWarning } from "@/lib/errors";
 
 export function readStoredString(key: string): string | null {
   if (typeof window === "undefined") return null;
   try {
     return window.localStorage.getItem(key);
-  } catch {
+  } catch (e) {
+    logWarning("browser-storage", `${key} unreadable`, e);
     return null;
   }
 }
 
-export function writeStoredString(key: string, value: string): void {
-  if (typeof window === "undefined") return;
+/** False when the value could not be persisted (quota, private mode, SSR). */
+export function writeStoredString(key: string, value: string): boolean {
+  if (typeof window === "undefined") return false;
   try {
     window.localStorage.setItem(key, value);
-  } catch {
-    /* quota / private mode — persistence is best-effort */
+    return true;
+  } catch (e) {
+    logWarning("browser-storage", `${key} not persisted`, e);
+    return false;
   }
 }
 
@@ -31,15 +39,25 @@ export function readStoredJson<T>(key: string): T | null {
   if (!raw) return null;
   try {
     return JSON.parse(raw) as T;
-  } catch {
+  } catch (e) {
+    logWarning("browser-storage", `${key} holds unparseable JSON`, e);
     return null;
   }
 }
 
-export function writeStoredJson(key: string, value: unknown): void {
+/** False when the value could not be serialized or persisted. */
+export function writeStoredJson(key: string, value: unknown): boolean {
+  let serialized: string;
   try {
-    writeStoredString(key, JSON.stringify(value));
-  } catch {
-    /* unserializable value — nothing to persist */
+    const json = JSON.stringify(value);
+    if (json === undefined) {
+      logWarning("browser-storage", `${key} value is unserializable`);
+      return false;
+    }
+    serialized = json;
+  } catch (e) {
+    logWarning("browser-storage", `${key} value is unserializable`, e);
+    return false;
   }
+  return writeStoredString(key, serialized);
 }

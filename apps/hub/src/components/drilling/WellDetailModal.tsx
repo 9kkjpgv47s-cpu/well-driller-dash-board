@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { errorMessage } from "@/lib/errors";
 import type { WellRecord } from "@/lib/area-well-analytics";
-import { getLithLayers } from "@/lib/area-well-analytics";
-import { fetchJsonOrFallback } from "@/lib/http/fetch-json";
+import { getLithLayers, getLithParseError } from "@/lib/area-well-analytics";
+import { fetchJson, isAbortError } from "@/lib/http/fetch-json";
 import { resolveWellRefNo } from "@/lib/well-identity";
 import { getWellDisplayDepthFtViewer } from "@/lib/viewer-well-map";
 
@@ -70,6 +71,7 @@ type Props = {
 
 export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
   const [dnr, setDnr] = useState<DnrApi>({});
+  const [dnrError, setDnrError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
@@ -124,33 +126,46 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
   useEffect(() => {
     if (!well) {
       setDnr({});
+      setDnrError(null);
       return;
     }
     const refNo = String(resolveWellRefNo(well) ?? "").replace(/\.0+$/, "").trim();
     if (!refNo) {
       setDnr({ loading: false });
+      setDnrError(null);
       return;
     }
-    const hasLithCsv = (() => {
+    const hasLithCsv = getLithLayers(well).length > 0;
+    const lithReadError = getLithParseError(well);
+    const lithParseError = lithReadError
+      ? `Chunk well log could not be read: ${lithReadError}`
+      : null;
+
+    const base: DnrApi = hasLithCsv ? {} : { lithology: [] };
+    setDnr({ loading: true });
+    setDnrError(lithParseError);
+    const ac = new AbortController();
+
+    (async () => {
       try {
-        const j = getLithLayers(well);
-        return j.length > 0;
-      } catch {
-        return false;
+        const apiDnr = await fetchJson<DnrApi>(
+          `/api/dnr-report?refNo=${encodeURIComponent(refNo)}`,
+          { signal: ac.signal },
+        );
+        setDnr({ ...mergeDnr(base, apiDnr), loading: false });
+        setDnrError(lithParseError);
+      } catch (e) {
+        if (ac.signal.aborted || isAbortError(e)) return;
+        setDnr({ ...base, loading: false });
+        setDnrError(
+          [lithParseError, errorMessage(e, "DNR report lookup failed.")]
+            .filter(Boolean)
+            .join(" · "),
+        );
       }
     })();
 
-    setDnr({ loading: true });
-    const api = `/api/dnr-report?refNo=${encodeURIComponent(refNo)}`;
-
-    /** Wells without CSV lithology fall back to an empty lithology list. */
-    const base: DnrApi = hasLithCsv ? {} : { lithology: [] };
-
-    fetchJsonOrFallback<DnrApi>(api, {})
-      .then((apiDnr) => {
-        setDnr({ ...mergeDnr(base, apiDnr), loading: false });
-      })
-      .catch(() => setDnr({ ...base, loading: false }));
+    return () => ac.abort();
   }, [well]);
 
   if (!well) return null;
@@ -277,6 +292,14 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
           </button>
         </div>
         <div className="space-y-4 p-5 text-sm text-zinc-800 dark:text-zinc-200">
+          {dnrError ? (
+            <p
+              className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200"
+              role="alert"
+            >
+              {dnrError}
+            </p>
+          ) : null}
           <div>
             <strong>Well depth (ft):</strong> {depthFt}
           </div>

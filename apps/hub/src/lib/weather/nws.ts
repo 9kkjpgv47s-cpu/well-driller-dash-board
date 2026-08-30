@@ -1,3 +1,4 @@
+import { errorMessage, logWarning } from "@/lib/errors";
 import { upstreamJsonHeaders } from "@/lib/http/upstream";
 import type { WeatherHourly, WeatherSourceBundle } from "./types";
 
@@ -45,16 +46,35 @@ export async function fetchNwsHourly(
       `https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`,
       { headers, next: { revalidate: 3600 } },
     );
-    if (!pt.ok) return null;
+    if (!pt.ok) {
+      logWarning("weather/nws", `points lookup returned HTTP ${pt.status}`);
+      return null;
+    }
     const pj = (await pt.json()) as PointsResponse;
     const hourlyUrl = pj.properties?.forecastHourly;
-    if (!hourlyUrl || !isWeatherGovUrl(hourlyUrl)) return null;
+    if (!hourlyUrl) {
+      logWarning("weather/nws", "points response had no forecastHourly URL");
+      return null;
+    }
+    if (!isWeatherGovUrl(hourlyUrl)) {
+      logWarning(
+        "weather/nws",
+        `points response pointed hourly forecast off api.weather.gov: ${hourlyUrl}`,
+      );
+      return null;
+    }
 
     const fh = await fetch(hourlyUrl, { headers, next: { revalidate: 900 } });
-    if (!fh.ok) return null;
+    if (!fh.ok) {
+      logWarning("weather/nws", `hourly forecast returned HTTP ${fh.status}`);
+      return null;
+    }
     const fj = (await fh.json()) as ForecastHourlyResponse;
     const periods = fj.properties?.periods;
-    if (!periods?.length) return null;
+    if (!periods?.length) {
+      logWarning("weather/nws", "hourly forecast contained no periods");
+      return null;
+    }
 
     const hourly: WeatherHourly[] = periods.map((p) => ({
       time: p.startTime,
@@ -78,7 +98,12 @@ export async function fetchNwsHourly(
       hourly,
       fetchedAt: new Date().toISOString(),
     };
-  } catch {
+  } catch (e) {
+    logWarning(
+      "weather/nws",
+      `hourly fetch failed: ${errorMessage(e, "network or parse failure")}`,
+      e,
+    );
     return null;
   }
 }

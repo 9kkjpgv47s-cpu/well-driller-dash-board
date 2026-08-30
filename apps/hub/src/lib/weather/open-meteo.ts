@@ -1,3 +1,4 @@
+import { errorMessage, logWarning } from "@/lib/errors";
 import { wmoCodeLabel } from "./wmo";
 import type { WeatherHourly, WeatherSourceBundle } from "./types";
 
@@ -67,19 +68,37 @@ export async function fetchOpenMeteoModel(
   url.searchParams.set("forecast_days", String(forecastDays));
   url.searchParams.set("models", model);
 
-  const res = await fetch(url.toString(), {
-    next: { revalidate: 900 },
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) return null;
-  const json = (await res.json()) as OmResponse;
-  if (!json.hourly?.time?.length) return null;
-  return {
-    id: sourceId,
-    label,
-    provider: "Open-Meteo",
-    model,
-    hourly: parseHourly(json, sourceId, label),
-    fetchedAt: new Date().toISOString(),
-  };
+  try {
+    const res = await fetch(url.toString(), {
+      next: { revalidate: 900 },
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) {
+      logWarning(
+        "weather/open-meteo",
+        `${sourceId} returned HTTP ${res.status}`,
+      );
+      return null;
+    }
+    const json = (await res.json()) as OmResponse;
+    if (!json.hourly?.time?.length) {
+      logWarning("weather/open-meteo", `${sourceId} returned no hourly rows`);
+      return null;
+    }
+    return {
+      id: sourceId,
+      label,
+      provider: "Open-Meteo",
+      model,
+      hourly: parseHourly(json, sourceId, label),
+      fetchedAt: new Date().toISOString(),
+    };
+  } catch (e) {
+    logWarning(
+      "weather/open-meteo",
+      `${sourceId} fetch failed: ${errorMessage(e, "network or parse failure")}`,
+      e,
+    );
+    return null;
+  }
 }

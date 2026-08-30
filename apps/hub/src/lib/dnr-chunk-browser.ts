@@ -181,6 +181,7 @@ function readCachedChunkCount(): number | null {
 }
 
 function writeCachedChunkCount(count: number): void {
+  // Best-effort: on failure (private mode etc.) discovery just reruns next load.
   writeStoredJson(CHUNK_COUNT_CACHE_KEY, { count, at: Date.now() });
 }
 
@@ -305,7 +306,12 @@ async function fetchAndParseChunks(
   const all: WellRecord[] = [];
   for (let i = 0; i < total; i++) {
     const parsed = parsedByIndex.get(i);
-    if (parsed) all.push(...parsed.rows);
+    if (!parsed) {
+      throw new Error(
+        `Chunk ${i} was fetched but never parsed — refusing to report a partial registry.`,
+      );
+    }
+    all.push(...parsed.rows);
   }
   return all;
 }
@@ -504,9 +510,14 @@ async function loadLegacyChunks(
   });
 
   const all: WellRecord[] = [];
-  for (let i = 0; i < total; i++) {
+  for (const { i } of chunkResponses) {
     const parsed = parsedByIndex.get(i);
-    if (parsed) all.push(...parsed.rows);
+    if (!parsed) {
+      throw new Error(
+        `Chunk ${i} was fetched but never parsed — refusing to report a partial registry.`,
+      );
+    }
+    all.push(...parsed.rows);
   }
 
   report(total, total, all.length, `Loaded ${all.length.toLocaleString()} wells`);

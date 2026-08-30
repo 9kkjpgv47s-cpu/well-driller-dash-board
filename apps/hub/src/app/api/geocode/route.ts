@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsonError } from "@/lib/api/responses";
+import { errorMessage, logError } from "@/lib/errors";
 import { upstreamJsonHeaders } from "@/lib/http/upstream";
 
 /**
@@ -17,20 +18,30 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("format", "json");
   url.searchParams.set("limit", "5");
 
-  const res = await fetch(url.toString(), {
-    headers: upstreamJsonHeaders(),
-    next: { revalidate: 86400 },
-  });
+  let data: { lat: string; lon: string; display_name?: string }[];
+  try {
+    const res = await fetch(url.toString(), {
+      headers: upstreamJsonHeaders(),
+      next: { revalidate: 86400 },
+    });
 
-  if (!res.ok) {
-    return jsonError(`Geocoder returned ${res.status}`, 502);
+    if (!res.ok) {
+      return jsonError(`Geocoder returned ${res.status}`, 502);
+    }
+
+    data = (await res.json()) as typeof data;
+  } catch (e) {
+    logError("api/geocode", e);
+    return jsonError(
+      `Geocoder unreachable — ${errorMessage(e, "network or parse failure")}.`,
+      502,
+    );
   }
 
-  const data = (await res.json()) as {
-    lat: string;
-    lon: string;
-    display_name?: string;
-  }[];
+  if (!Array.isArray(data)) {
+    logError("api/geocode", new Error("Geocoder returned a non-array payload"));
+    return jsonError("Geocoder returned an unexpected payload.", 502);
+  }
 
   const results = data.map((r) => ({
     lat: parseFloat(r.lat),
