@@ -15,7 +15,10 @@ const baseJob: DrillJob = {
   isEmergency: false,
   crewIndex: 0,
   daySlot: 0,
-  locationSource: "coordinates",
+  rig: "Rig 1",
+  lead: "Test Lead",
+  status: "planned",
+  routingFitScore: 80,
 };
 
 function hour(
