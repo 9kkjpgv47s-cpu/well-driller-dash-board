@@ -1137,6 +1137,7 @@ export function DrillingHubClient() {
                         )}
                       </div>
 
+                      <div className="min-w-0 lg:col-span-12">
                       <NearestWellsStrip
                         wells={workspaceWells}
                         onSelectWell={setDetailWell}
@@ -1178,6 +1179,7 @@ export function DrillingHubClient() {
                         }
                         maxHeightClass="max-h-[13rem] md:max-h-[15rem]"
                       />
+                      </div>
                     </div>
                   </section>
                 );

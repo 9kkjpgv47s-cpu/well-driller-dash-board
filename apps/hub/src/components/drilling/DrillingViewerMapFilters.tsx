@@ -25,7 +25,7 @@ function Row({
         type="checkbox"
         checked={checked}
         onChange={(e) => oc(e.target.checked)}
-        className="h-5 w-5 shrink-0 rounded"
+        className="h-5 w-5 shrink-0 rounded accent-[var(--accent)]"
       />
       <span className={`text-sm font-semibold leading-tight ${labelClass}`}>
         {label}
@@ -42,8 +42,8 @@ function FilterBand({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-line p-2.5">
-      <p className="mb-1.5 text-sm font-bold text-ink">
+    <div className="rounded-lg border border-line p-3">
+      <p className="eyebrow plain mb-2">
         {title}
       </p>
       {children}
@@ -61,7 +61,7 @@ export function MapLabelToolbarControls({ value, onChange }: Props) {
           type="checkbox"
           checked={value.hideWellLabels}
           onChange={(e) => patch({ hideWellLabels: e.target.checked })}
-          className="h-5 w-5 shrink-0 rounded"
+          className="h-5 w-5 shrink-0 rounded accent-[var(--accent)]"
         />
         <span className="whitespace-nowrap text-sm font-semibold text-accent-ink">
           Hide labels
@@ -107,7 +107,7 @@ export function DrillingViewerMapFilters({ value, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-3">
         <FilterBand title="Well Type Filter">
           <Row
             checked={value.typeUncon}
