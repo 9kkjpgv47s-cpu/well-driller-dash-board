@@ -48,18 +48,16 @@ export function DrillerFieldPrepPanel({
 
   return (
     <section
-      className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900"
+      className="card space-y-4"
       aria-labelledby="driller-prep-h"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h2
-            id="driller-prep-h"
-            className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
-          >
+          <p className="eyebrow">Field prep</p>
+          <h2 id="driller-prep-h">
             Site optimization (auto)
           </h2>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="mt-1 text-sm text-ink-2">
             Checklist and neighborhood hints load automatically for the active
             jobsite coordinates from registry chunk data.
           </p>
@@ -72,55 +70,55 @@ export function DrillerFieldPrepPanel({
       </div>
 
       {loading && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Loading optimization…
-        </p>
+        <div className="skel h-4 w-48" role="status">
+          <span className="sr-only">Loading optimization…</span>
+        </div>
       )}
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <div className="callout is-bad p-3 text-sm" role="alert">
           {error}
-        </p>
+        </div>
       )}
 
       {result && (
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="rounded-lg bg-bg-2 p-3">
+              <p className="text-xs text-ink-3">
                 Wells in radius
               </p>
-              <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+              <p className="num text-2xl font-semibold text-ink">
                 {result.neighborhood.sampleWellsInRadius}
               </p>
             </div>
-            <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="rounded-lg bg-bg-2 p-3">
+              <p className="text-xs text-ink-3">
                 Median depth
               </p>
-              <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+              <p className="num text-2xl font-semibold text-ink">
                 {result.neighborhood.medianDepthFt} ft
               </p>
             </div>
-            <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/80">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="rounded-lg bg-bg-2 p-3">
+              <p className="text-xs text-ink-3">
                 Static band
               </p>
-              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              <p className="num text-lg font-semibold text-ink">
                 {result.neighborhood.typicalStaticBandFt}
               </p>
             </div>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <p className="eyebrow plain">
               Checklist
             </p>
-            <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
+            <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-ink-2">
               {result.checklist.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
-          <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+          <div className="callout is-warn p-3 text-xs">
             <p className="font-semibold">
               {result.dataSource === "registry"
                 ? "Registry notes"
@@ -132,7 +130,7 @@ export function DrillerFieldPrepPanel({
               ))}
             </ul>
           </div>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="text-xs text-ink-4">
             Generated {new Date(result.generatedAt).toLocaleString()}
           </p>
         </div>

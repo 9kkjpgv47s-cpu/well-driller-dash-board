@@ -16,6 +16,7 @@ import {
 import { formatOpenMeteoWallClock } from "@/lib/weather/open-meteo-display";
 import type { DayWeatherSummary, WeatherApiResponse } from "@/lib/weather/types";
 import { LiveRadarMap } from "@/components/scheduling/LiveRadarMap";
+import { Icon } from "@/components/ui/Icon";
 
 type Props = {
   job: DrillJob | null;
@@ -179,7 +180,7 @@ export function JobWeatherPanel({
 
   if (!job) {
     return (
-      <section className="rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-500 dark:border-zinc-600 dark:text-zinc-400">
+      <section className="card border-dashed text-sm text-ink-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <p className="min-w-0 flex-1">
             Select a job on the board to load a job-scoped forecast, hour-by-hour
@@ -192,18 +193,18 @@ export function JobWeatherPanel({
           ) : null}
         </div>
         <details
-          className="mt-4 rounded-lg border border-zinc-200 text-zinc-800 dark:border-zinc-700 dark:text-zinc-200"
+          className="mt-4 rounded-lg border border-line text-ink-2"
           onToggle={(e) => setNearMeOpen((e.currentTarget as HTMLDetailsElement).open)}
         >
           <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium">
             Weather near me — tap to expand
           </summary>
-          <div className="border-t border-zinc-100 px-3 py-3 dark:border-zinc-800">
+          <div className="border-t border-line px-3 py-3">
             {nearMeLoading ? (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Loading weather near you…</p>
+              <p className="text-xs text-ink-3">Loading weather near you…</p>
             ) : null}
             {nearMeErr ? (
-              <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800 dark:bg-red-950/40 dark:text-red-200">
+              <p className="callout is-bad px-3 py-2 text-xs">
                 {nearMeErr}
               </p>
             ) : null}
@@ -222,14 +223,15 @@ export function JobWeatherPanel({
   }
 
   return (
-    <section className="space-y-6 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
+    <section className="card space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="eyebrow">Forecast</p>
+          <h2>
             {fieldLayout ? "Weather" : "Daily weather brief"}
           </h2>
           {!fieldLayout ? (
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="mt-1 text-sm text-ink-2">
               {job.title} · {job.county} Co. · day-by-day outlook with full hourly
               rows for the current model window.
             </p>
@@ -242,8 +244,9 @@ export function JobWeatherPanel({
                 type="button"
                 onClick={() => setWeatherRefreshKey((k) => k + 1)}
                 disabled={loading}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                className="btn btn-ghost btn-sm"
               >
+                <Icon name="refresh" />
                 {loading ? "Refreshing…" : "Refresh weather"}
               </button>
             ) : null}
@@ -254,8 +257,9 @@ export function JobWeatherPanel({
             type="button"
             onClick={() => setWeatherRefreshKey((k) => k + 1)}
             disabled={loading}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="btn btn-ghost btn-sm"
           >
+            <Icon name="refresh" />
             {loading ? "Refreshing…" : "Refresh weather"}
           </button>
         ) : null}
@@ -263,22 +267,22 @@ export function JobWeatherPanel({
 
       {!fieldLayout ? (
         <details
-          className="rounded-lg border border-zinc-200 dark:border-zinc-700"
+          className="rounded-lg border border-line"
           onToggle={(e) =>
             setNearMeOpen((e.currentTarget as HTMLDetailsElement).open)
           }
         >
-          <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">
+          <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium text-ink-2">
             Weather near me — tap to expand
           </summary>
-          <div className="border-t border-zinc-100 px-3 py-3 dark:border-zinc-800">
+          <div className="border-t border-line px-3 py-3">
             {nearMeLoading ? (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-ink-3">
                 Loading weather near you…
               </p>
             ) : null}
             {nearMeErr ? (
-              <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800 dark:bg-red-950/40 dark:text-red-200">
+              <p className="callout is-bad px-3 py-2 text-xs">
                 {nearMeErr}
               </p>
             ) : null}
@@ -296,10 +300,10 @@ export function JobWeatherPanel({
 
       {!fieldLayout ? (
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          <h3 className="eyebrow plain">
             Live radar (jobsite)
           </h3>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1 text-xs text-ink-3">
             Composite reflectivity at the selected jobsite coordinates.
           </p>
           <div className="mt-2">
@@ -309,10 +313,12 @@ export function JobWeatherPanel({
       ) : null}
 
       {loading && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading outlook…</p>
+        <div className="skel h-4 w-40" role="status">
+          <span className="sr-only">Loading outlook…</span>
+        </div>
       )}
       {err && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
+        <p className="callout is-bad px-3 py-2 text-sm">
           {err}
         </p>
       )}
@@ -327,11 +333,11 @@ export function JobWeatherPanel({
           />
 
           {consolidatedAdvice.general.length ? (
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            <div className="rounded-lg border border-line bg-bg-2 p-4">
+              <h3 className="text-sm font-semibold text-ink">
                 Field considerations
               </h3>
-              <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-zinc-800 dark:text-zinc-100">
+              <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-ink-2">
                 {consolidatedAdvice.general.map((b) => (
                   <li key={b}>{b}</li>
                 ))}
@@ -363,17 +369,17 @@ export function JobWeatherPanel({
             hourly={primaryHourly}
           />
 
-          <div className="rounded-lg border border-zinc-200 px-3 py-3 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">
-            <p className="font-medium text-zinc-800 dark:text-zinc-100">
+          <div className="rounded-lg border border-line px-3 py-3 text-sm text-ink-3">
+            <p className="font-medium text-ink">
               Forecast sources ({data.sources.length})
             </p>
             <ul className="mt-2 space-y-2">
               {data.sources.map((s) => (
                 <li key={s.id}>
-                  <span className="font-medium text-zinc-800 dark:text-zinc-100">
+                  <span className="font-medium text-ink">
                     {s.label}
                   </span>
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-ink-3">
                     {" "}
                     · {s.provider} · updated {new Date(s.fetchedAt).toLocaleTimeString()}
                   </span>
@@ -383,10 +389,10 @@ export function JobWeatherPanel({
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <h3 className="eyebrow plain">
               Why the numbers differ
             </h3>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-600 dark:text-zinc-300">
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-2">
               {data.explanations.map((line, i) => (
                 <li key={i}>{line}</li>
               ))}
@@ -401,13 +407,13 @@ export function JobWeatherPanel({
                   ? "border-red-300 bg-red-50 dark:border-red-900 dark:bg-red-950/30"
                   : entry.advice.severity === "caution"
                     ? "border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20"
-                    : "border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50"
+                    : "border-line bg-bg-2"
               }`}
             >
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              <h3 className="text-sm font-semibold text-ink">
                 Field considerations for {entry.date}
               </h3>
-              <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-zinc-800 dark:text-zinc-100">
+              <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-ink-2">
                 {entry.advice.bullets.map((b, i) => (
                   <li key={`${entry.date}-${i}`}>{b}</li>
                 ))}
@@ -441,7 +447,7 @@ function HourlyForecast({
   return (
     <div className="space-y-3">
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <h3 className="eyebrow plain">
           Hourly forecast
         </h3>
         <div className="grid w-full grid-cols-3 gap-2">
@@ -455,8 +461,8 @@ function HourlyForecast({
                 aria-pressed={active}
                 className={`rounded-lg border px-2 py-2 text-xs font-semibold transition ${
                   active
-                    ? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-600 dark:bg-emerald-600"
-                    : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                    ? "border-accent bg-accent-soft text-accent-ink"
+                    : "border-line bg-surface text-ink-2 hover:bg-bg-2"
                 }`}
               >
                 {sourceButtonLabel(s)}
@@ -465,9 +471,9 @@ function HourlyForecast({
           })}
         </div>
       </div>
-      <div className="max-h-72 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
+      <div className="max-h-72 overflow-auto rounded-lg border border-line">
         <table className="w-full min-w-[620px] text-left text-xs">
-          <thead className="sticky top-0 bg-zinc-50 dark:bg-zinc-800">
+          <thead className="sticky top-0 bg-bg-2">
             <tr>
               <th className="px-2 py-2 font-medium">Date</th>
               <th className="px-2 py-2 font-medium">Hour</th>
@@ -482,12 +488,12 @@ function HourlyForecast({
             {hourly.map((h) => (
               <tr
                 key={`${selectedSourceId}-${h.time}`}
-                className="border-t border-zinc-100 dark:border-zinc-800"
+                className="border-t border-line"
               >
-                <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
+                <td className="whitespace-nowrap px-2 py-1.5 text-ink-2">
                   {h.time.slice(0, 10)}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
+                <td className="whitespace-nowrap px-2 py-1.5 text-ink-2">
                   {formatOpenMeteoWallClock(h.time)}
                 </td>
                 <td className="px-2 py-1.5">{Math.round(h.tempF)}°F</td>
@@ -500,7 +506,7 @@ function HourlyForecast({
                 <td className="px-2 py-1.5">
                   {h.windMph != null ? `${Math.round(h.windMph)} mph` : "—"}
                 </td>
-                <td className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300">
+                <td className="px-2 py-1.5 text-ink-3">
                   {h.conditionLabel}
                 </td>
               </tr>
@@ -526,18 +532,18 @@ function DailyBrief({
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <h3 className="eyebrow plain">
           {title}
         </h3>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-xs text-ink-3">
           Forecast timezone{" "}
-          <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">{timezone}</code>.
+          <code className="rounded bg-bg-2 px-1">{timezone}</code>.
           Day summaries are paired with full hourly rows from the primary model.
         </p>
       </div>
       {summaries.map((day) => (
-        <div key={day.date} className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{day.date}</p>
+        <div key={day.date} className="space-y-2 rounded-lg border border-line p-3">
+          <p className="mono text-sm font-semibold text-ink">{day.date}</p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Stat
               label="Peak rain chance"
@@ -559,9 +565,9 @@ function DailyBrief({
           </div>
         </div>
       ))}
-      <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
+      <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-line">
         <table className="w-full min-w-[620px] text-left text-xs">
-          <thead className="sticky top-0 bg-zinc-50 dark:bg-zinc-800">
+          <thead className="sticky top-0 bg-bg-2">
             <tr>
               <th className="px-2 py-2 font-medium">Date</th>
               <th className="px-2 py-2 font-medium">Hour</th>
@@ -574,11 +580,11 @@ function DailyBrief({
           </thead>
           <tbody>
             {hourly.map((h) => (
-              <tr key={h.time} className="border-t border-zinc-100 dark:border-zinc-800">
-                <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
+              <tr key={h.time} className="border-t border-line">
+                <td className="whitespace-nowrap px-2 py-1.5 text-ink-2">
                   {h.time.slice(0, 10)}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-zinc-700 dark:text-zinc-200">
+                <td className="whitespace-nowrap px-2 py-1.5 text-ink-2">
                   {formatOpenMeteoWallClock(h.time)}
                 </td>
                 <td className="px-2 py-1.5">{Math.round(h.tempF)}°F</td>
@@ -587,7 +593,7 @@ function DailyBrief({
                 <td className="px-2 py-1.5">
                   {h.windMph != null ? `${Math.round(h.windMph)} mph` : "—"}
                 </td>
-                <td className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300">{h.conditionLabel}</td>
+                <td className="px-2 py-1.5 text-ink-3">{h.conditionLabel}</td>
               </tr>
             ))}
           </tbody>
@@ -599,11 +605,11 @@ function DailyBrief({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-zinc-200 px-3 py-2 dark:border-zinc-700">
-      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+    <div className="rounded-lg border border-line px-3 py-2">
+      <p className="mono text-xs font-medium uppercase tracking-wide text-ink-3">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+      <p className="num mt-1 text-sm font-semibold text-ink">
         {value}
       </p>
     </div>

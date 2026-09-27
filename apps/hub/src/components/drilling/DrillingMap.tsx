@@ -451,18 +451,18 @@ export function DrillingMap({
       <div className="relative min-w-0 w-full max-w-full">
         <div
           ref={containerRef}
-          className="z-0 h-[min(55vh,520px)] min-w-0 w-full max-w-full rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900"
+          className="z-0 h-[min(55vh,520px)] min-w-0 w-full max-w-full rounded-lg border border-line bg-bg-2"
         />
       </div>
       {jobsiteLocation ? (
-        <p className="text-xs text-[var(--muted)]" role="status">
+        <p className="text-xs text-ink-3" role="status">
           Amber JOB pin = dead center of the search circle · job GPS{" "}
           {jobsiteLocation.lat.toFixed(6)}, {jobsiteLocation.lon.toFixed(6)}. No
           phone location permission required.
         </p>
       ) : null}
       {capNote ? (
-        <p className="text-xs text-[var(--muted)]" role="status">
+        <p className="text-xs text-ink-3" role="status">
           {capNote}
         </p>
       ) : null}

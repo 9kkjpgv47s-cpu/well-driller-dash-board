@@ -25,7 +25,7 @@ function Row({
         type="checkbox"
         checked={checked}
         onChange={(e) => oc(e.target.checked)}
-        className="h-5 w-5 shrink-0 rounded border-zinc-400 text-blue-600"
+        className="h-5 w-5 shrink-0 rounded"
       />
       <span className={`text-sm font-semibold leading-tight ${labelClass}`}>
         {label}
@@ -42,8 +42,8 @@ function FilterBand({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 p-2.5 dark:border-zinc-600">
-      <p className="mb-1.5 text-sm font-bold text-zinc-700 dark:text-zinc-200">
+    <div className="rounded-lg border border-line p-2.5">
+      <p className="mb-1.5 text-sm font-bold text-ink">
         {title}
       </p>
       {children}
@@ -55,23 +55,23 @@ export function MapLabelToolbarControls({ value, onChange }: Props) {
   const patch = (p: Partial<ViewerMapFilters>) => onChange({ ...value, ...p });
 
   return (
-    <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-zinc-200 bg-zinc-100/90 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-900/60">
+    <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-line bg-bg-2 px-3 py-2">
       <label className="flex cursor-pointer items-center gap-2">
         <input
           type="checkbox"
           checked={value.hideWellLabels}
           onChange={(e) => patch({ hideWellLabels: e.target.checked })}
-          className="h-5 w-5 shrink-0 rounded border-zinc-400"
+          className="h-5 w-5 shrink-0 rounded"
         />
-        <span className="whitespace-nowrap text-sm font-semibold text-red-700 dark:text-red-400">
+        <span className="whitespace-nowrap text-sm font-semibold text-accent-ink">
           Hide labels
         </span>
       </label>
       <div className="flex shrink-0 items-center gap-1.5">
-        <span className="whitespace-nowrap text-sm text-zinc-500">Size</span>
+        <span className="whitespace-nowrap text-sm text-ink-3">Size</span>
         <button
           type="button"
-          className="min-h-5 min-w-7 rounded border border-zinc-300 px-2 py-1 text-sm font-bold dark:border-zinc-600"
+          className="btn btn-ghost btn-sm min-w-8 font-bold"
           onClick={() =>
             patch({
               markerLabelScale: Math.min(
@@ -85,7 +85,7 @@ export function MapLabelToolbarControls({ value, onChange }: Props) {
         </button>
         <button
           type="button"
-          className="min-h-5 min-w-7 rounded border border-zinc-300 px-2 py-1 text-sm font-bold dark:border-zinc-600"
+          className="btn btn-ghost btn-sm min-w-8 font-bold"
           onClick={() =>
             patch({
               markerLabelScale: Math.max(

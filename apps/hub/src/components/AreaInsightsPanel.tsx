@@ -37,8 +37,8 @@ function BreakdownTable({
   rows: { label: string; count: number; pct: string }[];
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-700">
-      <p className="border-b border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+    <div className="rounded-lg border border-line">
+      <p className="border-b border-line bg-bg-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-3">
         {title}
       </p>
       <table className="w-full text-sm">
@@ -46,15 +46,15 @@ function BreakdownTable({
           {rows.map((r) => (
             <tr
               key={r.label}
-              className="border-t border-zinc-100 dark:border-zinc-800"
+              className="border-t border-line"
             >
-              <td className="px-3 py-2 text-zinc-700 dark:text-zinc-300">
+              <td className="px-3 py-2 text-ink-2">
                 {r.label}
               </td>
-              <td className="px-3 py-2 text-right tabular-nums text-zinc-900 dark:text-zinc-100">
+              <td className="px-3 py-2 text-right tabular-nums text-ink">
                 {r.count}
               </td>
-              <td className="w-16 px-3 py-2 text-right text-zinc-500 dark:text-zinc-400">
+              <td className="w-16 px-3 py-2 text-right text-ink-3">
                 {r.pct}%
               </td>
             </tr>
@@ -168,27 +168,24 @@ export function AreaInsightsPanel({
 
   const qualityTone =
     report?.insightQuality.grade === "high"
-      ? "text-emerald-800 dark:text-emerald-200"
+      ? "text-ok"
       : report?.insightQuality.grade === "medium"
-        ? "text-amber-800 dark:text-amber-200"
-        : "text-rose-800 dark:text-rose-200";
+        ? "text-warn"
+        : "text-bad";
 
   return (
     <section
-      className="space-y-4 rounded-xl border border-emerald-900/20 bg-emerald-50/40 p-5 dark:border-emerald-800/40 dark:bg-emerald-950/30"
+      className="card space-y-4"
       aria-labelledby="area-insights-h"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2
-            id="area-insights-h"
-            className="text-sm font-semibold text-emerald-950 dark:text-emerald-100"
-          >
+          <h2 id="area-insights-h">
             {title}
           </h2>
-          <p className="mt-1 text-xs text-emerald-900/80 dark:text-emerald-200/80">
+          <p className="mt-1 text-xs text-ink-2">
             Registry-backed counts from gz chunks in{" "}
-            <code className="rounded bg-white/60 px-1 dark:bg-black/30">
+            <code className="rounded bg-bg-3 px-1">
               /well-viewer/
             </code>
             . Radius <strong>{radiusMiles} mi</strong> · center{" "}
@@ -197,7 +194,7 @@ export function AreaInsightsPanel({
             </strong>
           </p>
           {detailNote ? (
-            <p className="mt-2 text-xs text-emerald-950/90 dark:text-emerald-100/90">
+            <p className="mt-2 text-xs text-ink-2">
               {detailNote}
             </p>
           ) : null}
@@ -207,7 +204,7 @@ export function AreaInsightsPanel({
           {showViewerLinks ? (
             <Link
               href={`/?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`}
-              className="rounded-lg border border-emerald-800/40 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-white/50 dark:border-emerald-600 dark:text-emerald-100 dark:hover:bg-emerald-900/50"
+              className="btn btn-ghost btn-sm"
             >
               Open field map
             </Link>
@@ -216,11 +213,11 @@ export function AreaInsightsPanel({
       </div>
 
       {status ? (
-        <p className="text-xs text-emerald-900 dark:text-emerald-200">{status}</p>
+        <p className="mono text-xs text-ink-3">{status}</p>
       ) : null}
       {error ? (
         <div
-          className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/50 dark:text-red-100"
+          className="callout is-bad p-3 text-sm"
           role="alert"
         >
           <p className="font-medium">Well data not available</p>
@@ -228,7 +225,7 @@ export function AreaInsightsPanel({
           {showViewerLinks ? (
             <p className="mt-2 text-xs">
               After running{" "}
-              <code className="rounded bg-white/80 px-1 dark:bg-black/40">
+              <code className="rounded bg-surface px-1">
                 ./scripts/sync-well-viewer-into-hub.sh
               </code>{" "}
               from the monorepo root, restart <code>npm run dev</code>.
@@ -240,19 +237,19 @@ export function AreaInsightsPanel({
       {(report && breakdowns) ? (
         <div className="space-y-6">
           {report ? (
-            <div className="rounded-lg border border-emerald-800/25 bg-white/80 p-4 dark:border-emerald-700/40 dark:bg-zinc-900/50">
+            <div className="rounded-lg border border-line bg-bg-2 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900 dark:text-emerald-200">
+                <p className="eyebrow plain">
                   Chunk data coverage (this radius)
                 </p>
                 <p className={`text-xs font-semibold uppercase tracking-wide ${qualityTone}`}>
                   Insight confidence {report.insightQuality.grade} · {report.insightQuality.score}/100
                 </p>
               </div>
-              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+              <p className="mt-1 text-xs text-ink-3">
                 These counts show how many wells in your circle actually carry
                 each field from the synced{" "}
-                <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">
+                <code className="rounded bg-surface px-1">
                   dnr_wells_chunk_*.csv.gz
                 </code>{" "}
                 export. Area tables use registry aquifer text when present, then
@@ -264,55 +261,55 @@ export function AreaInsightsPanel({
                 ))}
               </ul>
               <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                <div className="flex justify-between gap-2 rounded-md bg-emerald-50/80 px-3 py-2 dark:bg-emerald-950/40">
-                  <dt className="text-zinc-600 dark:text-zinc-400">
+                <div className="flex justify-between gap-2 rounded-md bg-surface px-3 py-2">
+                  <dt className="text-ink-3">
                     Lithology intervals
                   </dt>
-                  <dd className="tabular-nums font-medium text-zinc-900 dark:text-zinc-100">
+                  <dd className="tabular-nums font-medium text-ink">
                     {report.dataCoverage.lithologyIntervals} /{" "}
                     {report.totalWellsInRadius}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2 rounded-md bg-emerald-50/80 px-3 py-2 dark:bg-emerald-950/40">
-                  <dt className="text-zinc-600 dark:text-zinc-400">
+                <div className="flex justify-between gap-2 rounded-md bg-surface px-3 py-2">
+                  <dt className="text-ink-3">
                     Vein / gravel thickness col
                   </dt>
-                  <dd className="tabular-nums font-medium text-zinc-900 dark:text-zinc-100">
+                  <dd className="tabular-nums font-medium text-ink">
                     {report.dataCoverage.veinThicknessCol} /{" "}
                     {report.totalWellsInRadius}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2 rounded-md bg-emerald-50/80 px-3 py-2 dark:bg-emerald-950/40">
-                  <dt className="text-zinc-600 dark:text-zinc-400">
+                <div className="flex justify-between gap-2 rounded-md bg-surface px-3 py-2">
+                  <dt className="text-ink-3">
                     Rock top col
                   </dt>
-                  <dd className="tabular-nums font-medium text-zinc-900 dark:text-zinc-100">
+                  <dd className="tabular-nums font-medium text-ink">
                     {report.dataCoverage.rockTopCol} /{" "}
                     {report.totalWellsInRadius}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2 rounded-md bg-emerald-50/80 px-3 py-2 dark:bg-emerald-950/40">
-                  <dt className="text-zinc-600 dark:text-zinc-400">
+                <div className="flex justify-between gap-2 rounded-md bg-surface px-3 py-2">
+                  <dt className="text-ink-3">
                     Registry aquifer text
                   </dt>
-                  <dd className="tabular-nums font-medium text-zinc-900 dark:text-zinc-100">
+                  <dd className="tabular-nums font-medium text-ink">
                     {report.dataCoverage.registryAquiferNonBlank} /{" "}
                     {report.totalWellsInRadius}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2 rounded-md bg-emerald-50/80 px-3 py-2 dark:bg-emerald-950/40">
-                  <dt className="text-zinc-600 dark:text-zinc-400">
+                <div className="flex justify-between gap-2 rounded-md bg-surface px-3 py-2">
+                  <dt className="text-ink-3">
                     Parseable GPM
                   </dt>
-                  <dd className="tabular-nums font-medium text-zinc-900 dark:text-zinc-100">
+                  <dd className="tabular-nums font-medium text-ink">
                     {report.wellsWithGpm} / {report.totalWellsInRadius}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2 rounded-md bg-emerald-50/80 px-3 py-2 dark:bg-emerald-950/40">
-                  <dt className="text-zinc-600 dark:text-zinc-400">
+                <div className="flex justify-between gap-2 rounded-md bg-surface px-3 py-2">
+                  <dt className="text-ink-3">
                     Used for sand/gravel stats
                   </dt>
-                  <dd className="tabular-nums font-medium text-zinc-900 dark:text-zinc-100">
+                  <dd className="tabular-nums font-medium text-ink">
                     {report.wellsWithLithology} / {report.totalWellsInRadius}
                   </dd>
                 </div>
@@ -320,11 +317,11 @@ export function AreaInsightsPanel({
             </div>
           ) : null}
           {report && report.narratives.length > 0 ? (
-            <div className="space-y-3 rounded-lg bg-white/70 p-4 dark:bg-zinc-900/60">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <div className="space-y-3 rounded-lg border border-line bg-surface p-4">
+              <p className="eyebrow plain">
                 Narrative summary
               </p>
-              <ul className="space-y-3 text-sm leading-relaxed text-zinc-800 dark:text-zinc-200">
+              <ul className="space-y-3 text-sm leading-relaxed text-ink-2">
                 {report.narratives.map((entry, i) => (
                   <li
                     key={i}
@@ -355,7 +352,7 @@ export function AreaInsightsPanel({
                 />
               </div>
 
-              <div className="rounded-lg border border-amber-200/80 bg-amber-50/90 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+              <div className="callout is-warn p-3 text-xs">
                 <p className="font-semibold">Methodology & limits</p>
                 <ul className="mt-2 list-inside list-disc space-y-1">
                   {report.disclaimers.map((d) => (

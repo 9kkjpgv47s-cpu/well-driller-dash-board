@@ -164,17 +164,17 @@ export function LiveRadarMap({ lat, lon, className = "h-72" }: Props) {
 
   if (metaErr) {
     return (
-      <p className="text-xs text-red-700 dark:text-red-300">{metaErr}</p>
+      <p className="text-xs text-bad">{metaErr}</p>
     );
   }
 
   if (!maps && !metaErr) {
     return (
       <div
-        className={`flex w-full items-center justify-center rounded-lg border border-dashed border-zinc-200 bg-zinc-50 text-xs text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-400 ${className}`}
-      >
-        Loading radar…
-      </div>
+        className={`skel w-full ${className}`}
+        role="status"
+        aria-label="Loading radar"
+      />
     );
   }
 
@@ -182,37 +182,37 @@ export function LiveRadarMap({ lat, lon, className = "h-72" }: Props) {
     <div className="space-y-2">
       <div
         ref={containerRef}
-        className={`w-full overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 ${className}`}
+        className={`w-full overflow-hidden rounded-lg border border-line ${className}`}
       />
       {n > 1 ? (
-        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-ink-3">
           <button
             type="button"
-            className="rounded border border-zinc-300 px-2 py-1 font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="btn btn-ghost btn-sm"
             onClick={() => setFrameIndex((i) => (i - 1 + n) % n)}
           >
             Prev
           </button>
           <button
             type="button"
-            className="rounded border border-zinc-300 px-2 py-1 font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="btn btn-ghost btn-sm"
             onClick={() => setPlaying((p) => !p)}
           >
             {playing ? "Pause" : "Play"}
           </button>
           <button
             type="button"
-            className="rounded border border-zinc-300 px-2 py-1 font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="btn btn-ghost btn-sm"
             onClick={() => setFrameIndex((i) => (i + 1) % n)}
           >
             Next
           </button>
           {label ? (
-            <span className="text-zinc-500 dark:text-zinc-500">{label}</span>
+            <span className="text-ink-4">{label}</span>
           ) : null}
         </div>
       ) : null}
-      <p className="text-[11px] leading-snug text-zinc-500 dark:text-zinc-500">
+      <p className="text-[11px] leading-snug text-ink-4">
         Composite radar tiles update as providers publish frames (not a forecast model
         strip). Max zoom on radar imagery is limited by the tile source.
       </p>

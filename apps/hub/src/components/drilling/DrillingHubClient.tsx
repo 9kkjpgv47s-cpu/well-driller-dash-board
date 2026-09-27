@@ -54,8 +54,9 @@ import {
 } from "@/lib/viewer-well-map";
 import { FieldDispatchPanel } from "./FieldDispatchPanel";
 import { DrillingViewerMapFilters, MapLabelToolbarControls } from "./DrillingViewerMapFilters";
-import { FieldSegmentedToggle, FIELD_TOOLBAR_BTN } from "./FieldSegmentedToggle";
+import { FieldSegmentedToggle } from "./FieldSegmentedToggle";
 import { NearestWellsStrip } from "./NearestWellsStrip";
+import { Icon } from "@/components/ui/Icon";
 import { WellAslStratigraphyChart } from "./WellAslStratigraphyChart";
 import { WellDepthThermometer } from "./WellDepthThermometer";
 import { WellDetailModal } from "./WellDetailModal";
@@ -65,9 +66,10 @@ const DrillingMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="card flex h-[min(55vh,520px)] w-full items-center justify-center text-sm text-[var(--muted)]">
-        Loading map…
-      </div>
+      <div
+        className="skel h-[min(55vh,520px)] w-full rounded-lg"
+        aria-label="Loading map"
+      />
     ),
   },
 );
@@ -883,7 +885,7 @@ export function DrillingHubClient() {
 
       {center && wellsProgress && wellsProgress.total > 0 ? (
         <div className="space-y-1.5" aria-live="polite">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm text-[var(--muted)]">
+          <div className="mono flex flex-wrap items-baseline justify-between gap-2 text-sm text-ink-3">
             <span>
               Loading registry chunks — {wellsProgress.done} /{" "}
               {wellsProgress.total}
@@ -893,15 +895,14 @@ export function DrillingHubClient() {
             </span>
           </div>
           <div
-            className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]"
+            className="progress"
             role="progressbar"
             aria-label="Registry chunk loading progress"
             aria-valuemin={0}
             aria-valuemax={wellsProgress.total}
             aria-valuenow={wellsProgress.done}
           >
-            <div
-              className="h-full rounded-full bg-emerald-600 transition-[width] duration-300 dark:bg-emerald-500"
+            <span
               style={{
                 width: `${Math.round((100 * wellsProgress.done) / wellsProgress.total)}%`,
               }}
@@ -909,13 +910,10 @@ export function DrillingHubClient() {
           </div>
         </div>
       ) : center && wellsStatus ? (
-        <p className="text-sm text-[var(--muted)]">{wellsStatus}</p>
+        <p className="text-sm text-ink-3">{wellsStatus}</p>
       ) : null}
       {wellsError ? (
-        <div
-          className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
-          role="alert"
-        >
+        <div className="callout is-warn text-sm" role="alert">
           {wellsError}
         </div>
       ) : null}
@@ -932,10 +930,7 @@ export function DrillingHubClient() {
                     aria-labelledby="drill-map-h"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <h2
-                        id="drill-map-h"
-                        className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]"
-                      >
+                      <h2 id="drill-map-h" className="eyebrow">
                         Map &amp; views (
                         {formatRadiusHeading(
                           workspaceView === "map"
@@ -945,7 +940,7 @@ export function DrillingHubClient() {
                         )
                       </h2>
                       <div className="flex flex-wrap items-center gap-2">
-                        <label className="flex items-center gap-1.5 text-xs text-[var(--muted)]">
+                        <label className="flex items-center gap-1.5 text-xs text-ink-3">
                           <span>Radius</span>
                           <select
                             value={String(
@@ -958,7 +953,7 @@ export function DrillingHubClient() {
                                 ? onRadiusSelect(e.target.value)
                                 : onDepthRadiusSelect(e.target.value)
                             }
-                            className="rounded-md border border-[var(--border)] bg-[var(--surface-solid)] px-2 py-1 text-xs font-medium text-[var(--foreground)] shadow-sm"
+                            className="select select-sm"
                             aria-label={
                               workspaceView === "map"
                                 ? "Registry search radius"
@@ -1009,8 +1004,9 @@ export function DrillingHubClient() {
                                 type="button"
                                 onClick={() => void fetchGroundElevations()}
                                 disabled={elevLoading}
-                                className={`${FIELD_TOOLBAR_BTN} shrink-0 bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-600`}
+                                className="btn btn-accent btn-sm shrink-0"
                               >
+                                <Icon name="elevation" />
                                 {elevLoading
                                   ? "Fetching…"
                                   : "Ground elevation"}
@@ -1027,16 +1023,13 @@ export function DrillingHubClient() {
                         {workspaceView === "map" ? (
                           <>
                             {elevError ? (
-                              <p
-                                className="text-sm text-red-600 dark:text-red-400"
-                                role="alert"
-                              >
+                              <p className="text-sm text-bad" role="alert">
                                 {elevError}
                               </p>
                             ) : null}
                             {demRefGroundElevFt != null ||
                             demWellElevRows.length > 0 ? (
-                              <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50/90 px-3 py-2 text-xs text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100">
+                              <div className="space-y-2 rounded-lg border border-ok bg-ok-soft px-3 py-2 text-xs text-ink-2">
                                 {demRefGroundElevFt != null ? (
                                   <p>
                                     <strong>
@@ -1054,7 +1047,7 @@ export function DrillingHubClient() {
                                   <div className="overflow-x-auto">
                                     <table className="w-full min-w-[280px] border-collapse text-left text-[11px]">
                                       <thead>
-                                        <tr className="border-b border-emerald-300/80 dark:border-emerald-700">
+                                        <tr className="border-b border-ok">
                                           <th className="py-1 pr-2 font-semibold">
                                             Well
                                           </th>
@@ -1070,7 +1063,7 @@ export function DrillingHubClient() {
                                         {demWellElevRows.map((r) => (
                                           <tr
                                             key={r.label}
-                                            className="border-b border-emerald-200/60 dark:border-emerald-800/60"
+                                            className="border-b border-line"
                                           >
                                             <td className="py-1 pr-2 font-mono">
                                               {r.label}
@@ -1089,7 +1082,7 @@ export function DrillingHubClient() {
                                         ))}
                                       </tbody>
                                     </table>
-                                    <p className="mt-1 text-[10px] text-emerald-800/90 dark:text-emerald-200/90">
+                                    <p className="mt-1 text-[10px] text-ink-3">
                                       Δ is well minus reference (positive =
                                       well higher than center).
                                     </p>
@@ -1231,31 +1224,28 @@ export function DrillingHubClient() {
         </>
       ) : (
         <section
-          className="card space-y-4 rounded-xl border border-dashed border-[var(--border)] p-6"
+          className="card space-y-4 border-dashed p-6"
           aria-labelledby="field-onboarding-h"
         >
-          <h2
-            id="field-onboarding-h"
-            className="text-base font-semibold text-[var(--foreground)]"
-          >
+          <h2 id="field-onboarding-h">
             Get the field map started
           </h2>
-          <ol className="list-inside list-decimal space-y-2 text-sm text-[var(--muted)]">
+          <ol className="list-inside list-decimal space-y-2 text-sm text-ink-2">
             <li>
-              <strong className="text-[var(--foreground)]">
+              <strong className="text-ink">
                 Paste dispatch text
               </strong>{" "}
               (email body with an address and/or GPS coordinates) into the box
               above.
             </li>
             <li>
-              <strong className="text-[var(--foreground)]">
+              <strong className="text-ink">
                 Tap “Generate job brief”
               </strong>{" "}
               — we pull out the location, contact, and rig-path details.
             </li>
             <li>
-              <strong className="text-[var(--foreground)]">
+              <strong className="text-ink">
                 Map unlocks automatically
               </strong>{" "}
               with nearby DNR registry wells, weather, and area drilling
@@ -1263,8 +1253,8 @@ export function DrillingHubClient() {
             </li>
           </ol>
           {geocodableAddress ? (
-            <div className="space-y-2 rounded-lg border border-emerald-300 bg-emerald-50/80 p-4 dark:border-emerald-800 dark:bg-emerald-950/40">
-              <p className="text-sm text-emerald-950 dark:text-emerald-100">
+            <div className="callout is-ok space-y-2">
+              <p className="text-sm">
                 We found an address but no GPS coordinates in the paste:
                 <br />
                 <strong>{geocodableAddress}</strong>
@@ -1273,15 +1263,12 @@ export function DrillingHubClient() {
                 type="button"
                 onClick={() => void geocodeDispatchAddress()}
                 disabled={geocoding}
-                className="btn-primary disabled:opacity-50"
+                className="btn btn-accent"
               >
                 {geocoding ? "Geocoding…" : "Geocode address"}
               </button>
               {geocodeError ? (
-                <p
-                  className="text-sm text-red-600 dark:text-red-400"
-                  role="alert"
-                >
+                <p className="text-sm text-bad" role="alert">
                   {geocodeError}
                 </p>
               ) : null}
@@ -1301,7 +1288,7 @@ export function DrillingHubClient() {
 
       {toast ? (
         <p
-          className="fixed bottom-6 right-6 z-[1000] rounded-lg bg-[var(--foreground)] px-4 py-2 text-sm text-[var(--background)] shadow-lg"
+          className="fixed bottom-6 right-6 z-[1000] rounded-lg bg-ink px-4 py-2 text-sm text-bg shadow-lg"
           role="status"
         >
           {toast}

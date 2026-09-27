@@ -38,9 +38,9 @@ export function NearestWellsStrip({
   onListModeChange,
 }: Props) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-zinc-50/80 dark:border-zinc-600 dark:bg-zinc-900/50">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 px-3 py-2 dark:border-zinc-600">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+    <div className="rounded-lg border border-line bg-bg-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
+        <h3 className="mono text-xs font-semibold uppercase tracking-wide text-ink-3">
           {title}
         </h3>
         <div className="flex flex-wrap items-center gap-2">
@@ -57,14 +57,14 @@ export function NearestWellsStrip({
             />
           ) : null}
           {hint ? (
-            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
+            <span className="text-[10px] text-ink-4">
               {hint}
             </span>
           ) : null}
         </div>
       </div>
       {!wells.length ? (
-        <p className="px-3 py-4 text-xs text-[var(--muted)]">{emptyMessage}</p>
+        <p className="px-3 py-4 text-xs text-ink-3">{emptyMessage}</p>
       ) : (
         <div
           className={`${maxHeightClass} overflow-y-auto overflow-x-hidden p-2`}
@@ -93,16 +93,16 @@ export function NearestWellsStrip({
                 key={`${k}-${idx}`}
                 type="button"
                 onClick={() => onSelectWell(w)}
-                className={`rounded-lg border bg-white p-2.5 text-left text-xs shadow-sm transition dark:bg-zinc-950 ${
+                className={`rounded-lg border bg-surface p-2.5 text-left text-xs shadow-sm transition ${
                   selectedKey === k
-                    ? "border-sky-500 bg-sky-50/70 ring-1 ring-sky-400 dark:border-sky-500 dark:bg-sky-950/40"
-                    : "border-zinc-200 hover:border-sky-400 hover:bg-sky-50/50 dark:border-zinc-600 dark:hover:border-sky-600 dark:hover:bg-sky-950/20"
+                    ? "border-accent bg-accent-soft ring-1 ring-accent"
+                    : "border-line hover:border-accent hover:bg-accent-soft"
                 }`}
               >
-                <p className="font-mono font-semibold text-zinc-900 dark:text-zinc-50">
+                <p className="font-mono font-semibold text-ink">
                   {id}
                 </p>
-                <p className="mt-0.5 text-[11px] text-zinc-600 dark:text-zinc-400">
+                <p className="mt-0.5 text-[11px] text-ink-3">
                   {tagTokens.length ? (
                     <span className="inline-flex flex-wrap items-end gap-x-2">
                       {tagTokens.map((tok, ti) => {
@@ -181,7 +181,7 @@ export function NearestWellsStrip({
                         return (
                           <span
                             key={`${tok}-${ti}`}
-                            className="inline-flex items-end text-zinc-700 dark:text-zinc-300"
+                            className="inline-flex items-end text-ink-2"
                           >
                             {tok}
                           </span>
@@ -191,20 +191,20 @@ export function NearestWellsStrip({
                   ) : showPlainFallback ? (
                     <span>{typeLb}</span>
                   ) : typeLb === "Well" ? (
-                    <span className="text-zinc-500">Well</span>
+                    <span className="text-ink-3">Well</span>
                   ) : null}
                 </p>
-                <p className="mt-1 text-[11px] text-zinc-700 dark:text-zinc-300">
+                <p className="mt-1 text-[11px] text-ink-2">
                   {depth != null ? `${depth} ft` : "— depth"}
                   {gpm != null ? ` · ${gpm} gpm` : ""}
                 </p>
                 {aq ? (
-                  <p className="mt-1 line-clamp-2 text-[10px] text-zinc-500 dark:text-zinc-400">
+                  <p className="mt-1 line-clamp-2 text-[10px] text-ink-3">
                     {aq}
                   </p>
                 ) : null}
                 {demFt != null ? (
-                  <p className="mt-1 text-[10px] text-emerald-800 dark:text-emerald-200">
+                  <p className="mt-1 text-[10px] text-ok">
                     DEM {demFt} ft
                     {diff != null
                       ? ` (${diff > 0 ? "+" : ""}${diff} vs ref)`

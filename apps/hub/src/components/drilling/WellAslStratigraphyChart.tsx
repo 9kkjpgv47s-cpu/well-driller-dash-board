@@ -374,7 +374,7 @@ export function WellAslStratigraphyChart({
 
   if (!wells.length) {
     return (
-      <p className="text-center text-sm text-[var(--muted)]">
+      <p className="text-center text-sm text-ink-3">
         No wells in this radius.
       </p>
     );
@@ -382,7 +382,7 @@ export function WellAslStratigraphyChart({
 
   if (!fullLayout.columns.length) {
     return (
-      <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+      <div className="callout is-warn space-y-3 p-4 text-sm">
         <p className="font-medium">Need ground elevation and lithology logs</p>
         <p className="text-xs opacity-90">
           This view plots each well&apos;s log intervals by elevation (ft ASL) so
@@ -400,7 +400,7 @@ export function WellAslStratigraphyChart({
             type="button"
             onClick={onRequestElevations}
             disabled={elevLoading}
-            className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-800 disabled:opacity-50 dark:bg-emerald-600"
+            className="btn btn-accent btn-sm"
           >
             {elevLoading ? "Loading elevations…" : "Load ground elevations"}
           </button>
@@ -411,7 +411,7 @@ export function WellAslStratigraphyChart({
 
   if (!layout.columns.length) {
     return (
-      <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+      <div className="callout is-warn space-y-3 p-4 text-sm">
         <p className="font-medium">No matching aquifer wells to display</p>
         <p className="text-xs opacity-90">
           Turn off &quot;Matching aquifer only&quot; to see all wells with logs in
@@ -423,7 +423,7 @@ export function WellAslStratigraphyChart({
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      <p className="text-[11px] leading-snug text-zinc-600 sm:text-xs dark:text-zinc-400">
+      <p className="text-[11px] leading-snug text-ink-3 sm:text-xs">
         Lithology by <strong>elevation (ft ASL)</strong> within {radiusMiles} mi.
         {matchingAquiferOnly ? (
           <>
@@ -445,12 +445,12 @@ export function WellAslStratigraphyChart({
 
       {matchingWellTotal > 0 ? (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-medium text-zinc-700 sm:text-[11px] dark:text-zinc-200">
+          <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-medium text-ink-2 sm:text-[11px]">
             <input
               type="checkbox"
               checked={matchingAquiferOnly}
               onChange={(e) => setMatchingAquiferOnly(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-zinc-400 accent-red-600"
+              className="h-3.5 w-3.5 rounded"
             />
             Matching aquifer only ({matchingWellTotal} well
             {matchingWellTotal === 1 ? "" : "s"})
@@ -471,7 +471,7 @@ export function WellAslStratigraphyChart({
               : `View all shared aquifer wells (${matchingWellTotal})`}
           </button>
           {chartLimited ? (
-            <span className="text-[10px] text-amber-800 dark:text-amber-200">
+            <span className="text-[10px] text-warn">
               Only {matchingInChart} of {matchingWellTotal} matching wells in chart
               — enable filter above to see all
             </span>
@@ -479,13 +479,13 @@ export function WellAslStratigraphyChart({
         </div>
       ) : null}
 
-      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+      <p className="text-[10px] text-ink-4">
         Click a lithology layer or well name to open that well. Use{" "}
         <strong>View all</strong> / <strong>View wells</strong> for distances to
         overlapping aquifers.
       </p>
 
-      <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[9px] text-zinc-600 sm:text-[10px] dark:text-zinc-400">
+      <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[9px] text-ink-3 sm:text-[10px]">
         {LEGEND.map((c) => {
           const { fill, stroke, label } = lithologyClassColors(c);
           return (
@@ -516,17 +516,17 @@ export function WellAslStratigraphyChart({
         ) : null}
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white/80 dark:border-zinc-700 dark:bg-zinc-900/40">
+      <div className="rounded-lg border border-line bg-surface">
         <div className="flex min-w-0">
           <aside
-            className="relative hidden shrink-0 border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/60 sm:block"
+            className="relative hidden shrink-0 border-r border-line bg-bg-2 sm:block"
             style={{ width: SHARED_PANEL_W, height: CHART_HEIGHT }}
             aria-label="Shared aquifer labels"
           >
-            <div className="border-b border-zinc-200 px-1.5 py-1 text-[8px] font-semibold leading-tight text-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
+            <div className="border-b border-line px-1.5 py-1 text-[8px] font-semibold leading-tight text-ink">
               Shared aquifers
               {drillReferenceElevFt != null ? (
-                <span className="block font-normal text-zinc-600 dark:text-zinc-400">
+                <span className="block font-normal text-ink-3">
                   at your site · {drillReferenceElevFt} ft ground
                 </span>
               ) : null}
@@ -538,10 +538,10 @@ export function WellAslStratigraphyChart({
                 style={{ top: desktopBandTops.get(row.key) ?? row.y - 28 }}
               >
                 <div
-                  className={`rounded-sm px-1 py-0.5 text-[8px] leading-snug text-emerald-950 shadow-sm dark:text-emerald-100 ${
+                  className={`rounded-sm px-1 py-0.5 text-[8px] leading-snug text-ink-2 shadow-sm ${
                     wellsListMode === row.key
                       ? "bg-red-50/95 ring-1 ring-red-400 dark:bg-red-950/50"
-                      : "bg-zinc-50/95 dark:bg-zinc-900/95"
+                      : "bg-surface"
                   }`}
                 >
                   <SharedBandLabelContent
@@ -807,11 +807,11 @@ export function WellAslStratigraphyChart({
         </div>
 
         {sharedBandRows.length ? (
-          <div className="space-y-2 border-t border-zinc-200 p-2 sm:hidden dark:border-zinc-700">
-            <p className="text-[10px] font-semibold text-zinc-800 dark:text-zinc-100">
+          <div className="space-y-2 border-t border-line p-2 sm:hidden">
+            <p className="text-[10px] font-semibold text-ink">
               Shared aquifers
               {drillReferenceElevFt != null ? (
-                <span className="font-normal text-zinc-600 dark:text-zinc-400">
+                <span className="font-normal text-ink-3">
                   {" "}
                   · your site {drillReferenceElevFt} ft ground
                 </span>
@@ -840,7 +840,7 @@ export function WellAslStratigraphyChart({
       </div>
 
       {hover ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-zinc-100 px-2.5 py-2 text-[11px] text-zinc-800 sm:px-3 sm:text-xs dark:bg-zinc-800 dark:text-zinc-100">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-bg-2 px-2.5 py-2 text-[11px] text-ink-2 sm:px-3 sm:text-xs">
           <p>
             <strong>{hover.label}</strong>
             {hover.aquiferMatch ? (
@@ -852,7 +852,7 @@ export function WellAslStratigraphyChart({
             <strong>{hover.formation}</strong> · {hover.topDepth}–{hover.bottomDepth}{" "}
             ft in hole · {hover.topAsl}–{hover.bottomAsl} ft ASL
             {center ? (
-              <span className="text-zinc-500 dark:text-zinc-400">
+              <span className="text-ink-3">
                 {" "}
                 · {formatDistMi(distanceMilesToCenter(hover.well, center))} away
               </span>
@@ -861,7 +861,7 @@ export function WellAslStratigraphyChart({
           <button
             type="button"
             onClick={() => onSelectWell(hover.well)}
-            className="shrink-0 rounded-md bg-emerald-700 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-800 dark:bg-emerald-600"
+            className="btn btn-accent btn-sm shrink-0"
           >
             Open well detail
           </button>
@@ -899,14 +899,14 @@ export function WellAslStratigraphyChart({
                   <button
                     type="button"
                     onClick={() => onSelectWell(row.well)}
-                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[11px] transition-colors hover:bg-white/80 dark:hover:bg-zinc-900/50 sm:text-xs ${
+                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[11px] transition-colors hover:bg-surface sm:text-xs ${
                       selected
-                        ? "bg-emerald-50 dark:bg-emerald-950/30"
+                        ? "bg-accent-soft"
                         : ""
                     }`}
                   >
                     <span className="min-w-0">
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      <span className="font-semibold text-ink">
                         {row.label}
                       </span>
                       {row.bandLabel ? (
@@ -918,9 +918,9 @@ export function WellAslStratigraphyChart({
                         </span>
                       ) : null}
                     </span>
-                    <span className="shrink-0 text-right font-mono text-[11px] font-semibold text-zinc-800 dark:text-zinc-100">
+                    <span className="shrink-0 text-right font-mono text-[11px] font-semibold text-ink-2">
                       {formatDistMi(row.distanceMiles)}
-                      <span className="block text-[9px] font-normal text-emerald-700 dark:text-emerald-300">
+                      <span className="block text-[9px] font-normal text-accent-ink">
                         Open →
                       </span>
                     </span>
@@ -937,7 +937,7 @@ export function WellAslStratigraphyChart({
           type="button"
           onClick={onRequestElevations}
           disabled={elevLoading}
-          className="text-[11px] font-semibold text-emerald-700 hover:underline disabled:opacity-50 sm:text-xs dark:text-emerald-400"
+          className="text-[11px] font-semibold text-accent-ink hover:underline disabled:opacity-50 sm:text-xs"
         >
           {elevLoading ? "Refreshing elevations…" : "Refresh ground elevations"}
         </button>

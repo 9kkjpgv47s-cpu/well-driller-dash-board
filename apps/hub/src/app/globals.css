@@ -1,228 +1,208 @@
 @import "tailwindcss";
 
-/* Default hub tokens (Office + shell) */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --muted: #52525b;
-  --border: rgba(23, 23, 23, 0.12);
-  --surface: rgba(255, 255, 255, 0.72);
-  --surface-solid: #ffffff;
-  --surface-muted: #f4f4f5;
-  --accent: #0284c7;
-  --accent-soft: rgba(2, 132, 199, 0.12);
-  --ring: rgba(2, 132, 199, 0.35);
-  --glow: radial-gradient(
-    1200px 600px at 10% -10%,
-    rgba(2, 132, 199, 0.08),
-    transparent 55%
-  );
-}
+/* C&J design system — canonical source is design/cj/ at the repo root.
+   The copies under src/styles/cj/ are written by scripts/sync-cj-design.sh;
+   never edit them here. */
+@import "../styles/cj/tokens.css";
+@import "../styles/cj/base.css";
+@import "../styles/cj/components.css";
+@import "../styles/cj/motion.css";
+@import "../styles/cj/loader.css";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Semantic C&J tokens exposed as Tailwind utilities (bg-bg, text-ink-3,
+   border-line, bg-accent-soft, font-serif, …). `inline` keeps var() so the
+   utilities follow [data-theme]. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-ink: var(--accent-2-ink);
+  --color-accent-2-soft: var(--accent-2-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-bad-ink: var(--bad-ink);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --muted: #a1a1aa;
-    --border: rgba(244, 244, 245, 0.12);
-    --surface: rgba(24, 24, 27, 0.75);
-    --surface-solid: #18181b;
-    --surface-muted: rgba(39, 39, 42, 0.6);
-    --accent: #38bdf8;
-    --accent-soft: rgba(56, 189, 248, 0.15);
-    --ring: rgba(56, 189, 248, 0.35);
-    --glow: radial-gradient(
-      1200px 600px at 10% -10%,
-      rgba(56, 189, 248, 0.12),
-      transparent 55%
-    );
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  min-height: 100vh;
-}
-
-/* Field workspace — legacy Driller brief palette (scoped) */
-.field-hub-scope {
-  --background: #f4f6fb;
-  --foreground: #0c1222;
-  --muted: #5c6578;
-  --border: rgba(12, 18, 34, 0.08);
-  --surface: rgba(255, 255, 255, 0.72);
-  --surface-solid: #ffffff;
-  --surface-muted: rgba(255, 255, 255, 0.5);
-  --accent: #2563eb;
-  --accent-soft: rgba(37, 99, 235, 0.12);
-  --ring: rgba(37, 99, 235, 0.35);
+/* Legacy token aliases — components written before the C&J restyle still
+   resolve var(--background)/var(--foreground)/… at use-site, so they follow
+   the active theme. */
+:root {
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --muted: var(--ink-3);
+  --border: var(--line-strong);
+  --surface-solid: var(--surface);
+  --surface-muted: var(--bg-2);
+  --ring: var(--accent-soft);
   --glow: radial-gradient(
     1200px 600px at 10% -10%,
-    rgba(37, 99, 235, 0.18),
+    var(--accent-soft),
     transparent 55%
   );
-  background: var(--background);
-  color: var(--foreground);
-  border-radius: 1rem;
-  padding: 1.5rem 0;
-  margin-left: 0;
-  margin-right: 0;
+}
+
+/* Field workspace scope — a layout container only; all color now comes from
+   the theme tokens (was a separate blue palette). */
+.field-hub-scope {
+  border-radius: var(--radius-lg);
+  padding: var(--s-5) 0;
 }
 
 @media (min-width: 640px) {
   .field-hub-scope {
-    padding: 1.5rem 1rem;
-    margin-left: -0.25rem;
-    margin-right: -0.25rem;
+    padding: var(--s-5) var(--s-4);
   }
-}
-
-@media (prefers-color-scheme: dark) {
-  .field-hub-scope {
-    --background: #070a12;
-    --foreground: #eef1f7;
-    --muted: #9aa3b5;
-    --border: rgba(238, 241, 247, 0.1);
-    --surface: rgba(18, 22, 36, 0.75);
-    --surface-solid: #111522;
-    --surface-muted: rgba(18, 22, 36, 0.55);
-    --accent: #60a5fa;
-    --accent-soft: rgba(96, 165, 250, 0.15);
-    --ring: rgba(96, 165, 250, 0.4);
-    --glow: radial-gradient(
-      1200px 600px at 10% -10%,
-      rgba(96, 165, 250, 0.2),
-      transparent 55%
-    );
-  }
-}
-
-.app-backdrop {
-  background-image: var(--glow),
-    radial-gradient(
-      800px 400px at 90% 0%,
-      rgba(14, 165, 233, 0.12),
-      transparent 50%
-    );
 }
 
 .field-hub-scope .card {
-  border-radius: 1rem;
-  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(12, 18, 34, 0.06);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
 }
 
-@media (prefers-color-scheme: dark) {
-  .field-hub-scope .card {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 12px 40px rgba(0, 0, 0, 0.35);
-  }
-}
-
-.input-field {
-  width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border);
-  background: var(--surface-solid);
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.input-field:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--ring);
-}
-
-@media (prefers-color-scheme: dark) {
-  .input-field {
-    background: rgba(15, 18, 30, 0.9);
-  }
-}
-
+/* Legacy button/input class names, restyled onto the C&J system (no
+   gradients, pill shape, token colors). */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  padding: 0.625rem 1.1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-  transition: transform 0.12s, box-shadow 0.12s, opacity 0.12s;
+  gap: var(--s-2);
+  min-height: var(--tap);
+  padding: 0.6rem 1.15rem;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--bg);
+  background: var(--ink);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast), opacity var(--dur-fast);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.5);
 }
 
 .btn-primary:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-@media (prefers-color-scheme: dark) {
-  .btn-primary {
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
-  }
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border);
-  background: var(--surface-solid);
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--foreground);
-  transition: background 0.12s, border-color 0.12s;
+  gap: var(--s-2);
+  min-height: var(--tap);
+  padding: 0.6rem 1.05rem;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast), background-color var(--dur-fast),
+    opacity var(--dur-fast);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  border-color: var(--accent);
+  transform: translateY(-1px);
+  border-color: var(--ink);
   background: var(--accent-soft);
 }
 
 .btn-secondary:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--muted);
-  transition: color 0.12s, background 0.12s;
+  gap: var(--s-2);
+  min-height: var(--tap);
+  padding: 0.6rem 1.05rem;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast), background-color var(--dur-fast),
+    color var(--dur-fast), opacity var(--dur-fast);
 }
 
-.btn-ghost:hover {
-  color: var(--foreground);
-  background: var(--surface-muted);
+.btn-ghost:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--accent-soft);
 }
 
+.btn-ghost:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.input-field {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.75rem;
+  min-height: var(--tap);
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast),
+    background-color var(--dur-fast);
+}
+
+.input-field:hover {
+  border-color: var(--ink-3);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.input-field::placeholder {
+  color: var(--ink-4);
+}
+
+/* ===== LOCKED: well/map marker styles — do not edit ===== */
 /*
  * Leaflet map marker chrome — MUST live in globals so it always ships with layout.
  * Component CSS (drilling-map-viewer.css) was missing from production bundles, so

@@ -28,7 +28,7 @@ export function Icon({
       className={className}
       aria-hidden="true"
       focusable="false"
-      // eslint-disable-next-line react/no-danger -- generated from our own sprite
+       
       dangerouslySetInnerHTML={{ __html: ICONS[name] }}
     />
   );

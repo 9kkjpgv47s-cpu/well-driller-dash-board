@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DrillingHubClient } from "@/components/drilling/DrillingHubClient";
+import { BoreLoader } from "@/components/ui/BoreLoader";
 
 export const metadata: Metadata = {
   title: "Field — Driller Dashboard",
@@ -10,11 +11,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <Suspense
-      fallback={
-        <p className="text-sm text-[var(--muted)]">Loading…</p>
-      }
-    >
+    <Suspense fallback={<BoreLoader status="Loading field hub" />}>
       <DrillingHubClient />
     </Suspense>
   );

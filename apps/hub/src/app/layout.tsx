@@ -1,23 +1,43 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Instrument_Serif, Inter, IBM_Plex_Mono } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Self-hosted via next/font — no fonts.googleapis.com RTT on first paint.
+// The --f-* vars plug into the C&J tokens (--font-display/body/mono).
+const fontDisplay = Instrument_Serif({
+  weight: "400",
+  style: ["normal", "italic"],
   subsets: ["latin"],
+  variable: "--f-display",
+  display: "swap",
+});
+const fontBody = Inter({
+  weight: ["400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--f-body",
+  display: "swap",
+});
+const fontMono = IBM_Plex_Mono({
+  weight: ["400", "500"],
+  subsets: ["latin"],
+  variable: "--f-mono",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// No-flash theme bootstrap — mirrors design/cj/theme-init.js verbatim.
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('cj-theme');if(t!=='light'&&t!=='dark'&&t!=='field'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='light'}})();`;
 
 export const metadata: Metadata = {
-  title: "Driller Dashboard — Field Hub",
+  title: "Driller Hub — C&J Well Co",
   description:
     "Field jobsite workspace: dispatch parsing, DNR wells map, depth view, weather, and area drilling analysis.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -26,10 +46,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
-      >
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`}
+    >
+      <body suppressHydrationWarning>
+        {/* First child of <body>: sets html[data-theme] before paint. */}
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <AppShell>{children}</AppShell>
         <ServiceWorkerRegister />
       </body>

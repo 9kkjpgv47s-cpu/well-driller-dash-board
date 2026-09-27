@@ -6,6 +6,7 @@ import { getLithLayers } from "@/lib/area-well-analytics";
 import { fetchJsonOrFallback } from "@/lib/http/fetch-json";
 import { resolveWellRefNo } from "@/lib/well-identity";
 import { getWellDisplayDepthFtViewer } from "@/lib/viewer-well-map";
+import { Icon } from "@/components/ui/Icon";
 
 type DnrApi = {
   loading?: boolean;
@@ -248,7 +249,7 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[2000] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+      className="modal-backdrop z-[2000]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="well-modal-title"
@@ -256,14 +257,12 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
     >
       <div
         ref={dialogRef}
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-600 dark:bg-zinc-900"
+        className="modal-dialog w-full p-0"
+        style={{ width: "min(42rem, 100%)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 flex items-start justify-between gap-3 border-b border-zinc-200 bg-white px-5 py-4 dark:border-zinc-700 dark:bg-zinc-900">
-          <h2
-            id="well-modal-title"
-            className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
-          >
+        <div className="modal-head sticky top-0 z-10 mb-0 border-b border-line bg-surface px-5 py-4">
+          <h2 id="well-modal-title">
             {String(well.id ?? well.refno ?? "Well")}
           </h2>
           <button
@@ -271,12 +270,13 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Close well details"
-            className="rounded-lg px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="btn btn-ghost btn-sm"
           >
+            <Icon name="close" />
             Close
           </button>
         </div>
-        <div className="space-y-4 p-5 text-sm text-zinc-800 dark:text-zinc-200">
+        <div className="space-y-4 p-5 text-sm text-ink-2">
           <div>
             <strong>Well depth (ft):</strong> {depthFt}
           </div>
@@ -285,17 +285,17 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
               Material drilled through — Well Log (Top, Bottom, Formation)
             </strong>
             {logRows.length > 0 ? (
-              <div className="mt-1 max-h-72 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-600">
+              <div className="mt-1 max-h-72 overflow-auto rounded-lg border border-line">
                 <table className="w-full border-collapse text-xs">
                   <thead>
-                    <tr className="sticky top-0 bg-zinc-100 dark:bg-zinc-800">
-                      <th className="border-b border-zinc-200 p-2 text-left dark:border-zinc-600">
+                    <tr className="sticky top-0 bg-bg-2">
+                      <th className="border-b border-line p-2 text-left">
                         Top
                       </th>
-                      <th className="border-b border-zinc-200 p-2 text-left dark:border-zinc-600">
+                      <th className="border-b border-line p-2 text-left">
                         Bottom
                       </th>
-                      <th className="border-b border-zinc-200 p-2 text-left dark:border-zinc-600">
+                      <th className="border-b border-line p-2 text-left">
                         Formation
                       </th>
                     </tr>
@@ -304,7 +304,7 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
                     {logRows.map((row, i) => (
                       <tr
                         key={i}
-                        className="border-b border-zinc-100 dark:border-zinc-800"
+                        className="border-b border-line"
                       >
                         <td className="p-2 align-top">
                           {String((row as Record<string, unknown>).top ?? "")}
@@ -321,9 +321,9 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
                 </table>
               </div>
             ) : dnr.loading ? (
-              <span className="text-zinc-400">Loading Well Log…</span>
+              <span className="text-ink-4">Loading Well Log…</span>
             ) : (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+              <div className="callout is-warn p-3 text-xs">
                 <div className="font-semibold">
                   Well Log rows aren&apos;t in this chunk row.
                 </div>
@@ -336,7 +336,7 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
                     href={rep}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 inline-block text-emerald-800 underline dark:text-emerald-300"
+                    className="mt-2 inline-block text-accent-ink underline"
                   >
                     Open official DNR record
                   </a>
@@ -361,24 +361,24 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
               href={rep}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-emerald-700 underline dark:text-emerald-400"
+              className="inline-block text-accent-ink underline"
             >
               Official DNR well record
             </a>
           ) : null}
         </div>
-        <div className="flex flex-wrap gap-2 border-t border-zinc-200 p-5 dark:border-zinc-700">
+        <div className="flex flex-wrap gap-2 border-t border-line p-5">
           <button
             type="button"
             onClick={() => onAddToJob(well)}
-            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+            className="btn btn-accent"
           >
             Add to job queue
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-600"
+            className="btn btn-ghost"
           >
             Done
           </button>

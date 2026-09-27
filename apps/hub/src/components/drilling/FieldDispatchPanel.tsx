@@ -18,6 +18,7 @@ import {
   buildJobShareUrl,
 } from "@/lib/job-share";
 import { directionsLinksForDispatch } from "@/lib/navigation-links";
+import { Icon } from "@/components/ui/Icon";
 
 type Props = {
   /** Called when dispatch paste includes GPS coordinates (not address stubs). */
@@ -326,10 +327,11 @@ export function FieldDispatchPanel({
     <div className="space-y-6">
       <section className="card p-4 sm:p-6">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">
+          <p className="eyebrow">Intake</p>
+          <h2>
             Dispatch input
           </h2>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
+          <p className="mt-1 max-w-2xl text-sm text-ink-2">
             Paste the body of your dispatch email (or any text that includes
             an address and/or latitude and longitude). We extract location
             heuristically. Your last paste is saved on this phone/browser so
@@ -349,7 +351,7 @@ export function FieldDispatchPanel({
             }}
             placeholder="Paste dispatch email here…"
             rows={12}
-            className="input-field min-h-[200px] resize-y font-mono text-sm leading-relaxed"
+            className="textarea min-h-[200px] font-mono text-sm leading-relaxed"
           />
         </label>
 
@@ -357,7 +359,7 @@ export function FieldDispatchPanel({
           <button
             type="button"
             onClick={() => void generate()}
-            className="btn-primary"
+            className="btn btn-primary"
             disabled={generateBusy || !raw.trim()}
           >
             {generateBusy ? "Working…" : "Generate job brief"}
@@ -366,38 +368,39 @@ export function FieldDispatchPanel({
             type="button"
             onClick={() => void shareJobLink()}
             disabled={!canShareJob}
-            className="btn-secondary disabled:opacity-50"
+            className="btn btn-ghost"
             title={
               canShareJob
                 ? "Send a link so someone else opens this same job (dispatch + map)"
                 : "Generate a job brief with a map location first"
             }
           >
+            <Icon name="share" />
             {copiedField === "share" ? "Link ready" : "Share job link"}
           </button>
           {raw.trim() ? (
             <button
               type="button"
               onClick={clearSaved}
-              className="btn-secondary"
+              className="btn btn-ghost"
             >
               Clear saved dispatch
             </button>
           ) : null}
           {generateHint ? (
-            <p className="text-sm text-[var(--muted)]" role="status">
+            <p className="text-sm text-ink-3" role="status">
               {generateHint}
             </p>
           ) : null}
         </div>
         {canShareJob ? (
-          <p className="mt-2 text-xs text-[var(--muted)]">
+          <p className="mt-2 text-xs text-ink-3">
             Share job link opens the same dispatch text and map pin on their phone
             (hard refresh once if they still see an old page).
           </p>
         ) : null}
         {savedHint ? (
-          <p className="mt-2 text-xs text-[var(--muted)]" role="status">
+          <p className="mt-2 text-xs text-ink-3" role="status">
             {savedHint}
           </p>
         ) : null}
@@ -408,10 +411,10 @@ export function FieldDispatchPanel({
         <div className="space-y-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
+              <p className="eyebrow">
                 Parsed brief
               </p>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-[var(--foreground)] sm:text-2xl">
+              <h2 className="mt-1 text-xl tracking-tight sm:text-2xl">
                 {parsed.title ?? "Job brief"}
               </h2>
             </div>
@@ -420,8 +423,9 @@ export function FieldDispatchPanel({
                 type="button"
                 onClick={() => void shareJobLink()}
                 disabled={!canShareJob}
-                className="btn-secondary shrink-0 self-start disabled:opacity-50"
+                className="btn btn-ghost shrink-0 self-start"
               >
+                <Icon name="share" />
                 {copiedField === "share" ? "Link ready" : "Share job link"}
               </button>
               {mapsUrl ? (
@@ -429,7 +433,7 @@ export function FieldDispatchPanel({
                   href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-primary shrink-0 self-start"
+                  className="btn btn-accent shrink-0 self-start"
                 >
                   {parsed.locationSource === "coordinates"
                     ? "Open GPS in Maps"
@@ -440,8 +444,8 @@ export function FieldDispatchPanel({
           </div>
 
           {directions ? (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)]/60 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            <div className="rounded-xl border border-line bg-bg-2 px-4 py-3">
+              <p className="eyebrow plain">
                 Directions (opens app or browser)
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -449,7 +453,7 @@ export function FieldDispatchPanel({
                   href={directions.google}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary text-xs"
+                  className="btn btn-ghost btn-sm"
                 >
                   Google Maps
                 </a>
@@ -457,7 +461,7 @@ export function FieldDispatchPanel({
                   href={directions.apple}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary text-xs"
+                  className="btn btn-ghost btn-sm"
                 >
                   Apple Maps
                 </a>
@@ -465,7 +469,7 @@ export function FieldDispatchPanel({
                   href={directions.waze}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary text-xs"
+                  className="btn btn-ghost btn-sm"
                 >
                   Waze
                 </a>
@@ -474,7 +478,7 @@ export function FieldDispatchPanel({
           ) : null}
 
           {parsed.warnings.length > 0 ? (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100">
+            <div className="callout is-warn text-sm">
               <p className="font-semibold">Heads up</p>
               <ul className="mt-2 list-inside list-disc space-y-1 opacity-90">
                 {parsed.warnings.map((w) => (
@@ -485,54 +489,54 @@ export function FieldDispatchPanel({
           ) : null}
 
           <section className="card p-5">
-            <h3 className="text-sm font-semibold text-[var(--foreground)]">
+            <h3 className="text-sm font-semibold text-ink">
               Location
             </h3>
             <dl className="mt-3 space-y-3 text-sm">
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <dt className="text-xs font-medium text-[var(--muted)]">
+                  <dt className="text-xs font-medium text-ink-3">
                     Address
                   </dt>
                   {parsed.address ? (
                     <button
                       type="button"
                       onClick={() => void copyToClipboard(parsed.address!, "address")}
-                      className="rounded-md border border-[var(--border)] px-2 py-1 text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--surface-muted)]"
+                      className="btn btn-ghost btn-sm"
                     >
                       {copiedField === "address" ? "Copied" : "Copy address"}
                     </button>
                   ) : null}
                 </div>
-                <dd className="mt-0.5 text-[var(--foreground)]">
+                <dd className="mt-0.5 text-ink">
                   {parsed.address ?? "—"}
                 </dd>
               </div>
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <dt className="text-xs font-medium text-[var(--muted)]">
+                  <dt className="text-xs font-medium text-ink-3">
                     Coordinates
                   </dt>
                   {coordText ? (
                     <button
                       type="button"
                       onClick={() => void copyToClipboard(coordText, "coords")}
-                      className="rounded-md border border-[var(--border)] px-2 py-1 text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--surface-muted)]"
+                      className="btn btn-ghost btn-sm"
                     >
                       {copiedField === "coords" ? "Copied" : "Copy lat/long"}
                     </button>
                   ) : null}
                 </div>
-                <dd className="mt-0.5 font-mono text-[var(--foreground)]">
+                <dd className="mt-0.5 font-mono text-ink">
                   {coordText ?? "—"}
                 </dd>
               </div>
               {parsed.distanceOffDrive ? (
                 <div>
-                  <dt className="text-xs font-medium text-[var(--muted)]">
+                  <dt className="text-xs font-medium text-ink-3">
                     Rig path
                   </dt>
-                  <dd className="mt-0.5 text-[var(--foreground)]">
+                  <dd className="mt-0.5 text-ink">
                     {parsed.distanceOffDrive}
                   </dd>
                 </div>

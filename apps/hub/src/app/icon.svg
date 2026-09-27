@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <!-- C&J BrandMark — literal hex (favicons have no access to theme tokens) -->
+  <rect x="4" y="5.4" width="32" height="32" fill="#FFE90A" stroke="#111" stroke-width="0.7"/>
+  <rect x="3.8" y="3.8" width="22.9" height="22.9" fill="#C60000" stroke="#111" stroke-width="0.7"/>
+  <rect x="14.2" y="10.9" width="12.5" height="8.2" fill="#fff" stroke="#111" stroke-width="0.6"/>
+  <text x="20.45" y="15" text-anchor="middle" dominant-baseline="central" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="8" fill="#111">&amp;</text>
+</svg>

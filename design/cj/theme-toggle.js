@@ -25,7 +25,7 @@
     document.documentElement.dataset.theme = t;
     try {
       localStorage.setItem(KEY, t);
-    } catch (e) {}
+    } catch {}
     document
       .querySelectorAll("[data-cj-theme-toggle]")
       .forEach(paint);

@@ -261,7 +261,7 @@ async function viewerWaitFocused(page) {
   await page.waitForFunction(
     (t) => {
       try {
-        // eslint-disable-next-line no-undef
+         
         const m = map;
         if (!m || typeof m.getZoom !== "function") return false;
         const c = m.getCenter();
@@ -286,7 +286,7 @@ async function viewerFixedView(page) {
   // subset. Clear it so pool = deterministic in-view bounds; zoom in until the
   // pool is under the cap.
   const out = await page.evaluate(async (t) => {
-    /* eslint-disable no-undef */
+     
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     if (typeof tempMarker !== "undefined" && tempMarker && map) {
       try {
@@ -311,7 +311,7 @@ async function viewerFixedView(page) {
       wellsInView: inView,
       wellsTotal: typeof wells !== "undefined" ? wells.length : -1,
     };
-    /* eslint-enable no-undef */
+     
   }, TARGET);
   await waitMarkerStable(page, "#map");
   await settle(page);
@@ -349,7 +349,7 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
   const behavior = {
     url: focusUrl,
     totalWellsLoaded: await page.evaluate(() =>
-      // eslint-disable-next-line no-undef
+       
       typeof wells !== "undefined" ? wells.length : -1,
     ),
     wellCountHeader: await page
@@ -369,14 +369,14 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
 
   // coords-input focus check (existing UI: #coordsInput + sibling Go button).
   await page.evaluate((t) => {
-    // eslint-disable-next-line no-undef
+     
     map.setView([t.lat + 0.08, t.lon + 0.08], 12, { animate: false });
   }, TARGET);
   await page.waitForTimeout(400);
   const centerBefore = await page.evaluate(() => {
-    // eslint-disable-next-line no-undef
+     
     const c = map.getCenter();
-    // eslint-disable-next-line no-undef
+     
     return { lat: c.lat, lon: c.lng, zoom: map.getZoom() };
   });
   await page.fill("#coordsInput", `${TARGET.lat}, ${TARGET.lon}`);
@@ -387,12 +387,12 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
   await page.waitForFunction(
     (t) => {
       try {
-        // eslint-disable-next-line no-undef
+         
         const c = map.getCenter();
         return (
           Math.abs(c.lat - t.lat) < 0.001 &&
           Math.abs(c.lng - t.lon) < 0.001 &&
-          // eslint-disable-next-line no-undef
+           
           map.getZoom() === 13
         );
       } catch {
@@ -403,9 +403,9 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
     { timeout: 25000 },
   );
   const centerAfter = await page.evaluate(() => {
-    // eslint-disable-next-line no-undef
+     
     const c = map.getCenter();
-    // eslint-disable-next-line no-undef
+     
     return { lat: c.lat, lon: c.lng, zoom: map.getZoom() };
   });
   behavior.coordsFocus = {
@@ -450,7 +450,7 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
   // Modal: click the marker nearest the map center pixel-point, fall back to
   // showDetailById if the click does not open the modal.
   const targetWell = await page.evaluate(() => {
-    // eslint-disable-next-line no-undef
+     
     const list = getWellsInView();
     if (!list.length) return null;
     // Prefer a well with a DNR report link so the modal check is meaningful.
@@ -460,10 +460,10 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
   let modalVia = "click";
   if (targetWell) {
     const pt = await page.evaluate((id) => {
-      // eslint-disable-next-line no-undef
+       
       const w = wells.find((x) => x.id === id);
       if (!w) return null;
-      // eslint-disable-next-line no-undef
+       
       const p = map.latLngToContainerPoint([Number(w.lat), Number(w.lon)]);
       return { x: p.x, y: p.y };
     }, targetWell);
@@ -532,7 +532,7 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
     ),
   };
   await page.evaluate(() => {
-    // eslint-disable-next-line no-undef
+     
     if (typeof closeModal === "function") closeModal();
   });
   console.log(`[viewer] modal via=${modalVia} title=${behavior.modal.title}`);
@@ -849,6 +849,58 @@ function compareDirs(dirA, dirB) {
   return { report: report.join("\n"), totalMismatch, pixelMismatch };
 }
 
+// ---------- review screenshots ----------
+
+const REVIEW_THEMES = ["light", "dark", "field"];
+
+async function captureReview(browser, base, outDir, { allowTiles }) {
+  const reviewDir = path.join(outDir, "review");
+  fs.mkdirSync(reviewDir, { recursive: true });
+  const written = [];
+  for (const theme of REVIEW_THEMES) {
+    for (const vp of VIEWPORTS) {
+      for (const [name, p] of [
+        ["hub-home", "/"],
+        ["hub-latlon", `/?lat=${TARGET.lat}&lon=${TARGET.lon}`],
+      ]) {
+        const { context, page } = await newPage(browser, vp);
+        await context.addInitScript((t) => {
+          try {
+            localStorage.setItem("cj-theme", t);
+          } catch {}
+        }, theme);
+        await setupRoutes(context, new Set([new URL(base).origin]), {
+          allowTiles,
+        });
+        await gotoIdle(page, base + p);
+        if (name === "hub-latlon") await hubWaitSettled(page);
+        const f = `${name}-${vp.name}-${theme}.png`;
+        await page.screenshot({
+          path: path.join(reviewDir, f),
+          fullPage: true,
+        });
+        written.push(`review/${f}`);
+        await context.close();
+      }
+    }
+    // /design showcase — desktop only, all themes.
+    const vp = VIEWPORTS[1];
+    const { context, page } = await newPage(browser, vp);
+    await context.addInitScript((t) => {
+      try {
+        localStorage.setItem("cj-theme", t);
+      } catch {}
+    }, theme);
+    await setupRoutes(context, new Set([new URL(base).origin]), { allowTiles });
+    await gotoIdle(page, `${base}/design`);
+    const f = `design-${vp.name}-${theme}.png`;
+    await page.screenshot({ path: path.join(reviewDir, f), fullPage: true });
+    written.push(`review/${f}`);
+    await context.close();
+  }
+  return written;
+}
+
 // ---------- main ----------
 
 function parseArgs(argv) {
@@ -886,6 +938,32 @@ async function main() {
     const r = compareDirs(path.resolve(dirA), path.resolve(dirB));
     console.log(r.report);
     process.exit(r.totalMismatch ? 1 : 0);
+  }
+
+  if (mode === "review") {
+    const outDir = path.resolve(args.out ?? "");
+    const base = (args.base ?? "http://localhost:3001").replace(/\/$/, "");
+    if (!args.out) {
+      console.error(
+        "usage: capture.mjs review --out <dir> --base <url> [--with-tiles]",
+      );
+      process.exit(2);
+    }
+    fs.mkdirSync(outDir, { recursive: true });
+    const { chromium } = loadPlaywright();
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const written = await captureReview(browser, base, outDir, {
+        allowTiles: !!args["with-tiles"],
+      });
+      console.log(
+        "DONE",
+        JSON.stringify({ outDir, shots: written.length, files: written }),
+      );
+    } finally {
+      await browser.close();
+    }
+    return;
   }
 
   // capture

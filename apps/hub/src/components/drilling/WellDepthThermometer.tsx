@@ -284,17 +284,17 @@ export function WellDepthThermometer({
       className={
         embedded
           ? "space-y-3"
-          : "rounded-xl border border-zinc-200 bg-[var(--surface-solid)] p-4 shadow-sm dark:border-zinc-700"
+          : "card p-4"
       }
     >
       <div className="mb-3 flex flex-wrap items-end gap-3">
         {onRadiusChange && !hideRadiusControl ? (
-          <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
+          <label className="flex flex-col gap-1 text-xs text-ink-3">
             <span className="font-semibold uppercase tracking-wide">Radius</span>
             <select
               value={String(radiusMiles)}
               onChange={(e) => onRadiusChange(e.target.value)}
-              className="rounded-md border border-[var(--border)] bg-[var(--surface-solid)] px-2 py-1.5 text-xs font-medium text-[var(--foreground)] shadow-sm"
+              className="select select-sm"
               aria-label="Depth view search radius"
             >
               {radiusOptions.map((r) => (
@@ -305,7 +305,7 @@ export function WellDepthThermometer({
             </select>
           </label>
         ) : null}
-        <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
+        <label className="flex flex-col gap-1 text-xs text-ink-3">
           <span className="font-semibold uppercase tracking-wide">
             Your depth (ft)
           </span>
@@ -324,12 +324,12 @@ export function WellDepthThermometer({
                   handleInputCommit();
                 }
               }}
-              className="w-24 rounded-md border border-[var(--border)] bg-[var(--surface-solid)] px-2 py-1.5 font-mono text-sm text-[var(--foreground)] shadow-sm"
+              className="input w-24 font-mono text-sm"
             />
-            <span className="text-[var(--foreground)]">ft</span>
+            <span className="text-ink">ft</span>
           </div>
           {inputError ? (
-            <span className="text-amber-700 dark:text-amber-300">{inputError}</span>
+            <span className="text-warn">{inputError}</span>
           ) : null}
         </label>
       </div>
@@ -355,7 +355,7 @@ export function WellDepthThermometer({
             role="group"
             aria-label={`Borehole depth view within ${radiusMiles} miles`}
             onKeyDown={handlePanelKeyDown}
-            className="outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+            className="outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <svg
               width={svgW}
@@ -624,7 +624,7 @@ export function WellDepthThermometer({
             maxHeightClass="max-h-[22rem] md:max-h-[26rem]"
           />
 
-          <footer className="flex flex-wrap gap-x-3 gap-y-1 border-t border-zinc-200 pt-3 text-[10px] text-zinc-500 dark:border-zinc-700">
+          <footer className="flex flex-wrap gap-x-3 gap-y-1 border-t border-line pt-3 text-[10px] text-ink-4">
             <span>
               {lines.length} plotted in {formatRadiusLabel(radiusMiles)} · scale
               0–{domain.maxFt} ft
@@ -639,7 +639,7 @@ export function WellDepthThermometer({
           </footer>
         </div>
         ) : (
-          <footer className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px] text-zinc-500">
+          <footer className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px] text-ink-4">
             <span>
               {lines.length} plotted · scale 0–{domain.maxFt} ft
             </span>
@@ -649,7 +649,7 @@ export function WellDepthThermometer({
       </div>
 
       {lines.length === 0 ? (
-        <p className="mt-3 text-center text-sm text-[var(--muted)]">
+        <p className="mt-3 text-center text-sm text-ink-3">
           No wells with depth in {formatRadiusLabel(radiusMiles)} — widen radius
           or relax map filters.
         </p>

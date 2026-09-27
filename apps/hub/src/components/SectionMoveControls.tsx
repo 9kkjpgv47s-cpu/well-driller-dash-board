@@ -19,7 +19,7 @@ export function SectionMoveControls<S extends string>({
         type="button"
         aria-label="Move section up"
         disabled={i <= 0}
-        className="rounded border border-[var(--border)] bg-[var(--surface-solid)] px-2 py-0.5 text-xs font-medium text-[var(--foreground)] shadow-sm hover:bg-[var(--surface-muted)] disabled:opacity-40"
+        className="btn btn-ghost btn-sm"
         onClick={() => onMove(id, -1)}
       >
         Up
@@ -28,7 +28,7 @@ export function SectionMoveControls<S extends string>({
         type="button"
         aria-label="Move section down"
         disabled={i < 0 || i >= order.length - 1}
-        className="rounded border border-[var(--border)] bg-[var(--surface-solid)] px-2 py-0.5 text-xs font-medium text-[var(--foreground)] shadow-sm hover:bg-[var(--surface-muted)] disabled:opacity-40"
+        className="btn btn-ghost btn-sm"
         onClick={() => onMove(id, 1)}
       >
         Down
