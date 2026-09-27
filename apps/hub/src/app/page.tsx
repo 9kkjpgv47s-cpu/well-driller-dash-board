@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <Suspense fallback={<BoreLoader status="Loading field hub" />}>
+      <h1 className="visually-hidden">Driller Hub — C&J Well Co</h1>
       <DrillingHubClient />
     </Suspense>
   );

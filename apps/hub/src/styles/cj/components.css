@@ -24,7 +24,7 @@
   box-shadow: 0 1px 0 var(--line-strong);
 }
 
-.cj-brand { display: inline-flex; align-items: center; gap: var(--s-3); min-width: 0; }
+.cj-brand { display: inline-flex; align-items: center; gap: var(--s-3); min-width: 0; min-height: var(--tap); }
 .cj-brand-mark { width: 28px; height: 28px; flex: none; }
 .cj-brand-text { font-family: var(--font-display); font-size: 1.2rem; letter-spacing: -0.01em; line-height: 1; white-space: nowrap; }
 .cj-brand-text em { font-style: italic; color: var(--ink-3); }
@@ -43,7 +43,7 @@
 /* app-switch link — door into the sibling app */
 .cj-app-switch {
   display: inline-flex; align-items: center; gap: var(--s-2);
-  min-height: 36px; padding: 0 var(--s-3);
+  min-height: var(--tap); padding: 0 var(--s-3);
   font-size: var(--fs-sm); font-weight: 500; color: var(--ink-2);
   border: 1px solid var(--line-strong); border-radius: 999px;
   white-space: nowrap;
@@ -72,7 +72,7 @@
 
 /* ---------- Theme toggle (sun / moon / field morph) ---------- */
 .theme-toggle {
-  width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center;
+  width: var(--tap); height: var(--tap); border-radius: 999px; display: grid; place-items: center; flex: none;
   border: 1px solid var(--line-strong); color: var(--ink-2);
   transition: border-color var(--dur-fast), color var(--dur-fast), background-color var(--dur-fast);
 }
@@ -119,10 +119,10 @@
 .btn-ghost:hover { border-color: var(--ink); background: var(--accent-soft); }
 .btn-danger { --btn-bg: transparent; --btn-fg: var(--bad); border-color: var(--line-strong); }
 .btn-danger:hover { border-color: var(--bad); background: var(--bad-soft); }
-.btn-sm { padding: 0.35rem 0.75rem; min-height: 30px; font-size: var(--fs-xs); }
+.btn-sm { padding: 0.35rem 0.75rem; min-height: var(--tap); font-size: var(--fs-xs); }
 /* square icon button — same pill family */
 .btn-icon { padding: 0; width: var(--tap); }
-.btn-icon.btn-sm { width: 30px; }
+.btn-icon.btn-sm { width: var(--tap); }
 .btn-icon svg { width: 18px; height: 18px; }
 
 /* loading — inline 14px spinner; label keeps its box so the button
@@ -161,7 +161,7 @@
   background: var(--bg-2);
 }
 .seg button {
-  min-height: 34px; padding: 0.3rem 0.9rem;
+  min-height: var(--tap); padding: 0.3rem 0.9rem;
   border-radius: 999px; border: 1px solid transparent;
   font-size: var(--fs-sm); font-weight: 500; color: var(--ink-3);
   transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast);
@@ -179,8 +179,8 @@
 }
 .seg .seg-icon { display: inline-flex; align-items: center; margin-right: var(--s-1); }
 .seg .seg-icon svg { width: 15px; height: 15px; }
-/* compact density — toolbars */
-.seg-sm button { min-height: 28px; padding: 0.2rem 0.7rem; font-size: var(--fs-xs); }
+/* compact density — toolbars; tap floor still holds (44 / 48 field) */
+.seg-sm button { min-height: var(--tap); padding: 0.2rem 0.7rem; font-size: var(--fs-xs); }
 
 /* ---------- Forms ---------- */
 .field { display: grid; gap: var(--s-2); }
@@ -207,8 +207,8 @@
   background-size: 5px 5px; background-repeat: no-repeat;
 }
 .textarea { min-height: 120px; resize: vertical; line-height: 1.55; }
-/* compact variants — dense toolbars; bumped to 16px on phones (iOS zoom) */
-.input-sm, .select-sm { min-height: 30px; padding: 0.25rem 0.55rem; font-size: var(--fs-xs); }
+/* compact variants — smaller type/padding, tap floor still holds */
+.input-sm, .select-sm { min-height: var(--tap); padding: 0.25rem 0.55rem; font-size: var(--fs-xs); }
 .select-sm { padding-right: 1.8rem; background-position: calc(100% - 13px) 50%, calc(100% - 8px) 50%; }
 @media (max-width: 760px) { .input-sm, .select-sm { font-size: 16px; } }
 .form-row { display: flex; gap: var(--s-3); align-items: flex-end; flex-wrap: wrap; }

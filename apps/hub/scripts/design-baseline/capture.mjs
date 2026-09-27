@@ -262,10 +262,10 @@ function cropMaskRects(w, h) {
     [0, h - ring, w, ring], // bottom border ring
     [0, 0, ring, h], // left border ring
     [w - ring, 0, ring, h], // right border ring
-    [0, 0, 84, 128], // zoom +/- control (top-left)
+    [0, 0, 84, 150], // zoom +/- control (top-left; 2x44px post-tap-target)
     [0, h - 76, w, 76], // bottom overlay band (pill, zoom stack, attribution)
-    [w - 88, h - 170, 88, 170], // zoom stack above bottom band
-    [w - 60, 0, 60, 60], // top-right overlay control (restyled chrome)
+    [w - 88, h - 190, 88, 190], // zoom stack above bottom band
+    [w - 80, 0, 80, 170], // top-right overlay control (label-size stack; chrome)
   ];
 }
 
@@ -1151,11 +1151,11 @@ async function captureReview(browser, base, outDir, { allowTiles, viewerUrl }) {
     }
   }
 
-  // Viewer modal open — 390x844 light (bottom-sheet layout).
-  {
+  // Viewer modal open — 390x844 light + dark (bottom-sheet layout).
+  for (const theme of ["light", "dark"]) {
     const vp = VIEWPORTS[0];
     const { context, page } = await newPage(browser, vp);
-    await context.addInitScript(themeInit, "light");
+    await context.addInitScript(themeInit, theme);
     await setupRoutes(context, new Set([new URL(base).origin, viewerOrigin]), {
       allowTiles,
     });
@@ -1180,7 +1180,7 @@ async function captureReview(browser, base, outDir, { allowTiles, viewerUrl }) {
       .waitForSelector("#wellModal:not(.hidden)", { timeout: 8000 })
       .catch(() => {});
     await page.waitForTimeout(800);
-    const f = `viewer-modal-${vp.name}-light.png`;
+    const f = `viewer-modal-${vp.name}-${theme}.png`;
     await page.screenshot({ path: path.join(reviewDir, f), fullPage: false });
     written.push(`review/${f}`);
     await context.close();

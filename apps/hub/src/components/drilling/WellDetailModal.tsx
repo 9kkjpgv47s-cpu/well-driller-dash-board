@@ -285,7 +285,10 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
               Material drilled through — Well Log (Top, Bottom, Formation)
             </strong>
             {logRows.length > 0 ? (
-              <div className="mt-1 max-h-72 overflow-auto rounded-lg border border-line">
+              <div
+                className="mt-1 max-h-72 overflow-auto rounded-lg border border-line"
+                tabIndex={0}
+              >
                 <table className="w-full border-collapse text-xs">
                   <thead>
                     <tr className="sticky top-0 bg-bg-2">

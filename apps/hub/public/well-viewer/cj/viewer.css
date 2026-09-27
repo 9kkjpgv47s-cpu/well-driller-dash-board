@@ -88,12 +88,19 @@ body.cj-viewer { font-family: var(--font-body); }
   border-radius: var(--radius) !important;
   box-shadow: var(--shadow);
 }
-.map-zoom-stack .zoom-btn { background: transparent; color: var(--ink-2); }
+.map-zoom-stack .zoom-btn {
+  width: var(--tap); height: var(--tap);
+  background: transparent; color: var(--ink-2);
+}
 .map-zoom-stack .zoom-btn:hover { background: var(--bg-2) !important; color: var(--ink); }
 .leaflet-bar a {
+  width: var(--tap); height: var(--tap); line-height: var(--tap);
   background: var(--surface); color: var(--ink-2);
   border-color: var(--line);
 }
+/* "Total loaded in memory" counter — emerald-700 (3.4:1) failed dark; --ok is
+   a readable green in every theme. Chrome stat, not a data color. */
+#totalWells { color: var(--ok); }
 .leaflet-bar a:hover { background: var(--bg-2); color: var(--ink); }
 .leaflet-control-attribution {
   background: var(--glass) !important;

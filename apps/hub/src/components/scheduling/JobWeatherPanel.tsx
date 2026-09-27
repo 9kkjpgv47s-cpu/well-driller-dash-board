@@ -462,7 +462,10 @@ function HourlyForecast({
           }))}
         />
       </div>
-      <div className="max-h-72 overflow-auto rounded-lg border border-line">
+      <div
+        className="max-h-72 overflow-auto rounded-lg border border-line"
+        tabIndex={0}
+      >
         <table className="w-full min-w-[620px] text-left text-xs">
           <thead className="sticky top-0 bg-bg-2">
             <tr>

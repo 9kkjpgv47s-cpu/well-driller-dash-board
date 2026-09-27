@@ -215,6 +215,22 @@
   font-feature-settings: normal;
 }
 
+/* Tap-target floor: Leaflet zoom buttons ship at 30px; checkbox labels wrap
+   their input so the row is the real click target. */
+.leaflet-bar a {
+  width: var(--tap);
+  height: var(--tap);
+  line-height: var(--tap);
+  font-size: 18px;
+}
+.field-hub-scope label:has(> input[type="checkbox"]) {
+  min-height: var(--tap);
+}
+.field-hub-scope input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+}
+
 /* ===== LOCKED: well/map marker styles — do not edit ===== */
 /*
  * Leaflet map marker chrome — MUST live in globals so it always ships with layout.
