@@ -4,7 +4,7 @@ import { DrillingHubClient } from "@/components/drilling/DrillingHubClient";
 import { BoreLoader } from "@/components/ui/BoreLoader";
 
 export const metadata: Metadata = {
-  title: "Field — Driller Dashboard",
+  title: "Field — Driller Hub · C&J Well Co",
   description:
     "Plan a site with address or coordinates, DNR wells map, job queue, weather, and area drilling analysis.",
 };

@@ -59,27 +59,18 @@ export function DesignShowcase() {
   };
 
   return (
-    <div className="cj-shell">
-      <header className="cj-topbar">
-        <span className="cj-brand">
-          <BrandMark />
-          <span className="cj-brand-text">C&J <em>Well Co</em></span>
-          <span className="cj-tag">Design system</span>
-        </span>
-        <div className="cj-top-actions">
-          <div className="seg" role="group" aria-label="Theme">
-            {THEME_ORDER.map((t) => (
-              <button key={t} type="button" aria-pressed={theme === t} onClick={() => setDocTheme(t)}>
-                {t}
-              </button>
-            ))}
-          </div>
-          <ThemeToggle />
-        </div>
-      </header>
-
-      <main className="cj-main">
-        <div style={{ paddingTop: "var(--s-6)" }}>
+    <div>
+      <div
+        style={{
+          paddingTop: "var(--s-6)",
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: "var(--s-4)",
+          flexWrap: "wrap",
+        }}
+      >
+        <div>
           <p className="eyebrow">C&J Well Co · design system</p>
           <h1 style={{ marginTop: "var(--s-3)", marginBottom: "var(--s-4)" }}>
             One system for <em>office and field</em>.
@@ -90,6 +81,38 @@ export function DesignShowcase() {
             field theme for daylight use.
           </p>
         </div>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}
+          aria-label="Theme preview controls"
+        >
+          <div className="seg" role="group" aria-label="Theme">
+            {THEME_ORDER.map((t) => (
+              <button key={t} type="button" aria-pressed={theme === t} onClick={() => setDocTheme(t)}>
+                {t}
+              </button>
+            ))}
+          </div>
+          <ThemeToggle />
+        </div>
+      </div>
+
+      <Section title="Top bar">
+        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <header className="cj-topbar" style={{ position: "static", top: "auto" }}>
+            <span className="cj-brand">
+              <BrandMark />
+              <span className="cj-brand-text">C&J <em>Well Co</em></span>
+              <span className="cj-tag">Design system</span>
+            </span>
+            <div className="cj-top-actions">
+              <a className="cj-app-switch" href="/design">
+                Specimen <span className="arrow">→</span>
+              </a>
+              <ThemeToggle />
+            </div>
+          </header>
+        </div>
+      </Section>
 
         <Section title="Color tokens">
           <div style={{ display: "grid", gap: "var(--s-3)", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))" }}>
@@ -279,7 +302,6 @@ export function DesignShowcase() {
             ))}
           </div>
         </Section>
-      </main>
     </div>
   );
 }

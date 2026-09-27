@@ -16,6 +16,7 @@ import {
 import { formatOpenMeteoWallClock } from "@/lib/weather/open-meteo-display";
 import type { DayWeatherSummary, WeatherApiResponse } from "@/lib/weather/types";
 import { LiveRadarMap } from "@/components/scheduling/LiveRadarMap";
+import { FieldSegmentedToggle } from "@/components/drilling/FieldSegmentedToggle";
 import { Icon } from "@/components/ui/Icon";
 
 type Props = {
@@ -450,26 +451,16 @@ function HourlyForecast({
         <h3 className="eyebrow plain">
           Hourly forecast
         </h3>
-        <div className="grid w-full grid-cols-3 gap-2">
-          {sources.map((s) => {
-            const active = s.id === selectedSourceId;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => onSourceChange(s.id)}
-                aria-pressed={active}
-                className={`rounded-lg border px-2 py-2 text-xs font-semibold transition ${
-                  active
-                    ? "border-accent bg-accent-soft text-accent-ink"
-                    : "border-line bg-surface text-ink-2 hover:bg-bg-2"
-                }`}
-              >
-                {sourceButtonLabel(s)}
-              </button>
-            );
-          })}
-        </div>
+        <FieldSegmentedToggle
+          ariaLabel="Forecast source"
+          size="sm"
+          value={selectedSourceId}
+          onChange={onSourceChange}
+          options={sources.map((s) => ({
+            value: s.id,
+            label: sourceButtonLabel(s),
+          }))}
+        />
       </div>
       <div className="max-h-72 overflow-auto rounded-lg border border-line">
         <table className="w-full min-w-[620px] text-left text-xs">

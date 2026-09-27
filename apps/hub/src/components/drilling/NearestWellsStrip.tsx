@@ -39,10 +39,20 @@ export function NearestWellsStrip({
 }: Props) {
   return (
     <div className="rounded-lg border border-line bg-bg-2">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
-        <h3 className="mono text-xs font-semibold uppercase tracking-wide text-ink-3">
-          {title}
-        </h3>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-line px-3 py-2">
+        <div className="min-w-0">
+          <p className="eyebrow plain">
+            {listMode === "nearest"
+              ? "Nearest registry wells"
+              : "Registry wells · by depth"}
+          </p>
+          <h3 className="font-serif text-base font-normal leading-tight text-ink">
+            {title}
+          </h3>
+          <p className="mono mt-0.5 text-[10px] uppercase tracking-wide text-ink-3">
+            {wells.length} wells
+          </p>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           {onListModeChange ? (
             <FieldSegmentedToggle
@@ -69,7 +79,7 @@ export function NearestWellsStrip({
         <div
           className={`${maxHeightClass} overflow-y-auto overflow-x-hidden p-2`}
         >
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {wells.map((w, idx) => {
             const id = String(w.id ?? w.refno ?? "?");
             const depth = getWellDisplayDepthFtViewer(w);
