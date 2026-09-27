@@ -6,14 +6,189 @@
     "serious": 0,
     "moderate": 0,
     "minor": 0,
-    "lockedScoped": 1,
-    "total": 1,
+    "lockedScoped": 26,
+    "total": 26,
     "findings": [
       {
         "id": "color-contrast",
         "impact": "serious",
         "target": ".text-orange-600",
         "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.59 (foreground color: #f54900, background color: #ffffff, font size: 10.5pt (14px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(155) > .vj-combo-marker[data-est-type=\"none\"][data-est-border=\"none\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(160) > .vj-combo-marker[data-est-type=\"none\"][data-est-border=\"none\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(206) > .vj-combo-marker[data-est-type=\"none\"][data-est-border=\"none\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(208) > .vj-combo-marker[data-est-type=\"none\"][data-est-border=\"none\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(234) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(242) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(253) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(268) > .vj-est-rock[data-est-type=\"vj-est-rock\"][data-est-border=\"#dc2626\"] > .cm-row > span:nth-child(1)",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(268) > .vj-est-rock[data-est-type=\"vj-est-rock\"][data-est-border=\"#dc2626\"] > .cm-row > span:nth-child(2)",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(269) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(272) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(273) > .vj-combo-marker[data-est-type=\"none\"][data-est-border=\"none\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(281) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(443) > .vj-est-rock[data-est-type=\"vj-est-rock\"][data-est-border=\"#dc2626\"] > .cm-row > span:nth-child(1)",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(517) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(530) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(539) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(556) > .vj-combo-marker[data-est-type=\"none\"][data-est-border=\"none\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(563) > .vj-combo-marker[data-est-type=\"none\"][data-est-border=\"none\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(575) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(653) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(702) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(725) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(770) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
+        "locked": true
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "target": ".vj-well-dot.leaflet-marker-icon.leaflet-interactive:nth-child(771) > .vj-est-gravel[data-est-type=\"vj-est-gravel\"][data-est-border=\"#2563eb\"] > .cm-row",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 6.3pt (8.4px), fon",
         "locked": true
       }
     ]
@@ -340,7 +515,7 @@
         "id": "color-contrast",
         "impact": "serious",
         "target": ".map-bottom-bar > .toggle-wrap > div > .toggle-label",
-        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.31 (foreground color: #dc2626, background color: #f3f2ee, font size: 8.6pt (11.52px), f",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.31 (foreground color: #dc2626, background color: #f3f2ee, font size: 7.8pt (10.4px), fo",
         "locked": true
       },
       {
@@ -1596,7 +1771,7 @@
         "id": "color-contrast",
         "impact": "serious",
         "target": ".map-bottom-bar > .toggle-wrap > div > .toggle-label",
-        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.19 (foreground color: #dc2626, background color: #3a3f48, font size: 8.6pt (11.52px), f",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.19 (foreground color: #dc2626, background color: #3a3f48, font size: 7.8pt (10.4px), fo",
         "locked": true
       },
       {

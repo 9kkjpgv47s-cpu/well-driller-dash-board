@@ -9,14 +9,14 @@
     },
     {
       "sel": "&C&J Well CoDriller Hub",
-      "w": 244.8,
+      "w": 114,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "Open the Well viewer",
-      "w": 125.9,
+      "w": 44,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -30,7 +30,7 @@
     },
     {
       "sel": "textarea min-h-[200px] font-mo",
-      "w": 1238,
+      "w": 300,
       "h": 324,
       "ownH": 317.2,
       "viaLabel": true
@@ -51,7 +51,7 @@
     },
     {
       "sel": "Registry search radius",
-      "w": 130.7,
+      "w": 148.7,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -155,8 +155,15 @@
       "viaLabel": false
     },
     {
-      "sel": "Move section up",
-      "w": 54,
+      "sel": "ECMWF",
+      "w": 68.6,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "NWS",
+      "w": 52.1,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -179,7 +186,7 @@
   "viewer-light": [
     {
       "sel": "Open the Driller hub",
-      "w": 108.4,
+      "w": 44,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -193,21 +200,21 @@
     },
     {
       "sel": "Use My Location",
-      "w": 350,
+      "w": 327,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "btnGroundElev",
-      "w": 350,
+      "w": 327,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "addressInput",
-      "w": 235.9,
+      "w": 212.9,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -221,7 +228,7 @@
     },
     {
       "sel": "coordsInput",
-      "w": 263.1,
+      "w": 240.1,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -235,28 +242,28 @@
     },
     {
       "sel": "minDepth",
-      "w": 316,
+      "w": 293,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "maxDepth",
-      "w": 316,
+      "w": 293,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "Apply Depth Filter",
-      "w": 316,
+      "w": 293,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "textSearch",
-      "w": 350,
+      "w": 327,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -272,14 +279,14 @@
     },
     {
       "sel": "&C&J Well CoDriller Hub",
-      "w": 244.8,
+      "w": 114,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "Open the Well viewer",
-      "w": 125.9,
+      "w": 44,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -293,7 +300,7 @@
     },
     {
       "sel": "textarea min-h-[200px] font-mo",
-      "w": 1238,
+      "w": 300,
       "h": 324,
       "ownH": 317.2,
       "viaLabel": true
@@ -314,7 +321,7 @@
     },
     {
       "sel": "Registry search radius",
-      "w": 130.7,
+      "w": 148.7,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -418,13 +425,6 @@
       "viaLabel": false
     },
     {
-      "sel": "GFS",
-      "w": 47.2,
-      "h": 44,
-      "ownH": 44,
-      "viaLabel": false
-    },
-    {
       "sel": "ECMWF",
       "w": 68.6,
       "h": 44,
@@ -434,13 +434,6 @@
     {
       "sel": "NWS",
       "w": 52.1,
-      "h": 44,
-      "ownH": 44,
-      "viaLabel": false
-    },
-    {
-      "sel": "Move section up",
-      "w": 54,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -463,7 +456,7 @@
   "viewer-dark": [
     {
       "sel": "Open the Driller hub",
-      "w": 108.4,
+      "w": 44,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
@@ -477,21 +470,21 @@
     },
     {
       "sel": "Use My Location",
-      "w": 350,
+      "w": 327,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "btnGroundElev",
-      "w": 350,
+      "w": 327,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "addressInput",
-      "w": 235.9,
+      "w": 212.9,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -505,7 +498,7 @@
     },
     {
       "sel": "coordsInput",
-      "w": 263.1,
+      "w": 240.1,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -519,28 +512,28 @@
     },
     {
       "sel": "minDepth",
-      "w": 316,
+      "w": 293,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "maxDepth",
-      "w": 316,
+      "w": 293,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "Apply Depth Filter",
-      "w": 316,
+      "w": 293,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "textSearch",
-      "w": 350,
+      "w": 327,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -556,14 +549,14 @@
     },
     {
       "sel": "&C&J Well CoDriller Hub",
-      "w": 244.8,
+      "w": 114,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "Open the Well viewer",
-      "w": 125.9,
+      "w": 48,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -577,7 +570,7 @@
     },
     {
       "sel": "textarea min-h-[200px] font-mo",
-      "w": 1238,
+      "w": 300,
       "h": 324.5,
       "ownH": 317.2,
       "viaLabel": true
@@ -598,7 +591,7 @@
     },
     {
       "sel": "Registry search radius",
-      "w": 130.7,
+      "w": 148.7,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -702,13 +695,6 @@
       "viaLabel": false
     },
     {
-      "sel": "GFS",
-      "w": 47.2,
-      "h": 48,
-      "ownH": 48,
-      "viaLabel": false
-    },
-    {
       "sel": "ECMWF",
       "w": 68.6,
       "h": 48,
@@ -718,13 +704,6 @@
     {
       "sel": "NWS",
       "w": 52.1,
-      "h": 48,
-      "ownH": 48,
-      "viaLabel": false
-    },
-    {
-      "sel": "Move section up",
-      "w": 54,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -747,7 +726,7 @@
   "viewer-field": [
     {
       "sel": "Open the Driller hub",
-      "w": 108.4,
+      "w": 48,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -761,21 +740,21 @@
     },
     {
       "sel": "Use My Location",
-      "w": 350,
+      "w": 327,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "btnGroundElev",
-      "w": 350,
+      "w": 327,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "addressInput",
-      "w": 235.9,
+      "w": 212.9,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -789,7 +768,7 @@
     },
     {
       "sel": "coordsInput",
-      "w": 263.1,
+      "w": 240.1,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -803,28 +782,28 @@
     },
     {
       "sel": "minDepth",
-      "w": 316,
+      "w": 293,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "maxDepth",
-      "w": 316,
+      "w": 293,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "Apply Depth Filter",
-      "w": 316,
+      "w": 293,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "textSearch",
-      "w": 350,
+      "w": 327,
       "h": 48,
       "ownH": 48,
       "viaLabel": false

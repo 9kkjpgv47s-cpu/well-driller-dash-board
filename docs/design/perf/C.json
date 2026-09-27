@@ -1,0 +1,348 @@
+{
+  "url": "http://localhost:3001/well-viewer/index.html",
+  "at": "2026-09-27T19:31:28.494Z",
+  "profiles": {
+    "desktop": {
+      "runs": [
+        {
+          "profile": "desktop",
+          "loadReadyMs": 7772,
+          "loadLongTaskMs": 5202,
+          "refresh": {
+            "ms": 1540,
+            "refreshCount": 2,
+            "refreshWorkMs": 333
+          },
+          "wheelPan": {
+            "refreshWorkMs": 130,
+            "longTaskMs": 134,
+            "maxFrameGap": 133.3,
+            "framesGt50": 1,
+            "frames": 90,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 706,
+            "refreshCount": 2,
+            "refreshWorkMs": 288
+          },
+          "filterToggle": {
+            "off": 254,
+            "on": 346
+          }
+        },
+        {
+          "profile": "desktop",
+          "loadReadyMs": 5903,
+          "loadLongTaskMs": 5280,
+          "refresh": {
+            "ms": 1524,
+            "refreshCount": 2,
+            "refreshWorkMs": 325
+          },
+          "wheelPan": {
+            "refreshWorkMs": 132,
+            "longTaskMs": 137,
+            "maxFrameGap": 133.4,
+            "framesGt50": 1,
+            "frames": 90,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 741,
+            "refreshCount": 2,
+            "refreshWorkMs": 289
+          },
+          "filterToggle": {
+            "off": 253,
+            "on": 331
+          }
+        },
+        {
+          "profile": "desktop",
+          "loadReadyMs": 5865,
+          "loadLongTaskMs": 5140,
+          "refresh": {
+            "ms": 1527,
+            "refreshCount": 2,
+            "refreshWorkMs": 330
+          },
+          "wheelPan": {
+            "refreshWorkMs": 131,
+            "longTaskMs": 135,
+            "maxFrameGap": 133.3,
+            "framesGt50": 1,
+            "frames": 90,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 555,
+            "refreshCount": 2,
+            "refreshWorkMs": 290
+          },
+          "filterToggle": {
+            "off": 256,
+            "on": 346
+          }
+        }
+      ],
+      "median": {
+        "loadReadyMs": 5903,
+        "loadLongTaskMs": 5202,
+        "refreshMs": 1527,
+        "refreshCount": 2,
+        "refreshWorkMs": 330,
+        "wheelRefreshCount": 1,
+        "wheelRefreshWorkMs": 131,
+        "wheelLongTaskMs": 135,
+        "wheelMaxFrameGap": 133.3,
+        "wheelFramesGt50": 1,
+        "zoomRefreshCount": 2,
+        "zoomSettleMs": 706,
+        "filterOffMs": 254,
+        "filterOnMs": 346,
+        "scrollMaxFrameGap": null,
+        "scrollFramesGt50": null,
+        "scrollLongTaskMs": null
+      }
+    },
+    "ipad": {
+      "runs": [
+        {
+          "profile": "ipad",
+          "loadReadyMs": 21832,
+          "loadLongTaskMs": 21025,
+          "refresh": {
+            "ms": 933,
+            "refreshCount": 2,
+            "refreshWorkMs": 626
+          },
+          "wheelPan": {
+            "refreshWorkMs": 446,
+            "longTaskMs": 466,
+            "maxFrameGap": 449.9,
+            "framesGt50": 1,
+            "frames": 71,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 941,
+            "refreshCount": 1,
+            "refreshWorkMs": 635
+          },
+          "filterToggle": {
+            "off": 400,
+            "on": 745
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        },
+        {
+          "profile": "ipad",
+          "loadReadyMs": 21433,
+          "loadLongTaskMs": 20659,
+          "refresh": {
+            "ms": 931,
+            "refreshCount": 2,
+            "refreshWorkMs": 642
+          },
+          "wheelPan": {
+            "refreshWorkMs": 440,
+            "longTaskMs": 462,
+            "maxFrameGap": 450,
+            "framesGt50": 1,
+            "frames": 71,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 959,
+            "refreshCount": 1,
+            "refreshWorkMs": 623
+          },
+          "filterToggle": {
+            "off": 384,
+            "on": 729
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        },
+        {
+          "profile": "ipad",
+          "loadReadyMs": 22073,
+          "loadLongTaskMs": 21250,
+          "refresh": {
+            "ms": 945,
+            "refreshCount": 2,
+            "refreshWorkMs": 631
+          },
+          "wheelPan": {
+            "refreshWorkMs": 446,
+            "longTaskMs": 469,
+            "maxFrameGap": 466.7,
+            "framesGt50": 1,
+            "frames": 70,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 940,
+            "refreshCount": 1,
+            "refreshWorkMs": 638
+          },
+          "filterToggle": {
+            "off": 383,
+            "on": 745
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        }
+      ],
+      "median": {
+        "loadReadyMs": 21832,
+        "loadLongTaskMs": 21025,
+        "refreshMs": 933,
+        "refreshCount": 2,
+        "refreshWorkMs": 631,
+        "wheelRefreshCount": 1,
+        "wheelRefreshWorkMs": 446,
+        "wheelLongTaskMs": 466,
+        "wheelMaxFrameGap": 450,
+        "wheelFramesGt50": 1,
+        "zoomRefreshCount": 1,
+        "zoomSettleMs": 941,
+        "filterOffMs": 384,
+        "filterOnMs": 745,
+        "scrollMaxFrameGap": 16.8,
+        "scrollFramesGt50": 0,
+        "scrollLongTaskMs": 0
+      }
+    },
+    "phone": {
+      "runs": [
+        {
+          "profile": "phone",
+          "loadReadyMs": 21462,
+          "loadLongTaskMs": 20682,
+          "refresh": {
+            "ms": 1003,
+            "refreshCount": 2,
+            "refreshWorkMs": 709
+          },
+          "wheelPan": {
+            "refreshWorkMs": 451,
+            "longTaskMs": 471,
+            "maxFrameGap": 466.5,
+            "framesGt50": 1,
+            "frames": 70,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 977,
+            "refreshCount": 1,
+            "refreshWorkMs": 643
+          },
+          "filterToggle": {
+            "off": 368,
+            "on": 744
+          },
+          "pageScroll": {
+            "maxFrameGap": 33.4,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        },
+        {
+          "profile": "phone",
+          "loadReadyMs": 21639,
+          "loadLongTaskMs": 20904,
+          "refresh": {
+            "ms": 946,
+            "refreshCount": 2,
+            "refreshWorkMs": 639
+          },
+          "wheelPan": {
+            "refreshWorkMs": 455,
+            "longTaskMs": 479,
+            "maxFrameGap": 466.7,
+            "framesGt50": 1,
+            "frames": 69,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 961,
+            "refreshCount": 1,
+            "refreshWorkMs": 648
+          },
+          "filterToggle": {
+            "off": 396,
+            "on": 781
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        },
+        {
+          "profile": "phone",
+          "loadReadyMs": 21520,
+          "loadLongTaskMs": 20729,
+          "refresh": {
+            "ms": 949,
+            "refreshCount": 2,
+            "refreshWorkMs": 644
+          },
+          "wheelPan": {
+            "refreshWorkMs": 453,
+            "longTaskMs": 474,
+            "maxFrameGap": 466.6,
+            "framesGt50": 1,
+            "frames": 70,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 1010,
+            "refreshCount": 1,
+            "refreshWorkMs": 662
+          },
+          "filterToggle": {
+            "off": 368,
+            "on": 745
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        }
+      ],
+      "median": {
+        "loadReadyMs": 21520,
+        "loadLongTaskMs": 20729,
+        "refreshMs": 949,
+        "refreshCount": 2,
+        "refreshWorkMs": 644,
+        "wheelRefreshCount": 1,
+        "wheelRefreshWorkMs": 453,
+        "wheelLongTaskMs": 474,
+        "wheelMaxFrameGap": 466.6,
+        "wheelFramesGt50": 1,
+        "zoomRefreshCount": 1,
+        "zoomSettleMs": 977,
+        "filterOffMs": 368,
+        "filterOnMs": 745,
+        "scrollMaxFrameGap": 16.8,
+        "scrollFramesGt50": 0,
+        "scrollLongTaskMs": 0
+      }
+    }
+  }
+}

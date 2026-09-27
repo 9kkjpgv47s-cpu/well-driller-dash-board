@@ -1,0 +1,165 @@
+{
+  "hub": {
+    "url": "http://localhost:3001/?lat=39.763&lon=-86.399",
+    "fixedZoom": 15,
+    "zoomNote": "2 clicks on .leaflet-control-zoom-in from boot zoom 13",
+    "markers": {
+      "all": 274,
+      "wellDots": 273,
+      "clusters": 0,
+      "jobPins": 1
+    },
+    "nearestWells": {
+      "title": "Nearest registry wells (up to 25)",
+      "hint": "25 shown · scroll · tap for detail",
+      "count": 25,
+      "entries": [
+        "DNR-185960Well84 ft · 10 gpmUnconsolidated",
+        "DNR-186211Well84 ft · 1 gpmUnconsolidated",
+        "DNR-186206Well73 ft · 35 gpmUnconsolidated",
+        "DNR-185965Well83 ft · 10 gpmUnconsolidated",
+        "DNR-185985Well82 ft · 8 gpmUnconsolidated",
+        "DNR-18063Well— depthEstimated",
+        "DNR-185980Well111 ft · 50 gpmUnconsolidated",
+        "DNR-186454Well84 ft · 10 gpmUnconsolidated",
+        "DNR-185950Well80 ft · 10 gpmUnconsolidated",
+        "DNR-185932Well112 ft · 15 gpmEstimated",
+        "DNR-185939Well77 ft · 10 gpmEstimated",
+        "DNR-185948Well130 ft · 10 gpmEstimated",
+        "DNR-185954Well95 ft · 10 gpmEstimated",
+        "DNR-185964Well89 ftEstimated",
+        "DNR-185969Well90 ft · 10 gpmEstimated",
+        "DNR-185974Well88 ft · 10 gpmEstimated",
+        "DNR-185979Well88 ft · 10 gpmEstimated",
+        "DNR-185983Well110 ft · 10 gpmEstimated",
+        "DNR-185984Well125 ftEstimated",
+        "DNR-186003Well113 ft · 10 gpmEstimated",
+        "DNR-186009Well140 ft · 10 gpmEstimated",
+        "DNR-186028Well108 ftEstimated",
+        "DNR-186039Well119 ft · 10 gpmEstimated",
+        "DNR-49448Well93 ft · 10 gpmEstimated",
+        "DNR-186246Well102 ft · 10 gpmUnconsolidated"
+      ]
+    },
+    "areaInsightsText": "Area drilling analysis (2 mi)\nRegistry-backed counts from gz chunks in /well-viewer/. Radius 2 mi · center 39.7630, -86.3990\nUp\nDown\nOpen field map\nCHUNK DATA COVERAGE (THIS RADIUS)\nINSIGHT CONFIDENCE LOW · 38/100\nThese counts show how many wells in your circle actually carry each field from the synced dnr_wells_chunk_*.csv.gz export. Area tables use registry aquifer text when present, then infer from lithology + vein/rock columns when aquifer is blank.\nMany nearby wells do not have parseable lithology intervals.\nLithology intervals\n0 / 1125\nVein / gravel thickness col\n794 / 1125\nRock top col\n317 / 1125\nRegistry aquifer text\n1116 / 1125\nParseable GPM\n869 / 1125\nUsed for sand/gravel stats\n830 / 1125\nNARRATIVE SUMMARY\nFound 1125 DNR registry wells within 2 mi of the point (all statistics below use only those wells).\nAmong 830 wells with lithology intervals and/or chunk vein/rock fields (`vein_size_ft`, `gravel_thickness_ft`, `rock_start_ft`, `depth_bedrock`): 0% show three or more sand/gravel/drift intervals (≥1′ each), 96% show exactly one, 0% show two, and 4% show none by parsed log + vein thickness rules.\n96% of those wells have at least one water-bearing sand/gravel interval by text rules; 4% have gravel-like intervals flagged but none matched the water-bearing heuristic (re-check raw logs for borderline wording).\nRegistry aquifer field (where present): 29% unconsolidated/sand/gravel, 2% bedrock/limestone/dolomite, 69% estimated location, 0% other/uncategorized (9 wells with blank aquifer in this radius).\n38% of wells with lithology logged a rock top. Of those, 89% drilled sand/gravel before rock — rock tops here run 10–177 ft.\nBy registry aquifer / notes flags, no dry-hole records appeared in this slice (still verify on-site).\nAmong 869 wells with a parseable pump/test GPM field: 20% are under 10 GPM, 76% fall 10–25 GPM, 4% report over 25 GPM (avg 14.5 GPM across those wells). Across all 1125 wells in the radius, 23% have no GPM in the export (older records or missing pump fields).\nAmong 292 sand/gravel (unconsolidated) wells with GPM: 23% under 10 GPM, 70% at 10–25 GPM, 7% over 25 GPM (avg 15.1 GPM).\nAmong 24 bedrock/rock wells with GPM: 25% under 10 GPM, 71% at 10–25 GPM, 4% over 25 GPM (avg 12.3 GPM).\nMedian depth for over 25 GPM wells (99 ft) is not deeper than for 25 GPM or below (101 ft) in this slice — treat yield–depth coupling as weak until more tests are in the export.\nMedian completed depth in the radius: 100 ft (from registry depth / construction fields).\nAQUIFER MIX (REGISTRY + INFERRED)\nUnconsolidated / sand / gravel\t847\t75%\nBedrock / limestone / dolomite\t32\t3%\nEstimated location\t237\t21%\nOther / mixed wording\t0\t0%\nBlank / not in export\t9\t1%\nSAND/GRAVEL (LOGS + VEIN COLUMNS)\n3+ sand/gravel intervals (≥1′)\t0\t0%\nExactly 2\t0\t0%\nExactly 1\t794\t96%\nNone parsed\t36\t4%\nNo lithology or vein columns\t295\t26%\nYIELD (PARSED GPM)\nUnder 10 GPM\t171\t20%\n10 – 25 GPM\t660\t76%\nOver 25 GPM\t38\t4%\nNo GPM in export\t256\t23%\nMethodology & limits\nOfficial DNR registry + WellLogs-derived lithology only; not a guarantee for any new hole.\nPercentages are descriptive for the loaded chunk set — widen radius or refresh data to reduce sampling noise.\nVein-style counts use merged lithology when possible, else raw intervals, with flexible depth fields; sand/gravel intervals ≥1′ thick. When intervals are missing, **vein_size_ft / gravel_thickness_ft** (ETL) count as at least one gravel-like interval if ≥1′. **rock_start_ft / depth_bedrock** inform rock-top and aquifer inference. Aquifer mix fills blanks via those signals + lithology + completed depth.\nThe well viewer modal may still show raw chunk lithology strings."
+  },
+  "viewer": {
+    "url": "http://localhost:3001/well-viewer/index.html?lat=39.763&lon=-86.399",
+    "totalWellsLoaded": 414953,
+    "wellCountHeader": "1150",
+    "loadingStatus": "Loaded 414,953 wells.",
+    "filterIds": [
+      "elevBlue",
+      "elevGreen",
+      "elevOrange",
+      "elevRed",
+      "yieldBlue",
+      "yieldGreen",
+      "yieldOrange",
+      "yieldRed",
+      "typeUncon",
+      "typeRock",
+      "typeBucket",
+      "typeDry",
+      "typeEstimated",
+      "hideWells"
+    ],
+    "coordsFocus": {
+      "before": {
+        "lat": 39.842999999999996,
+        "lon": -86.319,
+        "zoom": 12
+      },
+      "after": {
+        "lat": 39.763,
+        "lon": -86.399,
+        "zoom": 13
+      },
+      "movedToTarget": true
+    },
+    "fixedView": {
+      "zoom": 15,
+      "center": {
+        "lat": 39.763,
+        "lon": -86.399
+      },
+      "wellsInView": 277,
+      "wellsTotal": 414953,
+      "note": "searchCenter cleared; pool = in-view bounds (radius pool exceeds the random 800-marker cap)"
+    },
+    "markers": {
+      "default": {
+        "all": 277,
+        "wellDots": 277,
+        "clusters": 0,
+        "jobPins": 0
+      }
+    },
+    "toggleCounts": {
+      "elevBlue": {
+        "on": 83,
+        "off": 277
+      },
+      "elevGreen": {
+        "on": 30,
+        "off": 277
+      },
+      "elevOrange": {
+        "on": 0,
+        "off": 277
+      },
+      "elevRed": {
+        "on": 0,
+        "off": 277
+      },
+      "yieldBlue": {
+        "on": 224,
+        "off": 277
+      },
+      "yieldGreen": {
+        "on": 112,
+        "off": 277
+      },
+      "yieldOrange": {
+        "on": 88,
+        "off": 277
+      },
+      "yieldRed": {
+        "on": 78,
+        "off": 277
+      },
+      "typeUncon": {
+        "on": 156,
+        "off": 277
+      },
+      "typeRock": {
+        "on": 35,
+        "off": 277
+      },
+      "typeBucket": {
+        "on": 13,
+        "off": 277
+      },
+      "typeDry": {
+        "on": 51,
+        "off": 277
+      },
+      "typeEstimated": {
+        "on": 119,
+        "off": 277
+      },
+      "hideWells": {
+        "on": 0,
+        "off": 277
+      }
+    },
+    "modal": {
+      "targetWellId": "DNR-186267",
+      "opened": true,
+      "title": "DNR-186267",
+      "summaryReportHref": null,
+      "reportHref": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=186267&_from=SUMMARY&_action=Details",
+      "logViewerVisible": true
+    }
+  }
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "index": 0,
+    "src": "cj/theme-init.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 1,
+    "src": "vendor/leaflet.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 2,
+    "src": "vendor/leaflet.markercluster.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 3,
+    "src": "vendor/papaparse.min.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 4,
+    "src": "archive/classify-v1-viewer.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 5,
+    "src": "formation-class-v3.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 6,
+    "src": "well-tag-logic.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 7,
+    "src": null,
+    "sha256": "e99098c7d0cab2e72e19596f580e803555617c0db84603c52cead91e3e03a1e8",
+    "bytes": 454
+  },
+  {
+    "index": 8,
+    "src": null,
+    "sha256": "50f512bdcadea9c46b1babc6d976ee4c4689ce9761faedf4835775f6a6c78c57",
+    "bytes": 225782
+  },
+  {
+    "index": 9,
+    "src": "cj/theme-toggle.js",
+    "sha256": null,
+    "bytes": null
+  }
+]

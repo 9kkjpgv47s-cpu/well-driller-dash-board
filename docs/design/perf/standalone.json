@@ -1,0 +1,125 @@
+{
+  "url": "http://localhost:8791/index.html",
+  "at": "2026-09-27T19:46:45.991Z",
+  "profiles": {
+    "phone": {
+      "runs": [
+        {
+          "profile": "phone",
+          "loadReadyMs": 21211,
+          "loadLongTaskMs": 20501,
+          "refresh": {
+            "ms": 936,
+            "refreshCount": 2,
+            "refreshWorkMs": 623
+          },
+          "wheelPan": {
+            "refreshWorkMs": 443,
+            "longTaskMs": 464,
+            "maxFrameGap": 450,
+            "framesGt50": 1,
+            "frames": 70,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 925,
+            "refreshCount": 1,
+            "refreshWorkMs": 620
+          },
+          "filterToggle": {
+            "off": 365,
+            "on": 763
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        },
+        {
+          "profile": "phone",
+          "loadReadyMs": 21262,
+          "loadLongTaskMs": 20570,
+          "refresh": {
+            "ms": 934,
+            "refreshCount": 2,
+            "refreshWorkMs": 633
+          },
+          "wheelPan": {
+            "refreshWorkMs": 450,
+            "longTaskMs": 470,
+            "maxFrameGap": 466.6,
+            "framesGt50": 1,
+            "frames": 70,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 978,
+            "refreshCount": 1,
+            "refreshWorkMs": 633
+          },
+          "filterToggle": {
+            "off": 376,
+            "on": 715
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        },
+        {
+          "profile": "phone",
+          "loadReadyMs": 21075,
+          "loadLongTaskMs": 20382,
+          "refresh": {
+            "ms": 924,
+            "refreshCount": 2,
+            "refreshWorkMs": 621
+          },
+          "wheelPan": {
+            "refreshWorkMs": 445,
+            "longTaskMs": 469,
+            "maxFrameGap": 466.6,
+            "framesGt50": 1,
+            "frames": 70,
+            "refreshCount": 1
+          },
+          "zoomStep": {
+            "ms": 941,
+            "refreshCount": 1,
+            "refreshWorkMs": 624
+          },
+          "filterToggle": {
+            "off": 383,
+            "on": 760
+          },
+          "pageScroll": {
+            "maxFrameGap": 16.8,
+            "framesGt50": 0,
+            "longTaskMs": 0
+          }
+        }
+      ],
+      "median": {
+        "loadReadyMs": 21211,
+        "loadLongTaskMs": 20501,
+        "refreshMs": 934,
+        "refreshCount": 2,
+        "refreshWorkMs": 623,
+        "wheelRefreshCount": 1,
+        "wheelRefreshWorkMs": 445,
+        "wheelLongTaskMs": 469,
+        "wheelMaxFrameGap": 466.6,
+        "wheelFramesGt50": 1,
+        "zoomRefreshCount": 1,
+        "zoomSettleMs": 941,
+        "filterOffMs": 376,
+        "filterOnMs": 760,
+        "scrollMaxFrameGap": 16.8,
+        "scrollFramesGt50": 0,
+        "scrollLongTaskMs": 0
+      }
+    }
+  }
+}

@@ -30,7 +30,7 @@
     },
     {
       "sel": "textarea min-h-[200px] font-mo",
-      "w": 1238,
+      "w": 688.8,
       "h": 324,
       "ownH": 317.2,
       "viaLabel": true
@@ -155,6 +155,27 @@
       "viaLabel": false
     },
     {
+      "sel": "GFS",
+      "w": 47.2,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "ECMWF",
+      "w": 68.6,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "NWS",
+      "w": 52.1,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
       "sel": "Move section up",
       "w": 54,
       "h": 44,
@@ -193,21 +214,21 @@
     },
     {
       "sel": "Use My Location",
-      "w": 350,
+      "w": 264.3,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "btnGroundElev",
-      "w": 350,
+      "w": 264.3,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "addressInput",
-      "w": 235.9,
+      "w": 150.2,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -221,7 +242,7 @@
     },
     {
       "sel": "coordsInput",
-      "w": 263.1,
+      "w": 177.4,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -235,28 +256,28 @@
     },
     {
       "sel": "minDepth",
-      "w": 316,
+      "w": 230.3,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "maxDepth",
-      "w": 316,
+      "w": 230.3,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "Apply Depth Filter",
-      "w": 316,
+      "w": 230.3,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "textSearch",
-      "w": 350,
+      "w": 264.3,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -293,7 +314,7 @@
     },
     {
       "sel": "textarea min-h-[200px] font-mo",
-      "w": 1238,
+      "w": 688.8,
       "h": 324,
       "ownH": 317.2,
       "viaLabel": true
@@ -477,21 +498,21 @@
     },
     {
       "sel": "Use My Location",
-      "w": 350,
+      "w": 264.3,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "btnGroundElev",
-      "w": 350,
+      "w": 264.3,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "addressInput",
-      "w": 235.9,
+      "w": 150.2,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -505,7 +526,7 @@
     },
     {
       "sel": "coordsInput",
-      "w": 263.1,
+      "w": 177.4,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -519,28 +540,28 @@
     },
     {
       "sel": "minDepth",
-      "w": 316,
+      "w": 230.3,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "maxDepth",
-      "w": 316,
+      "w": 230.3,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
     },
     {
       "sel": "Apply Depth Filter",
-      "w": 316,
+      "w": 230.3,
       "h": 44,
       "ownH": 44,
       "viaLabel": false
     },
     {
       "sel": "textSearch",
-      "w": 350,
+      "w": 264.3,
       "h": 44.4,
       "ownH": 44.4,
       "viaLabel": false
@@ -577,7 +598,7 @@
     },
     {
       "sel": "textarea min-h-[200px] font-mo",
-      "w": 1238,
+      "w": 688.8,
       "h": 324.5,
       "ownH": 317.2,
       "viaLabel": true
@@ -761,21 +782,21 @@
     },
     {
       "sel": "Use My Location",
-      "w": 350,
+      "w": 264.3,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "btnGroundElev",
-      "w": 350,
+      "w": 264.3,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "addressInput",
-      "w": 235.9,
+      "w": 150.2,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -789,7 +810,7 @@
     },
     {
       "sel": "coordsInput",
-      "w": 263.1,
+      "w": 177.4,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
@@ -803,28 +824,28 @@
     },
     {
       "sel": "minDepth",
-      "w": 316,
+      "w": 230.3,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "maxDepth",
-      "w": 316,
+      "w": 230.3,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "Apply Depth Filter",
-      "w": 316,
+      "w": 230.3,
       "h": 48,
       "ownH": 48,
       "viaLabel": false
     },
     {
       "sel": "textSearch",
-      "w": 350,
+      "w": 264.3,
       "h": 48,
       "ownH": 48,
       "viaLabel": false

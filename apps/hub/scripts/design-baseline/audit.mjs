@@ -169,12 +169,14 @@ async function measureTaps(page) {
   }, LOCKED_SCOPE);
 }
 
-async function auditPage({ browser, url, theme, waitSel, waitMs }) {
+async function auditPage({ browser, url, theme, waitSel, waitMs, vp }) {
   const { chromium } = load(PWT);
   void chromium;
   const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
+    viewport: vp ?? { width: 1440, height: 900 },
     deviceScaleFactor: 1,
+    isMobile: !!(vp && vp.width < 900),
+    hasTouch: !!(vp && vp.width < 900),
     locale: "en-US",
     timezoneId: "America/Indiana/Indianapolis",
     serviceWorkers: "block",
@@ -235,6 +237,7 @@ async function main() {
   const outDir = path.resolve(args.out);
   const base = (args.base ?? "http://localhost:3001").replace(/\/$/, "");
   const before = args.baseline?.replace(/\/$/, "") ?? null;
+  const vp = args.vp ? { width: +args.vp.split("x")[0], height: +args.vp.split("x")[1] } : undefined;
   const viewerPath = args["viewer-path"] ?? "/well-viewer/index.html";
   fs.mkdirSync(outDir, { recursive: true });
   const { chromium } = load(PWT);
@@ -248,8 +251,8 @@ async function main() {
     jobs.push({ key: `viewer-before`, url: `${before}${viewerPath}?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme: null, waitSel: "#map .leaflet-marker-icon" });
   }
   for (const theme of THEMES) {
-    jobs.push({ key: `hub-${theme}`, url: `${base}/?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: ".leaflet-container" });
-    jobs.push({ key: `viewer-${theme}`, url: `${base}${viewerPath}?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: "#map .leaflet-marker-icon" });
+    jobs.push({ key: `hub-${theme}`, url: `${base}/?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: ".leaflet-container", vp });
+    jobs.push({ key: `viewer-${theme}`, url: `${base}${viewerPath}?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: "#map .leaflet-marker-icon", vp });
   }
   if (args.only) {
     const keep = args.only.split(",");
