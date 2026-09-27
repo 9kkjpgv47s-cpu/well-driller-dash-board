@@ -1,0 +1,92 @@
+.leaflet-container { font-family: inherit; }
+
+/* Leaflet clips divIcon to iconSize — allow inner label to paint fully */
+        .leaflet-marker-icon.well-dot.leaflet-div-icon {
+            overflow: visible !important; }
+
+.well-marker { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); box-sizing: border-box; }
+
+/* Estimated (green-fill) dots: minimal 1px type ring — blue gravel/uncon, red rock */
+        .well-marker.vj-est-rock {
+            border: 1px solid #dc2626 !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+
+.well-marker.vj-est-gravel {
+            border: 1px solid #2563eb !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+
+.well-depth-label { font-size: 9px; font-weight: 700; color: #111827; text-shadow: 0 0 2px #ffffff, 0 0 3px #ffffff; line-height: 1; }
+
+.toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #d1d5db; border-radius: 24px; transition: background 0.2s; }
+
+.toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+
+.toggle-switch input:checked + .toggle-slider { background: #2563eb; }
+
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+#elevBlue:checked + .toggle-slider { background: #1d4ed8 !important; }
+
+#elevGreen:checked + .toggle-slider { background: #059669 !important; }
+
+#elevOrange:checked + .toggle-slider { background: #d97706 !important; }
+
+#elevRed:checked + .toggle-slider { background: #dc2626 !important; }
+
+#yieldBlue:checked + .toggle-slider { background: #1d4ed8 !important; }
+
+#yieldGreen:checked + .toggle-slider { background: #059669 !important; }
+
+#yieldOrange:checked + .toggle-slider { background: #d97706 !important; }
+
+#yieldRed:checked + .toggle-slider { background: #dc2626 !important; }
+
+#typeUncon:checked + .toggle-slider { background: #2563eb !important; }
+
+#typeRock:checked + .toggle-slider { background: #dc2626 !important; }
+
+#typeBucket:checked + .toggle-slider { background: #f97316 !important; }
+
+#typeDry:checked + .toggle-slider { background: #111827 !important; }
+
+#typeEstimated:checked + .toggle-slider { background: #16a34a !important; }
+
+#hideWells:checked + .toggle-slider { background: #ef4444 !important; }
+
+/* Must live inside .leaflet-container (moved in JS) so bottom = bottom of map, not tall grid cell */
+        .leaflet-container .map-bottom-bar {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 12px;
+            z-index: 1100;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.65rem 0.35rem 0.45rem;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+            max-width: calc(100% - 100px); }
+
+.leaflet-container .map-bottom-bar .toggle-label { font-size: 0.65rem; max-width: 42vw; }
+
+/* Unverified green boxes: minimal 1px type ring (v4 — fill size unchanged) */
+        .combo-marker.vj-est-rock,
+        .well-marker.vj-est-rock {
+            border: 1px solid #dc2626 !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+
+.combo-marker.vj-est-gravel,
+        .well-marker.vj-est-gravel {
+            border: 1px solid #2563eb !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+
+.combo-marker.vj-est-sand,
+        .well-marker.vj-est-sand {
+            border: 1px solid #eab308 !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+
+.leaflet-container .map-zoom-stack { position: absolute; bottom: 24px; right: 12px; z-index: 1100; }

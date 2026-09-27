@@ -88,8 +88,8 @@ else
   note "write apps/hub/src/styles/cj/icons.ts (generated)"
 fi
 
-# --- viewer public copy (everything) ---
-for f in "${CSS_FILES[@]}" "${JS_FILES[@]}" icons.svg; do copy "$SRC/$f" "$VIEWER/$f"; done
+# --- viewer public copy (everything + viewer-only chrome sheet) ---
+for f in "${CSS_FILES[@]}" "${JS_FILES[@]}" icons.svg viewer.css; do copy "$SRC/$f" "$VIEWER/$f"; done
 for f in "$SRC"/fonts/*; do copy "$f" "$VIEWER/fonts/$(basename "$f")"; done
 
 if [ "$CHECK" = 1 ]; then

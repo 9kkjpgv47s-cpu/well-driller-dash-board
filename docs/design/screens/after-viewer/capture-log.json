@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-09-27T16:26:04.454Z",
+  "base": "http://localhost:3001",
+  "viewerUrl": "http://localhost:3001/well-viewer/index.html",
+  "outDir": "/Users/dominiceasterling/Projects/well-driller-dash-board/docs/design/screens/after-viewer",
+  "allowTiles": false,
+  "stubbed": [
+    "/api/weather (fixed Open-Meteo GFS JSON)",
+    "/api/radar/** (fixed frames)"
+  ],
+  "abortedExternal": "all other cross-origin requests (OSM tiles unless --with-tiles, nominatim, elevation, NWS, open-meteo, ...)",
+  "finishedAt": "2026-09-27T16:27:31.624Z",
+  "locked": {
+    "scripts": 10,
+    "inlineScripts": 2,
+    "cssRules": 30,
+    "hubMarkerBytes": 2891
+  }
+}

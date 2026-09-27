@@ -1065,10 +1065,15 @@ function compareDirs(dirA, dirB) {
 
 const REVIEW_THEMES = ["light", "dark", "field"];
 
-async function captureReview(browser, base, outDir, { allowTiles }) {
+async function captureReview(browser, base, outDir, { allowTiles, viewerUrl }) {
   const reviewDir = path.join(outDir, "review");
   fs.mkdirSync(reviewDir, { recursive: true });
   const written = [];
+  const themeInit = (t) => {
+    try {
+      localStorage.setItem("cj-theme", t);
+    } catch {}
+  };
   for (const theme of REVIEW_THEMES) {
     for (const vp of VIEWPORTS) {
       for (const [name, p] of [
@@ -1076,11 +1081,7 @@ async function captureReview(browser, base, outDir, { allowTiles }) {
         ["hub-latlon", `/?lat=${TARGET.lat}&lon=${TARGET.lon}`],
       ]) {
         const { context, page } = await newPage(browser, vp);
-        await context.addInitScript((t) => {
-          try {
-            localStorage.setItem("cj-theme", t);
-          } catch {}
-        }, theme);
+        await context.addInitScript(themeInit, theme);
         await setupRoutes(context, new Set([new URL(base).origin]), {
           allowTiles,
         });
@@ -1098,15 +1099,96 @@ async function captureReview(browser, base, outDir, { allowTiles }) {
     // /design showcase — desktop only, all themes.
     const vp = VIEWPORTS[1];
     const { context, page } = await newPage(browser, vp);
-    await context.addInitScript((t) => {
-      try {
-        localStorage.setItem("cj-theme", t);
-      } catch {}
-    }, theme);
+    await context.addInitScript(themeInit, theme);
     await setupRoutes(context, new Set([new URL(base).origin]), { allowTiles });
     await gotoIdle(page, `${base}/design`);
     const f = `design-${vp.name}-${theme}.png`;
     await page.screenshot({ path: path.join(reviewDir, f), fullPage: true });
+    written.push(`review/${f}`);
+    await context.close();
+  }
+
+  // Well viewer — all themes × viewports (with tiles).
+  const viewerBase = viewerUrl ?? `${base}/well-viewer/index.html`;
+  const viewerOrigin = new URL(viewerBase).origin;
+  for (const theme of REVIEW_THEMES) {
+    for (const vp of VIEWPORTS) {
+      const { context, page } = await newPage(browser, vp);
+      await context.addInitScript(themeInit, theme);
+      await setupRoutes(context, new Set([new URL(base).origin, viewerOrigin]), {
+        allowTiles,
+      });
+      await page.goto(
+        `${viewerBase}?lat=${TARGET.lat}&lon=${TARGET.lon}`,
+        { waitUntil: "domcontentloaded", timeout: 120000 },
+      );
+      await page
+        .waitForSelector("#map .leaflet-marker-icon", { timeout: 120000 })
+        .catch(() => {});
+      await settle(page, 900);
+      const f = `viewer-${vp.name}-${theme}.png`;
+      await page.screenshot({
+        path: path.join(reviewDir, f),
+        fullPage: true,
+      });
+      written.push(`review/${f}`);
+      await context.close();
+    }
+  }
+
+  // Viewer modal open — 390x844 light (bottom-sheet layout).
+  {
+    const vp = VIEWPORTS[0];
+    const { context, page } = await newPage(browser, vp);
+    await context.addInitScript(themeInit, "light");
+    await setupRoutes(context, new Set([new URL(base).origin, viewerOrigin]), {
+      allowTiles,
+    });
+    await page.goto(`${viewerBase}?lat=${TARGET.lat}&lon=${TARGET.lon}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 120000,
+    });
+    await page.waitForSelector("#map .leaflet-marker-icon", {
+      timeout: 120000,
+    });
+    await settle(page, 800);
+    const targetWell = await page.evaluate(() => {
+       
+      const list = getWellsInView();
+      if (!list.length) return null;
+      const withReport = list.find((w) => w.report && String(w.report).trim());
+      return (withReport || list[0]).id;
+    });
+    if (targetWell)
+      await page.evaluate((id) => showDetailById(id), targetWell);
+    await page
+      .waitForSelector("#wellModal:not(.hidden)", { timeout: 8000 })
+      .catch(() => {});
+    await page.waitForTimeout(800);
+    const f = `viewer-modal-${vp.name}-light.png`;
+    await page.screenshot({ path: path.join(reviewDir, f), fullPage: false });
+    written.push(`review/${f}`);
+    await context.close();
+  }
+
+  // Viewer loading state — capture early while DNR chunks still stream in.
+  {
+    const vp = VIEWPORTS[0];
+    const { context, page } = await newPage(browser, vp);
+    await context.addInitScript(themeInit, "light");
+    await setupRoutes(context, new Set([new URL(base).origin, viewerOrigin]), {
+      allowTiles,
+    });
+    await page.goto(viewerBase, {
+      waitUntil: "domcontentloaded",
+      timeout: 120000,
+    });
+    await page
+      .waitForSelector("#loadingDnrPanel:not(.hidden)", { timeout: 15000 })
+      .catch(() => {});
+    await page.waitForTimeout(350);
+    const f = `viewer-loading-${vp.name}-light.png`;
+    await page.screenshot({ path: path.join(reviewDir, f), fullPage: false });
     written.push(`review/${f}`);
     await context.close();
   }
@@ -1162,11 +1244,14 @@ async function main() {
       process.exit(2);
     }
     fs.mkdirSync(outDir, { recursive: true });
+    const viewerUrl =
+      args["viewer-url"] ?? `${base}/well-viewer/index.html`;
     const { chromium } = loadPlaywright();
     const browser = await chromium.launch({ headless: true });
     try {
       const written = await captureReview(browser, base, outDir, {
         allowTiles: !!args["with-tiles"],
+        viewerUrl,
       });
       console.log(
         "DONE",
