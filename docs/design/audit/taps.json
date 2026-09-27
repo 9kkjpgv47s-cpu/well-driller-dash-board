@@ -539,6 +539,27 @@
       "viaLabel": false
     },
     {
+      "sel": "minDepth",
+      "w": 316,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "maxDepth",
+      "w": 316,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "Apply Depth Filter",
+      "w": 316,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
       "sel": "textSearch",
       "w": 350,
       "h": 44.4,
@@ -802,6 +823,27 @@
       "viaLabel": false
     },
     {
+      "sel": "minDepth",
+      "w": 316,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "maxDepth",
+      "w": 316,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "Apply Depth Filter",
+      "w": 316,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
       "sel": "textSearch",
       "w": 350,
       "h": 44.4,
@@ -1060,6 +1102,27 @@
     {
       "sel": "Go",
       "w": 78.9,
+      "h": 48,
+      "ownH": 48,
+      "viaLabel": false
+    },
+    {
+      "sel": "minDepth",
+      "w": 316,
+      "h": 48,
+      "ownH": 48,
+      "viaLabel": false
+    },
+    {
+      "sel": "maxDepth",
+      "w": 316,
+      "h": 48,
+      "ownH": 48,
+      "viaLabel": false
+    },
+    {
+      "sel": "Apply Depth Filter",
+      "w": 316,
       "h": 48,
       "ownH": 48,
       "viaLabel": false

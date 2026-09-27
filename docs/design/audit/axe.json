@@ -2054,30 +2054,9 @@
     "serious": 0,
     "moderate": 0,
     "minor": 0,
-    "lockedScoped": 51,
-    "total": 51,
+    "lockedScoped": 48,
+    "total": 48,
     "findings": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "target": "#minDepth",
-        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.04 (foreground color: #0f1522, background color: #0a0f1a, font size: 12.0pt (16px), fon",
-        "locked": true
-      },
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "target": "#maxDepth",
-        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.04 (foreground color: #0f1522, background color: #0a0f1a, font size: 12.0pt (16px), fon",
-        "locked": true
-      },
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "target": "button[onclick=\"applyFilters()\"]",
-        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.04 (foreground color: #0a0f1a, background color: #0f1522, font size: 10.1pt (13.44px), ",
-        "locked": true
-      },
       {
         "id": "color-contrast",
         "impact": "serious",

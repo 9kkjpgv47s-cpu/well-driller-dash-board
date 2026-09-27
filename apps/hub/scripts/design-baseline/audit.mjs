@@ -251,6 +251,10 @@ async function main() {
     jobs.push({ key: `hub-${theme}`, url: `${base}/?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: ".leaflet-container" });
     jobs.push({ key: `viewer-${theme}`, url: `${base}${viewerPath}?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: "#map .leaflet-marker-icon" });
   }
+  if (args.only) {
+    const keep = args.only.split(",");
+    jobs.splice(0, jobs.length, ...jobs.filter((j) => keep.some((k) => j.key.startsWith(k))));
+  }
   for (const j of jobs) {
     try {
       const r = await auditPage({ browser, ...j });

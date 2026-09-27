@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-27T17:31:42.670Z",
+  "startedAt": "2026-09-27T17:51:01.780Z",
   "base": "http://localhost:3001",
   "viewerUrl": "http://localhost:3001/well-viewer/index.html",
   "outDir": "/Users/dominiceasterling/Projects/well-driller-dash-board/docs/design/screens/after",
@@ -9,7 +9,7 @@
     "/api/radar/** (fixed frames)"
   ],
   "abortedExternal": "all other cross-origin requests (OSM tiles unless --with-tiles, nominatim, elevation, NWS, open-meteo, ...)",
-  "finishedAt": "2026-09-27T17:33:05.058Z",
+  "finishedAt": "2026-09-27T17:52:36.688Z",
   "locked": {
     "scripts": 10,
     "inlineScripts": 2,
