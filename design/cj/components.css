@@ -53,6 +53,23 @@
 .cj-app-switch .arrow { font-family: var(--font-mono); display: inline-block; transition: transform var(--dur-fast) var(--ease-out); }
 .cj-app-switch:hover .arrow { transform: translateX(3px); }
 
+/* Narrow bars: the product tag and the app-switch text would collide with
+   the brand. ≤560px the switch collapses to an icon-only round button
+   (its label text is font-size:0 — keep an aria-label on the link);
+   ≤420px the tag (divider + text) drops entirely. */
+@media (max-width: 560px) {
+  .cj-app-switch {
+    width: var(--tap); height: var(--tap); min-height: var(--tap);
+    padding: 0; justify-content: center; gap: 0; font-size: 0;
+    border-radius: 999px;
+  }
+  .cj-app-switch .arrow { font-size: 1rem; }
+  .cj-app-switch:hover .arrow { transform: none; }
+}
+@media (max-width: 420px) {
+  .cj-tag { display: none; }
+}
+
 /* ---------- Theme toggle (sun / moon / field morph) ---------- */
 .theme-toggle {
   width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center;
@@ -239,6 +256,19 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
   display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
   margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--line);
 }
+
+/* ---------- Data plate — fixed light surface for locked data colors ----------
+   Legend swatches, R/G/S chips and other well-data encodings were designed
+   for white; on dark grounds they vanish. A plate keeps them readable in
+   every theme. Non-data text inside uses --plate-ink. */
+.cj-plate {
+  background: var(--plate);
+  color: var(--plate-ink);
+  border: 1px solid var(--plate-line);
+  border-radius: var(--radius);
+  box-shadow: var(--plate-ring);
+}
+.cj-plate-lg { border-radius: var(--radius-lg); }
 
 /* ---------- Callouts — left rule, tinted ground ---------- */
 .callout {

@@ -139,7 +139,7 @@ function loadPng() {
 
 // ---------- routing ----------
 
-function setupRoutes(context, allowedOrigins, { allowTiles, hubCapCss }) {
+function setupRoutes(context, allowedOrigins, { allowTiles, hubCapCss, viewerMapCss }) {
   return context.route(/.*/, (route) => {
     const req = route.request();
     let u;
@@ -152,13 +152,16 @@ function setupRoutes(context, allowedOrigins, { allowTiles, hubCapCss }) {
       return route.continue();
     }
     if (allowedOrigins.has(u.origin)) {
-      // Comparison-run width cap: inject a <style> into the HTML document so
-      // it applies before hydration/Leaflet init (init scripts proved flaky).
-      if (hubCapCss && req.resourceType() === "document") {
+      // Comparison-run geometry pins: inject a <style> into the HTML document
+      // so it applies before hydration/Leaflet init (init scripts proved
+      // flaky). hubCapCss is scoped to hub classes; viewerMapCss is scoped to
+      // .cj-viewer — safe to inject both into any same-origin document.
+      const injectCss = [hubCapCss, viewerMapCss].filter(Boolean).join("\n");
+      if (injectCss && req.resourceType() === "document") {
         return route.fetch().then(async (res) => {
           const body = (await res.text()).replace(
             "</head>",
-            `<style data-cj-cap>${hubCapCss}</style></head>`,
+            `<style data-cj-cap>${injectCss}</style></head>`,
           );
           return route.fulfill({ response: res, body });
         });
@@ -497,6 +500,7 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
   const { context, page } = await newPage(browser, CROP_VIEWPORT);
   await setupRoutes(context, new Set([new URL(base).origin]), {
     allowTiles: false,
+    viewerMapCss: opts.viewerMapCss,
   });
   const focusUrl = `${viewerUrl}${viewerUrl.includes("?") ? "&" : "?"}lat=${TARGET.lat}&lon=${TARGET.lon}`;
   await gotoIdle(page, focusUrl);
@@ -734,6 +738,17 @@ function hubCapCss(w) {
 .field-hub-scope {
   padding-left: 1rem !important; padding-right: 1rem !important;
   margin-left: -0.25rem !important; margin-right: -0.25rem !important;
+}`;
+}
+
+// Comparison-run pin: the restyled viewer map shell is sticky + viewport-
+// sized (100dvh), while the baseline was a fixed 72vh box. Pin the shell to
+// the baseline crop size so marker crops are diffable.
+function viewerMapCss(w, h) {
+  return `
+.cj-viewer .map-shell {
+  width: ${w}px !important; height: ${h}px !important;
+  min-height: 0 !important; position: static !important;
 }`;
 }
 
@@ -1306,10 +1321,14 @@ async function main() {
       matchDir,
       cropFrac: cropFracs["crops/hub-map-crop.png"],
     });
+    const vms = args["viewer-map-size"]
+      ? args["viewer-map-size"].split("x").map(Number)
+      : null;
     const viewer = await captureViewer(browser, base, viewerUrl, outDir, {
       allowTiles: !!args["with-tiles"],
       matchDir,
       cropFrac: cropFracs["crops/viewer-map-crop.png"],
+      viewerMapCss: vms ? viewerMapCss(vms[0], vms[1]) : null,
     });
     const behavior = {
       hub: hub.behavior,

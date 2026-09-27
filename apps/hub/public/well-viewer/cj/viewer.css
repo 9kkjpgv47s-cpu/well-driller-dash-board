@@ -101,11 +101,26 @@ body.cj-viewer { font-family: var(--font-body); }
 }
 .leaflet-control-attribution a { color: var(--ink-3); }
 
+/* ---------- Data plates — locked data colors sit on white in all themes.
+   Filter bands, well-list cards and the modal body carry legend/data colors
+   designed for light backgrounds; the plates re-declare the light ink/line/
+   surface ramp so themed chrome rules inside resolve to light values. */
+.cj-filter-card,
+.cj-viewer #wellsList .card,
+#modalBody,
+.cj-plate {
+  --ink: #0F1522; --ink-2: #3A4150; --ink-3: #565E6A; --ink-4: #5F6672;
+  --bg-2: #F6F4EF; --bg-3: #E7E3DA; --surface: #FBFAF7;
+  --line: rgba(15, 21, 34, 0.10); --line-strong: rgba(15, 21, 34, 0.22);
+}
+
 /* ---------- Filter cards (toggle slider/label colors LOCKED inline) ---------- */
 .cj-filter-card {
-  border: 1px solid var(--line);
+  border: 1px solid var(--plate-line);
   border-radius: var(--radius);
-  background: var(--bg-2);
+  background: var(--plate);
+  color: var(--plate-ink);
+  box-shadow: var(--plate-ring);
   padding: var(--s-3) var(--s-4) var(--s-3);
   margin-bottom: var(--s-3);
 }
@@ -114,9 +129,11 @@ body.cj-viewer { font-family: var(--font-body); }
 /* ---------- Results list ---------- */
 .cj-viewer #wellsList .card {
   padding: var(--s-3);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--plate);
+  color: var(--plate-ink);
+  border: 1px solid var(--plate-line);
   border-radius: var(--radius);
+  box-shadow: var(--plate-ring);
 }
 .cj-viewer #wellsList .card:hover { border-color: var(--accent); }
 
@@ -169,7 +186,10 @@ body.cj-viewer { font-family: var(--font-body); }
   box-shadow: var(--shadow);
 }
 #modalTitle { font-family: var(--font-display); font-weight: 400; color: var(--ink); }
-#modalBody .border-b { border-color: var(--line); }
+/* Modal data body is a plate: white in every theme so the locked data
+   colors inside (lithology, S/G/R chips, band text) stay readable. */
+#modalBody { background: var(--plate); color: var(--plate-ink); box-shadow: var(--plate-ring); }
+#modalBody .border-b { border-color: var(--plate-line); }
 #logViewerContent { background: var(--bg-2); border-color: var(--line); }
 #modalFooter { background: var(--surface) !important; border-top-color: var(--line) !important; }
 #wellModal .modal-backdrop { background: color-mix(in srgb, var(--ink) 38%, transparent); }
@@ -190,10 +210,35 @@ body.cj-viewer { font-family: var(--font-body); }
   display: inline-block; vertical-align: -3px;
 }
 
+/* Location/elevation status banner — a themed ok callout (its emerald
+   utilities are status colors, not registry data). */
+#locationBanner {
+  background: var(--ok-soft);
+  border-color: var(--ok) !important;
+  color: var(--ok);
+  border-radius: var(--radius);
+}
+#locationBanner strong { color: var(--ok); }
+
 /* ---------- Mobile map-first ordering (order only; DOM order untouched) ---------- */
 @media (max-width: 1023px) {
   .cj-viewer .order-1 { order: 1; }   /* location CTA + search inputs */
   .cj-viewer .order-2 { order: 2; }   /* map */
   .cj-viewer .order-3 { order: 3; }   /* results list */
   .cj-viewer .order-4 { order: 4; }   /* filters last */
+}
+
+/* ---------- Desktop map-first grid ---------- */
+@media (min-width: 1024px) {
+  /* The utility sheet's .lg:row-span-2 (grid-row: span 2) resets
+     lg:row-start-1 and auto-places the map on the LAST row — pin it to
+     own the right column across all rows while the left column
+     (controls → results → filters) scrolls. */
+  .cj-viewer .order-2 { grid-row: 1 / -1; }
+  .cj-viewer .order-2 .map-shell {
+    position: sticky;
+    top: calc(var(--top) + var(--s-4));
+    height: calc(100dvh - var(--top) - var(--s-6));
+    min-height: 520px;
+  }
 }

@@ -93,7 +93,9 @@ truth.
   field), main column at `min(100%, var(--wrap))` with `--gutter` padding.
 - `.cj-brand` = BrandMark + serif `.cj-brand-text` + mono `.cj-tag`
   (per-app identity: `DRILLER HUB`, `WELL VIEWER`).
-- `.cj-app-switch` — pill link to the sibling app.
+- `.cj-app-switch` — pill link to the sibling app; collapses to an
+  icon-only round button ≤560px (keep an `aria-label` on the link), and
+  `.cj-tag` hides ≤420px so the brand never collides with the actions.
 - `.theme-toggle` — 36px round button; the sun/moon/field morph is pure CSS.
 - Buttons: `.btn` + `.btn-primary` (ink) / `.btn-accent` (C&J red) /
   `.btn-ghost` / `.btn-danger` / `.btn-icon` / `.btn-sm`. `min-height: var(--tap)`.
@@ -104,6 +106,14 @@ truth.
 - `.card` (`.is-featured`), `.callout` (`.is-ok/.is-warn/.is-bad/.is-info`,
   left rule), `.badge` (`badge-ok/warn/bad/info/faint`), `.chip`, `.empty`.
 - `.modal-backdrop` + `.modal-dialog` — centered, bottom sheet ≤760px.
+- `.cj-plate` (**data plate**) — a fixed light surface (`--plate`/`--plate-ink`/
+  `--plate-line`, identical in all themes) for any container whose content
+  carries locked data colors (legend swatches, R/G/S chips, band labels).
+  It re-declares the light ink/line/surface ramp inside so themed rules
+  resolve to light values; in dark theme `--plate-ring` seats it on the
+  dark ground. Do NOT keep `dark:` color variants inside a plate — the
+  plate is always light, so the light value is the correct one everywhere.
+  `.cj-plate-lg` for `radius-lg`.
 - `.progress` — 3px accent hairline.
 - Loading: `.skel` shimmer skeletons for placeholders, `.cj-bore` +
   `.cj-bore__status` for screen/section loading.

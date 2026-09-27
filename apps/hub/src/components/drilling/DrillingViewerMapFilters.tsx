@@ -42,7 +42,7 @@ function FilterBand({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-line p-3">
+    <div className="cj-plate p-3">
       <p className="eyebrow plain mb-2">
         {title}
       </p>
@@ -113,31 +113,31 @@ export function DrillingViewerMapFilters({ value, onChange }: Props) {
             checked={value.typeUncon}
             onChange={(typeUncon) => patch({ typeUncon })}
             label="● Unconsolidated / Gravel"
-            labelClass="text-blue-700 dark:text-blue-400"
+            labelClass="text-blue-700"
           />
           <Row
             checked={value.typeRock}
             onChange={(typeRock) => patch({ typeRock })}
             label="● Bedrock / Rock"
-            labelClass="text-red-700 dark:text-red-400"
+            labelClass="text-red-700"
           />
           <Row
             checked={value.typeBucket}
             onChange={(typeBucket) => patch({ typeBucket })}
             label="● Bucket / Hand Dug"
-            labelClass="text-orange-600 dark:text-orange-400"
+            labelClass="text-orange-600"
           />
           <Row
             checked={value.typeDry}
             onChange={(typeDry) => patch({ typeDry })}
             label="● Dry Hole"
-            labelClass="text-zinc-900 dark:text-zinc-100"
+            labelClass="text-zinc-900"
           />
           <Row
             checked={value.typeEstimated}
             onChange={(typeEstimated) => patch({ typeEstimated })}
             label="● Estimated / Unverified Location (green; also in gravel/rock when known)"
-            labelClass="text-green-700 dark:text-green-400"
+            labelClass="text-green-700"
           />
         </FilterBand>
 
@@ -146,25 +146,25 @@ export function DrillingViewerMapFilters({ value, onChange }: Props) {
             checked={value.yieldBlue}
             onChange={(yieldBlue) => patch({ yieldBlue })}
             label="● 0.01–10 GPM"
-            labelClass="text-blue-800 dark:text-blue-300"
+            labelClass="text-blue-800"
           />
           <Row
             checked={value.yieldGreen}
             onChange={(yieldGreen) => patch({ yieldGreen })}
             label="● 10.01–25 GPM"
-            labelClass="text-emerald-800 dark:text-emerald-300"
+            labelClass="text-emerald-800"
           />
           <Row
             checked={value.yieldOrange}
             onChange={(yieldOrange) => patch({ yieldOrange })}
             label="● 25.01–50 GPM"
-            labelClass="text-amber-800 dark:text-amber-300"
+            labelClass="text-amber-800"
           />
           <Row
             checked={value.yieldRed}
             onChange={(yieldRed) => patch({ yieldRed })}
             label="● 50.01+ GPM"
-            labelClass="text-red-800 dark:text-red-300"
+            labelClass="text-red-800"
           />
         </FilterBand>
       </div>

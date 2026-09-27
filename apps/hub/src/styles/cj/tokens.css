@@ -8,10 +8,13 @@
 
 :root {
   /* Fonts — --f-* vars are supplied by next/font in the Next apps; the named
-     families resolve to the self-hosted faces in fonts.css elsewhere. */
-  --font-display: var(--f-display), "Instrument Serif", Georgia, "Times New Roman", serif;
-  --font-body: var(--f-body), "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: var(--f-mono), "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+     families resolve to the self-hosted faces in fonts.css elsewhere. The
+     var() fallbacks are required: where no --f-* var is defined (the static
+     viewer), a bare var() reference invalidates the whole declaration and
+     text falls back to the initial serif. */
+  --font-display: var(--f-display, "Instrument Serif"), Georgia, "Times New Roman", serif;
+  --font-body: var(--f-body, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--f-mono, "IBM Plex Mono"), ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Type scale — base stays >= 16px so iOS never zooms inputs. */
   --fs-xs: 0.72rem;
@@ -40,6 +43,15 @@
   --wrap: 1320px;
   --gutter: clamp(1.25rem, 3vw, 2.75rem);
   --tap: 44px;        /* minimum control height; 48px in field theme */
+
+  /* Data plates — containers whose content uses locked data colors (legend
+     bands, R/G/S chips, well-type swatches) get a fixed light surface in
+     EVERY theme so the encoding stays readable. Same values everywhere;
+     --plate-ring gives the plate a subtle outline on dark grounds. */
+  --plate: #FFFFFF;
+  --plate-ink: #0F1522;
+  --plate-line: rgba(15, 21, 34, 0.12);
+  --plate-ring: none;
 }
 
 /* ---------- Light ---------- */
@@ -102,6 +114,8 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -16px rgba(0, 0, 0, 0.6);
   --glass: rgba(10, 15, 26, 0.78);
   --selection: rgba(242, 85, 77, 0.28);
+  /* Data plates keep their white face in dark; a faint ring seats them. */
+  --plate-ring: 0 0 0 1px rgba(237, 235, 230, 0.14), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* ---------- Field — daylight legibility ----------

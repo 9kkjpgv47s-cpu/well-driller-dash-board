@@ -22,7 +22,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span className="cj-tag">Driller Hub</span>
         </Link>
         <div className="cj-top-actions">
-          <a className="cj-app-switch" href="/well-viewer/index.html">
+          <a
+            className="cj-app-switch"
+            href="/well-viewer/index.html"
+            aria-label="Open the Well viewer"
+          >
             Well viewer <span className="arrow">→</span>
           </a>
           <ThemeToggle />

@@ -21,6 +21,10 @@ node capture.mjs capture --out ../../../docs/design/screens/<label> \
                                             # fractional doc origin (recorded in
                                             # <baseline-dir>/crop-fracs.json) so
                                             # marker AA rasterizes identically
+     [--viewer-map-size 824x648]            # COMPARISON ONLY: pin the viewer
+                                            # .map-shell to the baseline crop
+                                            # size (post-restyle it is sticky +
+                                            # viewport-sized)
 ```
 
 Produces under `<out>`: full-page PNGs at 390x844 + 1440x900 (hub `/`, hub

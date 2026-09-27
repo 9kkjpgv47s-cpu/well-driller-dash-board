@@ -355,7 +355,7 @@
             <span class="cj-tag">Well Viewer</span>
         </span>
         <div class="cj-top-actions">
-            <a class="cj-app-switch" href="/">Driller hub <span class="arrow">→</span></a>
+            <a class="cj-app-switch" href="/" aria-label="Open the Driller hub">Driller hub <span class="arrow">→</span></a>
             <button type="button" class="theme-toggle" data-cj-theme-toggle aria-label="Switch theme">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <circle class="tt-sun" cx="12" cy="12" r="4" />
@@ -376,6 +376,15 @@
             <li>In the share sheet, scroll and tap <strong>“Open in Safari”</strong>. If you don’t see it, scroll right or tap “More” to find it.</li>
         </ol>
         <span class="link-tip">Still no “Open in Safari”? Ask the sender to upload this file to iCloud Drive, Google Drive, or Dropbox and send you the <strong>link</strong> — open the link in Safari to get the map.</span>
+    </div>
+    <div id="chatTip" class="chat-tip hidden">
+        <strong>Link opened but no map?</strong> Long-press the link and choose Open in Safari (or paste the link in Safari). If it still fails, use app.netlify.com/drop to upload this file and get a link that runs the map.
+        <button type="button" onclick="document.getElementById('chatTip').classList.add('hidden');" style="margin-left:0.5rem;background:#92400e;color:#fff;border:none;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;cursor:pointer;">Got it</button>
+    </div>
+    <div class="cj-page-head">
+        <p class="eyebrow">Indiana DNR Registry</p>
+        <h1>Well <em>viewer</em></h1>
+        <p class="lede">Map, search, filters, and the full DNR detail report.</p>
     </div>
     <div id="loadingDnrPanel" class="mb-4">
         <div class="cj-bore" role="status" aria-live="polite">
@@ -402,15 +411,6 @@
             <li><strong>Long-press the link</strong> (don't just tap) and choose <strong>Open in Safari</strong>. Or copy the link and paste it into Safari's address bar.</li><li><strong>If the map still doesn't load:</strong> Use <strong>Netlify Drop</strong>: on a computer open <strong>app.netlify.com/drop</strong> in Chrome or Safari, drag this HTML file onto the page, and get the link. Open that link in Safari on your phone — the map will work.</li>
             <li><strong>On computer:</strong> Double‑click the file to open it in Chrome or Safari, or run <code>python3 -m http.server 8080</code> in the file’s folder and open <strong>http://localhost:8080/</strong> in the browser.</li>
         </ol>
-    </div>
-    <div id="chatTip" class="chat-tip hidden">
-        <strong>Link opened but no map?</strong> Long-press the link and choose Open in Safari (or paste the link in Safari). If it still fails, use app.netlify.com/drop to upload this file and get a link that runs the map.
-        <button type="button" onclick="document.getElementById('chatTip').classList.add('hidden');" style="margin-left:0.5rem;background:#92400e;color:#fff;border:none;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;cursor:pointer;">Got it</button>
-    </div>
-    <div class="cj-page-head">
-        <p class="eyebrow">Indiana DNR Registry</p>
-        <h1>Well <em>viewer</em></h1>
-        <p class="lede">Map, search, filters, and the full DNR detail report.</p>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6" style="display: grid;">
         <div class="order-1 lg:col-start-1 lg:col-span-4 lg:row-start-1 cj-panel flex flex-col">

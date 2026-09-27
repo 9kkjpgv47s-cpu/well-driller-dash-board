@@ -103,7 +103,7 @@ export function NearestWellsStrip({
                 key={`${k}-${idx}`}
                 type="button"
                 onClick={() => onSelectWell(w)}
-                className={`rounded-lg border bg-surface p-2.5 text-left text-xs shadow-sm transition ${
+                className={`cj-plate rounded-lg border p-2.5 text-left text-xs shadow-sm transition ${
                   selectedKey === k
                     ? "border-accent bg-accent-soft ring-1 ring-accent"
                     : "border-line hover:border-accent hover:bg-accent-soft"
@@ -126,10 +126,10 @@ export function NearestWellsStrip({
                               className="inline-flex items-end rounded px-0.5"
                               title={`Rock top ${mr[1]} ft`}
                             >
-                              <span className="text-[10px] font-bold text-red-600 dark:text-red-400">
+                              <span className="text-[10px] font-bold text-red-600">
                                 R
                               </span>
-                              <span className="text-[15px] font-extrabold leading-none text-red-700 dark:text-red-300">
+                              <span className="text-[15px] font-extrabold leading-none text-red-700">
                                 {mr[1]}
                               </span>
                             </span>
@@ -143,10 +143,10 @@ export function NearestWellsStrip({
                               className="inline-flex items-end rounded px-0.5"
                               title={`Aquifer G${mg[1]} · ${mg[2]} ft thick`}
                             >
-                              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                              <span className="text-[10px] font-bold text-blue-600">
                                 G{mg[1]}
                               </span>
-                              <span className="text-[15px] font-extrabold leading-none text-blue-700 dark:text-blue-300">
+                              <span className="text-[15px] font-extrabold leading-none text-blue-700">
                                 {" "}
                                 {mg[2]}
                               </span>
@@ -161,10 +161,10 @@ export function NearestWellsStrip({
                               className="inline-flex items-end rounded px-0.5"
                               title={`Dry sand S${ms[1]} · ${ms[2]} ft thick`}
                             >
-                              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-300">
+                              <span className="text-[10px] font-bold text-amber-600">
                                 S{ms[1]}
                               </span>
-                              <span className="text-[15px] font-extrabold leading-none text-amber-700 dark:text-amber-200">
+                              <span className="text-[15px] font-extrabold leading-none text-amber-700">
                                 {" "}
                                 {ms[2]}
                               </span>
@@ -179,10 +179,10 @@ export function NearestWellsStrip({
                               className="inline-flex items-end rounded px-0.5"
                               title={`G ${mf[1]}`}
                             >
-                              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                              <span className="text-[10px] font-bold text-blue-600">
                                 G
                               </span>
-                              <span className="text-[15px] font-extrabold leading-none text-blue-700 dark:text-blue-300">
+                              <span className="text-[15px] font-extrabold leading-none text-blue-700">
                                 {mf[1]}
                               </span>
                             </span>
