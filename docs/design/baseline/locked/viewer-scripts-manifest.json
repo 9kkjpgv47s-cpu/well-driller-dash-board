@@ -1,0 +1,50 @@
+[
+  {
+    "index": 0,
+    "src": "vendor/leaflet.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 1,
+    "src": "vendor/leaflet.markercluster.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 2,
+    "src": "vendor/papaparse.min.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 3,
+    "src": "archive/classify-v1-viewer.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 4,
+    "src": "formation-class-v3.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 5,
+    "src": "well-tag-logic.js",
+    "sha256": null,
+    "bytes": null
+  },
+  {
+    "index": 6,
+    "src": null,
+    "sha256": "e99098c7d0cab2e72e19596f580e803555617c0db84603c52cead91e3e03a1e8",
+    "bytes": 454
+  },
+  {
+    "index": 7,
+    "src": null,
+    "sha256": "719b8a0d81b5d2e0d689c9a0f21efd29853b399a15fbfaa2f2dfd71d88fc9b08",
+    "bytes": 215798
+  }
+]
