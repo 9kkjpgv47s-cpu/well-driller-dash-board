@@ -480,10 +480,11 @@ async function viewerFixedView(page) {
 
 async function captureViewer(browser, base, viewerUrl, outDir, opts) {
   const result = { screens: {}, crop: null, behavior: null };
+  const allowed = new Set([new URL(base).origin, new URL(viewerUrl).origin]);
 
   for (const vp of VIEWPORTS) {
     const { context, page } = await newPage(browser, vp);
-    await setupRoutes(context, new Set([new URL(base).origin]), opts);
+    await setupRoutes(context, allowed, opts);
     await gotoIdle(page, viewerUrl.split("?")[0]);
     await viewerWaitDataLoaded(page).catch(() => {});
     await waitMarkerStable(page, "#map", { min: 0 }).catch(() => {});
@@ -498,7 +499,7 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
 
   // Deterministic pass at fixed viewport: data + focus + crop + behavior.
   const { context, page } = await newPage(browser, CROP_VIEWPORT);
-  await setupRoutes(context, new Set([new URL(base).origin]), {
+  await setupRoutes(context, allowed, {
     allowTiles: false,
     viewerMapCss: opts.viewerMapCss,
   });
