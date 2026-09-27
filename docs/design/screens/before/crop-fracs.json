@@ -1,0 +1,5 @@
+{
+  "note": "Fractional document-position offsets (x,y in [0,1)) of the map elements at baseline capture time — measured from the baseline code under the capture flow. --match-baseline translates each element to reproduce this subpixel origin so marker AA rasterizes identically.",
+  "crops/hub-map-crop.png": { "x": 0.328125, "y": 0 },
+  "crops/viewer-map-crop.png": { "x": 0, "y": 0.21875 }
+}

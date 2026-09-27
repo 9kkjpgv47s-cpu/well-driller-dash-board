@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Instrument_Serif, Inter, IBM_Plex_Mono, Geist } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
@@ -23,6 +23,13 @@ const fontMono = IBM_Plex_Mono({
   weight: ["400", "500"],
   subsets: ["latin"],
   variable: "--f-mono",
+  display: "swap",
+});
+// Loaded only so map marker labels keep their pre-restyle font (the locked
+// marker CSS inherits body font — see globals.css note above the marker block).
+const fontMarker = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
   display: "swap",
 });
 
@@ -49,7 +56,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`}
+      className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable} ${fontMarker.variable}`}
     >
       <body suppressHydrationWarning>
         {/* First child of <body>: sets html[data-theme] before paint. */}

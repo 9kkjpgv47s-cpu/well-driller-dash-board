@@ -202,6 +202,19 @@
   color: var(--ink-4);
 }
 
+/* Marker text (depth labels, combo rows) inherits the map container's font
+   rendering. Pre-restyle that was Geist Sans at 16px/1.5 with default
+   text-rendering + feature settings (body had `antialiased`, which matches
+   base.css, so smoothing stays). Keeps marker glyphs byte-identical to the
+   captured baseline. */
+.leaflet-container {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  text-rendering: auto;
+  font-feature-settings: normal;
+}
+
 /* ===== LOCKED: well/map marker styles — do not edit ===== */
 /*
  * Leaflet map marker chrome — MUST live in globals so it always ships with layout.

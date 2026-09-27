@@ -139,7 +139,7 @@ function loadPng() {
 
 // ---------- routing ----------
 
-function setupRoutes(context, allowedOrigins, { allowTiles }) {
+function setupRoutes(context, allowedOrigins, { allowTiles, hubCapCss }) {
   return context.route(/.*/, (route) => {
     const req = route.request();
     let u;
@@ -152,6 +152,17 @@ function setupRoutes(context, allowedOrigins, { allowTiles }) {
       return route.continue();
     }
     if (allowedOrigins.has(u.origin)) {
+      // Comparison-run width cap: inject a <style> into the HTML document so
+      // it applies before hydration/Leaflet init (init scripts proved flaky).
+      if (hubCapCss && req.resourceType() === "document") {
+        return route.fetch().then(async (res) => {
+          const body = (await res.text()).replace(
+            "</head>",
+            `<style data-cj-cap>${hubCapCss}</style></head>`,
+          );
+          return route.fulfill({ response: res, body });
+        });
+      }
       if (u.pathname.startsWith("/api/weather")) {
         return route.fulfill({
           status: 200,
@@ -235,6 +246,152 @@ async function gotoIdle(page, url, timeout = 120000) {
     .waitForLoadState("networkidle", { timeout: 45000 })
     .catch(() => {});
   await settle(page);
+}
+
+// In-map overlay chrome (zoom control, bottom pill/stack, attribution) is
+// legitimately restyled, so crop diffs mask these rects to measure marker
+// pixels only. Rects: [x, y, w, h] relative to the crop image.
+function cropMaskRects(w, h) {
+  const ring = 2; // map-shell border is restyled chrome; also covers
+  // fractional clip-boundary slivers of adjacent content
+  return [
+    [0, 0, w, ring], // top border ring
+    [0, h - ring, w, ring], // bottom border ring
+    [0, 0, ring, h], // left border ring
+    [w - ring, 0, ring, h], // right border ring
+    [0, 0, 84, 128], // zoom +/- control (top-left)
+    [0, h - 76, w, 76], // bottom overlay band (pill, zoom stack, attribution)
+    [w - 88, h - 170, 88, 170], // zoom stack above bottom band
+    [w - 60, 0, 60, 60], // top-right overlay control (restyled chrome)
+  ];
+}
+
+function maskedPixelDiff(imgA, imgB, oxB, oyB, masks) {
+  const w = Math.min(imgA.width, imgB.width - oxB);
+  const h = Math.min(imgA.height, imgB.height - oyB);
+  if (w <= 0 || h <= 0) return Infinity;
+  const inside = (x, y) =>
+    masks.some(
+      ([mx, my, mw, mh]) => x >= mx && x < mx + mw && y >= my && y < my + mh,
+    );
+  let n = 0;
+  for (let y = 0; y < h; y++) {
+    let ka = y * imgA.width * 4;
+    let kb = ((y + oyB) * imgB.width + oxB) * 4;
+    for (let x = 0; x < w; x++, ka += 4, kb += 4) {
+      if (inside(x, y)) continue;
+      if (
+        imgA.data[ka] !== imgB.data[kb] ||
+        imgA.data[ka + 1] !== imgB.data[kb + 1] ||
+        imgA.data[ka + 2] !== imgB.data[kb + 2] ||
+        imgA.data[ka + 3] !== imgB.data[kb + 3]
+      )
+        n++;
+    }
+  }
+  return n;
+}
+
+// Element screenshots expand the clip to whole device pixels, so a fractional
+// element origin yields a N+1 px image. Quantize the clip to the element's
+// integer bounds so crops keep the element's real pixel size.
+async function quantizeCrop(page, sel, outPath, { matchPath, targetFrac } = {}) {
+  const loc = page.locator(sel).first();
+  await loc.scrollIntoViewIfNeeded();
+  // Marker pixels are subpixel-sensitive: a fractional element origin shifts
+  // every marker's AA. When a baseline crop exists (matchPath), nudge the
+  // element to reproduce the baseline's fractional origin exactly, then clip
+  // at floor/ceil bounds so dims match. Overlay chrome inside the map (zoom
+  // control, bottom pill/stack, attribution) is legitimately restyled — those
+  // rects are masked out of the diff. Without a baseline, snap to integers.
+  await loc.evaluate((el) => {
+    document.documentElement.style.scrollBehavior = "auto";
+    const b = el.getBoundingClientRect();
+    const vh = window.innerHeight;
+    if (b.top < 4 || b.bottom > vh - 4) {
+      window.scrollBy(0, b.top < 4 ? b.top - 40 : b.bottom - vh + 40);
+    }
+    // Quantize scroll to whole pixels so the element's viewport fraction
+    // equals its document fraction.
+    window.scrollTo(Math.round(window.scrollX), Math.round(window.scrollY));
+  });
+  await page.waitForTimeout(60);
+
+  const PNG = loadPng();
+  let matchPng = null;
+  if (matchPath && fs.existsSync(matchPath)) {
+    try {
+      matchPng = PNG.sync.read(fs.readFileSync(matchPath));
+    } catch {}
+  }
+
+  const shotPng = async () => {
+    const r = await loc.evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      return { x: b.left, y: b.top, w: b.width, h: b.height };
+    });
+    // Same capture call the baseline used (locator.screenshot) — the raw
+    // encoder output makes identical pixels byte-identical.
+    const buf = await loc.screenshot({ path: outPath });
+    return { png: PNG.sync.read(buf), rect: r };
+  };
+  // Nudge via a position:relative offset on <body> — a paint-time shift that
+  // re-rasterizes content at the fractional offset and moves the element
+  // together with all its clipping ancestors (a direct nudge on the element
+  // loses a sub-1px edge band to parent overflow:hidden). A CSS transform
+  // would create a composited layer that gets bilinear-resampled, which can
+  // never reproduce the baseline's natively-rasterized fractional phase.
+  const setFrac = (fx, fy) =>
+    loc.evaluate(
+      (el, [tx, ty]) => {
+        const b = el.getBoundingClientRect();
+        let dx = tx - (b.left - Math.floor(b.left));
+        let dy = ty - (b.top - Math.floor(b.top));
+        // Wrap to the smallest equivalent nudge (frac equality is mod 1).
+        if (dx > 0.5) dx -= 1;
+        else if (dx <= -0.5) dx += 1;
+        if (dy > 0.5) dy -= 1;
+        else if (dy <= -0.5) dy += 1;
+        const body = document.body;
+        if (getComputedStyle(body).position === "static")
+          body.style.position = "relative";
+        body.style.left = `${(parseFloat(body.style.left) || 0) + dx}px`;
+        body.style.top = `${(parseFloat(body.style.top) || 0) + dy}px`;
+      },
+      [fx, fy],
+    );
+
+  if (!matchPng || !PNG) {
+    await loc.evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      const body = document.body;
+      if (getComputedStyle(body).position === "static")
+        body.style.position = "relative";
+      body.style.left = `${Math.round(b.left) - b.left}px`;
+      body.style.top = `${Math.round(b.top) - b.top}px`;
+    });
+    const r = await loc.evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      return { x: b.left, y: b.top, w: b.width, h: b.height };
+    });
+    await loc.screenshot({ path: outPath });
+    return { matched: false, rect: r };
+  }
+
+  // Baseline crops were captured at the element's natural fractional
+  // document offset (recorded in <baseline>/crop-fracs.json). Nudge the
+  // element's paint offset so its viewport fraction reproduces that offset
+  // (scroll was quantized to integers above).
+  const tf = targetFrac || { x: 0, y: 0 };
+  await setFrac(tf.x, tf.y);
+  const { png, rect } = await shotPng();
+  const masks = cropMaskRects(matchPng.width, matchPng.height);
+  return {
+    matched: true,
+    rect,
+    frac: tf,
+    maskedDiffs: maskedPixelDiff(matchPng, png, 0, 0, masks),
+  };
 }
 
 // ---------- viewer ----------
@@ -425,7 +582,12 @@ async function captureViewer(browser, base, viewerUrl, outDir, opts) {
   // Crop the map element.
   const cropPath = path.join(outDir, "crops", "viewer-map-crop.png");
   fs.mkdirSync(path.dirname(cropPath), { recursive: true });
-  await page.locator("#map").screenshot({ path: cropPath });
+  result.cropInfo = await quantizeCrop(page, "#map", cropPath, {
+    matchPath: opts.matchDir
+      ? path.join(opts.matchDir, "crops", "viewer-map-crop.png")
+      : null,
+    targetFrac: opts.cropFrac,
+  });
   result.crop = "crops/viewer-map-crop.png";
 
   // Toggle every filter checkbox on then off; record marker counts.
@@ -562,7 +724,21 @@ async function hubWaitSettled(page) {
   await settle(page, 1200);
 }
 
+// Reproduce the pre-restyle content geometry (main max-w-6xl px-4 with the
+// old .field-hub-scope -0.25rem margins / 1rem padding) for comparison runs
+// only: the map element then has the same pixel size, so crops are diffable.
+function hubCapCss(w) {
+  return `
+.cj-main { padding-left: 16px !important; padding-right: 16px !important; }
+.cj-main > * { width: min(100%, ${w}px) !important; }
+.field-hub-scope {
+  padding-left: 1rem !important; padding-right: 1rem !important;
+  margin-left: -0.25rem !important; margin-right: -0.25rem !important;
+}`;
+}
+
 async function captureHub(browser, base, outDir, opts) {
+  if (opts.hubCapWidth) opts.hubCapCss = hubCapCss(opts.hubCapWidth);
   const result = { screens: {}, crop: null, behavior: null };
 
   for (const vp of VIEWPORTS) {
@@ -590,6 +766,7 @@ async function captureHub(browser, base, outDir, opts) {
   const { context, page } = await newPage(browser, CROP_VIEWPORT);
   await setupRoutes(context, new Set([new URL(base).origin]), {
     allowTiles: false,
+    hubCapCss: opts.hubCapCss,
   });
   const url = `${base}/?lat=${TARGET.lat}&lon=${TARGET.lon}`;
   await gotoIdle(page, url);
@@ -612,7 +789,12 @@ async function captureHub(browser, base, outDir, opts) {
 
   const cropPath = path.join(outDir, "crops", "hub-map-crop.png");
   fs.mkdirSync(path.dirname(cropPath), { recursive: true });
-  await page.locator(".leaflet-container").first().screenshot({ path: cropPath });
+  result.cropInfo = await quantizeCrop(page, ".leaflet-container", cropPath, {
+    matchPath: opts.matchDir
+      ? path.join(opts.matchDir, "crops", "hub-map-crop.png")
+      : null,
+    targetFrac: opts.cropFrac,
+  });
   result.crop = "crops/hub-map-crop.png";
 
   const behavior = {
@@ -779,7 +961,46 @@ function compareDirs(dirA, dirB) {
       }
       const pa = PNG.sync.read(ba);
       const pb = PNG.sync.read(bb);
+      // Map crops: mask the in-map overlay chrome (zoom control, bottom
+      // pill/stack, attribution) — restyled chrome is not gate content.
+      const masks = rel.startsWith(`crops${path.sep}`)
+        ? cropMaskRects(Math.max(pa.width, pb.width), Math.max(pa.height, pb.height))
+        : [];
+      const pxCmp = (imgA, imgB, oxB, oyB) =>
+        maskedPixelDiff(imgA, imgB, oxB, oyB, masks);
       if (pa.width !== pb.width || pa.height !== pb.height) {
+        // Baseline element screenshots clip at floor/ceil of a fractional
+        // origin, so they can include a 1px sliver of off-element bleed. The
+        // quantized crops are exactly element-bounded. When dims differ by
+        // <=2px, slide the smaller image inside the larger and compare the
+        // best aligned overlap.
+        const dw = Math.abs(pa.width - pb.width);
+        const dh = Math.abs(pa.height - pb.height);
+        if (dw <= 2 && dh <= 2) {
+          const big = pb.width * pb.height >= pa.width * pa.height ? pb : pa;
+          const small = big === pb ? pa : pb;
+          let best = Infinity;
+          for (let oy = 0; oy <= big.height - small.height; oy++) {
+            for (let ox = 0; ox <= big.width - small.width; ox++) {
+              const n = pxCmp(small, big, ox, oy);
+              if (n < best) best = n;
+              if (best === 0) break;
+            }
+            if (best === 0) break;
+          }
+          if (best === 0) {
+            report.push(
+              `OK  ${rel} (overlap pixel-identical${masks.length ? ", overlays masked" : ""}; ${pa.width}x${pa.height} vs ${pb.width}x${pb.height} — fractional clip-boundary sliver only)`,
+            );
+          } else {
+            report.push(
+              `DIFF ${rel} (size ${pa.width}x${pa.height} vs ${pb.width}x${pb.height}; best-aligned overlap ${best} mismatched pixels)`,
+            );
+            totalMismatch++;
+            pixelMismatch += best;
+          }
+          continue;
+        }
         report.push(
           `DIFF ${rel} (size ${pa.width}x${pa.height} vs ${pb.width}x${pb.height})`,
         );
@@ -787,20 +1008,11 @@ function compareDirs(dirA, dirB) {
         pixelMismatch += pa.width * pa.height;
         continue;
       }
-      let pxDiff = 0;
-      for (let k = 0; k < pa.data.length; k += 4) {
-        if (
-          pa.data[k] !== pb.data[k] ||
-          pa.data[k + 1] !== pb.data[k + 1] ||
-          pa.data[k + 2] !== pb.data[k + 2] ||
-          pa.data[k + 3] !== pb.data[k + 3]
-        )
-          pxDiff++;
-      }
+      const pxDiff = pxCmp(pa, pb, 0, 0);
       report.push(
         pxDiff === 0
-          ? `OK  ${rel} (re-encoded bytes differ, 0 pixel diffs)`
-          : `DIFF ${rel} (${pxDiff} mismatched pixels)`,
+          ? `OK  ${rel} (re-encoded bytes differ, 0 pixel diffs${masks.length ? ", overlays masked" : ""})`
+          : `DIFF ${rel} (${pxDiff} mismatched pixels${masks.length ? ", overlays masked" : ""})`,
       );
       if (pxDiff) {
         totalMismatch++;
@@ -975,9 +1187,20 @@ async function main() {
   }
   const viewerUrl =
     args["viewer-url"] ?? `${base}/well-viewer/index.html`;
+  // Locked extraction lands inside the capture's own dir — it must NOT
+  // overwrite the committed baseline locked/ files.
   const lockedDir = path.resolve(
-    args["locked-out"] ?? path.join(REPO_ROOT, "docs/design/baseline/locked"),
+    args["locked-out"] ?? path.join(outDir, "locked"),
   );
+  const matchDir = args["match-baseline"]
+    ? path.resolve(args["match-baseline"])
+    : null;
+  // Baseline fractional element origins, measured at baseline capture time.
+  let cropFracs = {};
+  if (matchDir) {
+    const fp = path.join(matchDir, "crop-fracs.json");
+    if (fs.existsSync(fp)) cropFracs = JSON.parse(fs.readFileSync(fp, "utf8"));
+  }
   fs.mkdirSync(outDir, { recursive: true });
 
   const { chromium } = loadPlaywright();
@@ -994,9 +1217,14 @@ async function main() {
   try {
     const hub = await captureHub(browser, base, outDir, {
       allowTiles: !!args["with-tiles"],
+      hubCapWidth: args["hub-cap-width"] ? Number(args["hub-cap-width"]) : 0,
+      matchDir,
+      cropFrac: cropFracs["crops/hub-map-crop.png"],
     });
     const viewer = await captureViewer(browser, base, viewerUrl, outDir, {
       allowTiles: !!args["with-tiles"],
+      matchDir,
+      cropFrac: cropFracs["crops/viewer-map-crop.png"],
     });
     const behavior = {
       hub: hub.behavior,

@@ -12,6 +12,15 @@ node capture.mjs capture --out ../../../docs/design/screens/<label> \
      --base http://localhost:3001            # hub dev server
      [--viewer-url http://localhost:8791/index.html]  # standalone viewer later
      [--with-tiles]                          # allow live OSM tiles in shots
+     [--hub-cap-width 1152]                  # COMPARISON ONLY: inject CSS that
+                                            # caps the hub field workspace at
+                                            # the pre-restyle content width so
+                                            # map geometry matches baseline
+     [--match-baseline <baseline-dir>]       # COMPARISON ONLY: translate each
+                                            # map element to the baseline's
+                                            # fractional doc origin (recorded in
+                                            # <baseline-dir>/crop-fracs.json) so
+                                            # marker AA rasterizes identically
 ```
 
 Produces under `<out>`: full-page PNGs at 390x844 + 1440x900 (hub `/`, hub
@@ -31,6 +40,26 @@ Pixel-diffs `crops/*.png` (pngjs, mismatched-pixel count) and requires
 `behavior.json` identical. Full-page screens are intentionally excluded from the
 gate: the viewer's default zoom-11 view exceeds its random 800-marker cap, so
 screens legitimately differ run-to-run.
+
+Crop compare masks in-map overlay chrome (zoom control, bottom pill/stack,
+attribution) — those are restyled UI, not gate content — and tolerates ±2px
+size differences by sliding the smaller crop inside the larger (baseline
+element screenshots could clip a 1px fractional-origin sliver).
+
+## Comparison-run recipe (post-restyle)
+
+```bash
+node capture.mjs capture --out ../../../docs/design/screens/after-<label> \
+     --base http://localhost:3001 --hub-cap-width 1152 \
+     --match-baseline ../../../docs/design/screens/before
+node capture.mjs compare ../../../docs/design/screens/before \
+     ../../../docs/design/screens/after-<label>
+```
+
+`crop-fracs.json` in the baseline dir records the baseline elements'
+fractional document origins (hub `{x:0.3281, y:0}`, viewer `{x:0, y:0.2188}`).
+Markers rasterize at subpixel offsets — without matching fracs, identical
+content diffs on every antialiased edge.
 
 ## Determinism contract
 
