@@ -1,0 +1,286 @@
+{
+  "hub-light-limestone": [
+    {
+      "sel": "Skip to content",
+      "w": 111.7,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "&C&J Well CoDriller Hub",
+      "w": 244.8,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Open the Well viewer",
+      "w": 125.9,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Theme: light — switch to dark",
+      "w": 44,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "textarea min-h-[200px] font-mo",
+      "w": 1238,
+      "h": 324,
+      "ownH": 317.2,
+      "viaLabel": true
+    },
+    {
+      "sel": "Generate job brief",
+      "w": 156,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Share job link",
+      "w": 149.1,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Registry search radius",
+      "w": 130.7,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Move section up",
+      "w": 54,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Move section down",
+      "w": 72.7,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Map",
+      "w": 48.6,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Depth",
+      "w": 57.5,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "ASL",
+      "w": 46.5,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Ground elevation",
+      "w": 146.8,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "h-5 w-5 shrink-0 rounded accen",
+      "w": 106.7,
+      "h": 44,
+      "ownH": 24,
+      "viaLabel": true
+    },
+    {
+      "sel": "+",
+      "w": 44.6,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "−",
+      "w": 44.6,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Closest",
+      "w": 65.8,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "By depth",
+      "w": 73.5,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Refresh weather",
+      "w": 168.2,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Move section up",
+      "w": 54,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Move section down",
+      "w": 72.7,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "GFS",
+      "w": 47.2,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "ECMWF",
+      "w": 68.6,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "NWS",
+      "w": 52.1,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Move section up",
+      "w": 54,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Move section down",
+      "w": 72.7,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Open field map",
+      "w": 134.3,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    }
+  ],
+  "viewer-light-limestone": [
+    {
+      "sel": "Open the Driller hub",
+      "w": 108.4,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Theme: light — switch to dark",
+      "w": 44,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "Use My Location",
+      "w": 350,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "btnGroundElev",
+      "w": 350,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "addressInput",
+      "w": 235.9,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "btnAddressSearch",
+      "w": 106.1,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "coordsInput",
+      "w": 263.1,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "Go",
+      "w": 78.9,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "minDepth",
+      "w": 316,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "maxDepth",
+      "w": 316,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    },
+    {
+      "sel": "Apply Depth Filter",
+      "w": 316,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "textSearch",
+      "w": 350,
+      "h": 44.4,
+      "ownH": 44.4,
+      "viaLabel": false
+    }
+  ]
+}

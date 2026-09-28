@@ -1,0 +1,146 @@
+{
+  "limestone": {
+    "bg": {
+      "ink": 14.76,
+      "ink-2": 8.72,
+      "ink-3": 6.05,
+      "ink-4": 5.02,
+      "accent": 5.25,
+      "accent-ink": 8.23,
+      "ok": 5.18,
+      "warn": 4.99,
+      "bad": 5.56
+    },
+    "bg-2": {
+      "ink": 13.36,
+      "ink-2": 7.89,
+      "ink-3": 5.48,
+      "ink-4": 4.55,
+      "accent": 4.75,
+      "accent-ink": 7.46,
+      "ok": 4.69,
+      "warn": 4.52,
+      "bad": 5.03
+    },
+    "surface": {
+      "ink": 15.85,
+      "ink-2": 9.36,
+      "ink-3": 6.5,
+      "ink-4": 5.39,
+      "accent": 5.64,
+      "accent-ink": 8.84,
+      "ok": 5.57,
+      "warn": 5.36,
+      "bad": 5.97
+    },
+    "minOnTextGrounds": 4.52
+  },
+  "sandstone": {
+    "bg": {
+      "ink": 13.11,
+      "ink-2": 7.96,
+      "ink-3": 5.88,
+      "ink-4": 5.1,
+      "accent": 5.11,
+      "accent-ink": 7.34,
+      "ok": 5.15,
+      "warn": 5.14,
+      "bad": 5.08
+    },
+    "bg-2": {
+      "ink": 11.61,
+      "ink-2": 7.05,
+      "ink-3": 5.2,
+      "ink-4": 4.52,
+      "accent": 4.53,
+      "accent-ink": 6.5,
+      "ok": 4.56,
+      "warn": 4.56,
+      "bad": 4.5
+    },
+    "surface": {
+      "ink": 14.61,
+      "ink-2": 8.88,
+      "ink-3": 6.55,
+      "ink-4": 5.68,
+      "accent": 5.7,
+      "accent-ink": 8.18,
+      "ok": 5.74,
+      "warn": 5.74,
+      "bad": 5.67
+    },
+    "minOnTextGrounds": 4.5
+  },
+  "kraft": {
+    "bg": {
+      "ink": 11.8,
+      "ink-2": 7.39,
+      "ink-3": 5.88,
+      "ink-4": 5.25,
+      "accent": 5.23,
+      "accent-ink": 6.59,
+      "ok": 5.23,
+      "warn": 5.25,
+      "bad": 5.25
+    },
+    "bg-2": {
+      "ink": 10.17,
+      "ink-2": 6.37,
+      "ink-3": 5.07,
+      "ink-4": 4.53,
+      "accent": 4.51,
+      "accent-ink": 5.68,
+      "ok": 4.51,
+      "warn": 4.53,
+      "bad": 4.53
+    },
+    "surface": {
+      "ink": 13.53,
+      "ink-2": 8.48,
+      "ink-3": 6.75,
+      "ink-4": 6.03,
+      "accent": 6,
+      "accent-ink": 7.56,
+      "ok": 6,
+      "warn": 6.03,
+      "bad": 6.03
+    },
+    "minOnTextGrounds": 4.51
+  },
+  "sage": {
+    "bg": {
+      "ink": 14.35,
+      "ink-2": 8.36,
+      "ink-3": 5.77,
+      "ink-4": 4.94,
+      "accent": 5.1,
+      "accent-ink": 7.99,
+      "ok": 5.03,
+      "warn": 4.94,
+      "bad": 5.39
+    },
+    "bg-2": {
+      "ink": 13.14,
+      "ink-2": 7.66,
+      "ink-3": 5.28,
+      "ink-4": 4.53,
+      "accent": 4.67,
+      "accent-ink": 7.32,
+      "ok": 4.61,
+      "warn": 4.52,
+      "bad": 4.94
+    },
+    "surface": {
+      "ink": 15.62,
+      "ink-2": 9.1,
+      "ink-3": 6.28,
+      "ink-4": 5.38,
+      "accent": 5.55,
+      "accent-ink": 8.7,
+      "ok": 5.48,
+      "warn": 5.37,
+      "bad": 5.87
+    },
+    "minOnTextGrounds": 4.52
+  }
+}

@@ -86,6 +86,31 @@ const TOKEN_TABLE = {
   },
 };
 
+// Opt-in light paper palettes (mirror of the [data-paper] blocks in
+// design/cj/tokens.css). Text tokens × bg/bg-2/surface must stay >= 4.5.
+const PAPER_TABLE = {
+  limestone: {
+    bg: "#F1ECE3", "bg-2": "#E8E1D5", surface: "#F8F4EE",
+    ink: "#1C1A17", "ink-2": "#45403A", "ink-3": "#5E574E", "ink-4": "#6B6359",
+    accent: "#C60000", "accent-ink": "#8F0000", ok: "#267030", warn: "#93560F", bad: "#B3261E",
+  },
+  sandstone: {
+    bg: "#E9DFCE", "bg-2": "#DFD2BD", surface: "#F3EBDD",
+    ink: "#22190F", "ink-2": "#4A3D2E", "ink-3": "#5F5040", "ink-4": "#695947",
+    accent: "#BB0000", "accent-ink": "#8F0000", ok: "#23682D", warn: "#854E0D", bad: "#B0251E",
+  },
+  kraft: {
+    bg: "#E2D3BD", "bg-2": "#D6C4A8", surface: "#EDE2D0",
+    ink: "#24180C", "ink-2": "#4B3A27", "ink-3": "#5C4832", "ink-4": "#644F39",
+    accent: "#AB0000", "accent-ink": "#8F0000", ok: "#205F29", warn: "#79470C", bad: "#9F221B",
+  },
+  sage: {
+    bg: "#E9EAE2", "bg-2": "#DFE1D6", surface: "#F3F3EE",
+    ink: "#181B17", "ink-2": "#3E433C", "ink-3": "#555B52", "ink-4": "#5F655D",
+    accent: "#C60000", "accent-ink": "#8F0000", ok: "#267030", warn: "#91550F", bad: "#B3261E",
+  },
+};
+
 function contrastReport() {
   const out = {};
   for (const [theme, t] of Object.entries(TOKEN_TABLE)) {
@@ -96,6 +121,22 @@ function contrastReport() {
         out[theme][bg][fg] = +ratio(t[fg], t[bg]).toFixed(2);
       }
     }
+  }
+  return out;
+}
+
+function paperContrastReport() {
+  const text = ["ink", "ink-2", "ink-3", "ink-4", "accent", "accent-ink", "ok", "warn", "bad"];
+  const out = {};
+  for (const [paper, t] of Object.entries(PAPER_TABLE)) {
+    out[paper] = {};
+    for (const bg of ["bg", "bg-2", "surface"]) {
+      out[paper][bg] = {};
+      for (const fg of text) out[paper][bg][fg] = +ratio(t[fg], t[bg]).toFixed(2);
+    }
+    out[paper].minOnTextGrounds = Math.min(
+      ...text.flatMap((fg) => ["bg", "bg-2", "surface"].map((bg) => out[paper][bg][fg])),
+    );
   }
   return out;
 }
@@ -169,7 +210,7 @@ async function measureTaps(page) {
   }, LOCKED_SCOPE);
 }
 
-async function auditPage({ browser, url, theme, waitSel, waitMs, vp }) {
+async function auditPage({ browser, url, theme, paper, waitSel, waitMs, vp }) {
   const { chromium } = load(PWT);
   void chromium;
   const context = await browser.newContext({
@@ -181,12 +222,16 @@ async function auditPage({ browser, url, theme, waitSel, waitMs, vp }) {
     timezoneId: "America/Indiana/Indianapolis",
     serviceWorkers: "block",
   });
-  if (theme) {
-    await context.addInitScript((t) => {
-      try {
-        localStorage.setItem("cj-theme", t);
-      } catch {}
-    }, theme);
+  if (theme || paper) {
+    await context.addInitScript(
+      ([t, p]) => {
+        try {
+          if (t) localStorage.setItem("cj-theme", t);
+          if (p) localStorage.setItem("cj-paper", p);
+        } catch {}
+      },
+      [theme, paper],
+    );
   }
   // Same stubbing as the capture harness: same-origin only.
   const origin = new URL(url).origin;
@@ -250,9 +295,11 @@ async function main() {
     jobs.push({ key: `hub-before`, url: `${before}/?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme: null, waitSel: ".leaflet-container" });
     jobs.push({ key: `viewer-before`, url: `${before}${viewerPath}?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme: null, waitSel: "#map .leaflet-marker-icon" });
   }
+  const paper = args.paper ?? null; // opt-in light palette (localStorage cj-paper)
   for (const theme of THEMES) {
-    jobs.push({ key: `hub-${theme}`, url: `${base}/?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: ".leaflet-container", vp });
-    jobs.push({ key: `viewer-${theme}`, url: `${base}${viewerPath}?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, waitSel: "#map .leaflet-marker-icon", vp });
+    const sfx = paper ? `-${paper}` : "";
+    jobs.push({ key: `hub-${theme}${sfx}`, url: `${base}/?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, paper, waitSel: ".leaflet-container", vp });
+    jobs.push({ key: `viewer-${theme}${sfx}`, url: `${base}${viewerPath}?lat=${TARGET.lat}&lon=${TARGET.lon}`, theme, paper, waitSel: "#map .leaflet-marker-icon", vp });
   }
   if (args.only) {
     const keep = args.only.split(",");
@@ -272,9 +319,16 @@ async function main() {
   await browser.close();
 
   const contrast = contrastReport();
+  const papers = paperContrastReport();
   fs.writeFileSync(path.join(outDir, "axe.json"), JSON.stringify(axe, null, 2));
   fs.writeFileSync(path.join(outDir, "taps.json"), JSON.stringify(taps, null, 2));
   fs.writeFileSync(path.join(outDir, "contrast.json"), JSON.stringify(contrast, null, 2));
+  fs.writeFileSync(path.join(outDir, "contrast-papers.json"), JSON.stringify(papers, null, 2));
+
+  console.log("\n=== paper contrast: min ratio on bg/bg-2/surface ===");
+  for (const [k, p] of Object.entries(papers)) {
+    console.log(`${k.padEnd(10)} min=${p.minOnTextGrounds}`);
+  }
 
   // Console summary tables.
   console.log("\n=== contrast (fg on bg / surface) ===");
