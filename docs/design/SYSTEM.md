@@ -106,14 +106,25 @@ truth.
 - `.card` (`.is-featured`), `.callout` (`.is-ok/.is-warn/.is-bad/.is-info`,
   left rule), `.badge` (`badge-ok/warn/bad/info/faint`), `.chip`, `.empty`.
 - `.modal-backdrop` + `.modal-dialog` — centered, bottom sheet ≤760px.
-- `.cj-plate` (**data plate**) — a fixed light surface (`--plate`/`--plate-ink`/
-  `--plate-line`, identical in all themes) for any container whose content
-  carries locked data colors (legend swatches, R/G/S chips, band labels).
-  It re-declares the light ink/line/surface ramp inside so themed rules
-  resolve to light values; in dark theme `--plate-ring` seats it on the
-  dark ground. Do NOT keep `dark:` color variants inside a plate — the
-  plate is always light, so the light value is the correct one everywhere.
-  `.cj-plate-lg` for `radius-lg`.
+- `.cj-plate` (**data chips**) — a container whose content carries locked
+  data colors (legend swatches, R/G/S chips, band labels). The container
+  ALWAYS follows the theme: `--plate`/`--plate-ink`/`--plate-line` resolve
+  to `--surface`/`--ink`/`--line` in every theme — there are no fixed-white
+  surfaces in chrome. Locked data colors inside stay exact; dark theme
+  adds legibility affordances only where needed:
+  - Legend rows (hub filter cards; viewer elevation/yield/type bands): the
+    colored ● dot / swatch and toggle slider keep their locked color; the
+    label text is wrapped in `.cj-datalbl` and flips to `--ink-2` in dark
+    theme only (light + field keep the locked color).
+  - Bare data-colored text with no background of its own (`.cj-data`:
+    viewer list R/G/S chips, distance badges, colored type/elev/yield
+    words; hub nearest-well token chips) gets a small light paper chip in
+    dark theme: `background: var(--data-chip)` (#EFE9DF), 4px radius,
+    `0 4px` padding — the exact locked color sits on the chip.
+  - Data elements that already carry their own colored background
+    (registry chips, marker combo rows) are unchanged.
+  - Viewer `#modalBody` follows the theme in dark; its data-colored text
+    uses the same chip rule and tables use theme ink/lines.
 - `.progress` — 3px accent hairline.
 - Loading: `.skel` shimmer skeletons for placeholders, `.cj-bore` +
   `.cj-bore__status` for screen/section loading.

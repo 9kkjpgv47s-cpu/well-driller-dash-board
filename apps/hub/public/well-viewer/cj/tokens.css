@@ -44,14 +44,14 @@
   --gutter: clamp(1.25rem, 3vw, 2.75rem);
   --tap: 44px;        /* minimum control height; 48px in field theme */
 
-  /* Data plates — containers whose content uses locked data colors (legend
-     bands, R/G/S chips, well-type swatches) get a fixed light surface in
-     EVERY theme so the encoding stays readable. Same values everywhere;
-     --plate-ring gives the plate a subtle outline on dark grounds. */
-  --plate: #FFFFFF;
-  --plate-ink: #0F1522;
-  --plate-line: rgba(15, 21, 34, 0.12);
-  --plate-ring: none;
+  /* Data chips — containers whose content uses locked data colors (legend
+     bands, R/G/S chips, well-type swatches) follow the theme like any card:
+     the plate tokens resolve to the active surface/ink/line in EVERY theme.
+     In dark theme only, bare data-colored text gets a small light paper
+     chip (--data-chip) so the exact encoding color stays legible. */
+  --plate: var(--surface);
+  --plate-ink: var(--ink);
+  --plate-line: var(--line);
 }
 
 /* ---------- Light ---------- */
@@ -114,8 +114,8 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -16px rgba(0, 0, 0, 0.6);
   --glass: rgba(10, 15, 26, 0.78);
   --selection: rgba(242, 85, 77, 0.28);
-  /* Data plates keep their white face in dark; a faint ring seats them. */
-  --plate-ring: 0 0 0 1px rgba(237, 235, 230, 0.14), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  /* Data chips: bare locked-color text sits on a small light paper chip. */
+  --data-chip: #EFE9DF;
 }
 
 /* ---------- Field — daylight legibility ----------

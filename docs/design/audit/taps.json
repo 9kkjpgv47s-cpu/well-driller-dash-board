@@ -155,6 +155,27 @@
       "viaLabel": false
     },
     {
+      "sel": "GFS",
+      "w": 47.2,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "ECMWF",
+      "w": 68.6,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
+      "sel": "NWS",
+      "w": 52.1,
+      "h": 44,
+      "ownH": 44,
+      "viaLabel": false
+    },
+    {
       "sel": "Move section up",
       "w": 54,
       "h": 44,

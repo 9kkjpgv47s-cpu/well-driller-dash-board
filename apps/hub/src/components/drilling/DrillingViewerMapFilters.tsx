@@ -28,7 +28,16 @@ function Row({
         className="h-5 w-5 shrink-0 rounded accent-[var(--accent)]"
       />
       <span className={`text-sm font-semibold leading-tight ${labelClass}`}>
-        {label}
+        {label.startsWith("●") ? (
+          <>
+            {label.slice(0, 2)}
+            {/* .cj-datalbl keeps the dot's locked color but lets the text
+                flip to theme ink in dark mode (components.css). */}
+            <span className="cj-datalbl">{label.slice(2)}</span>
+          </>
+        ) : (
+          label
+        )}
       </span>
     </label>
   );

@@ -123,7 +123,7 @@ export function NearestWellsStrip({
                           return (
                             <span
                               key={`${tok}-${ti}`}
-                              className="inline-flex items-end rounded px-0.5"
+                              className="cj-data inline-flex items-end rounded px-0.5"
                               title={`Rock top ${mr[1]} ft`}
                             >
                               <span className="text-[10px] font-bold text-red-600">
@@ -140,7 +140,7 @@ export function NearestWellsStrip({
                           return (
                             <span
                               key={`${tok}-${ti}`}
-                              className="inline-flex items-end rounded px-0.5"
+                              className="cj-data inline-flex items-end rounded px-0.5"
                               title={`Aquifer G${mg[1]} · ${mg[2]} ft thick`}
                             >
                               <span className="text-[10px] font-bold text-blue-600">
@@ -158,7 +158,7 @@ export function NearestWellsStrip({
                           return (
                             <span
                               key={`${tok}-${ti}`}
-                              className="inline-flex items-end rounded px-0.5"
+                              className="cj-data inline-flex items-end rounded px-0.5"
                               title={`Dry sand S${ms[1]} · ${ms[2]} ft thick`}
                             >
                               <span className="text-[10px] font-bold text-amber-600">
@@ -176,7 +176,7 @@ export function NearestWellsStrip({
                           return (
                             <span
                               key={`${tok}-${ti}`}
-                              className="inline-flex items-end rounded px-0.5"
+                              className="cj-data inline-flex items-end rounded px-0.5"
                               title={`G ${mf[1]}`}
                             >
                               <span className="text-[10px] font-bold text-blue-600">
