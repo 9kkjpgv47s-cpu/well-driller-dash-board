@@ -633,6 +633,7 @@ export function faceSetLabelFromLayers(layers: LayerLabel[]): string | null {
 
 /** @deprecated Bottoms alone cannot express aquifer footage — use veinSetLabelFromIntervals. */
 export function veinSetLabelFromBottoms(_bottoms: number[]): string | null {
+  void _bottoms;
   return null;
 }
 
