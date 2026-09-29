@@ -1079,7 +1079,7 @@ function compareDirs(dirA, dirB) {
 
 // ---------- review screenshots ----------
 
-const REVIEW_THEMES = ["light", "dark", "field"];
+const REVIEW_THEMES = ["light", "dark"];
 
 async function captureReview(browser, base, outDir, { allowTiles, viewerUrl }) {
   const reviewDir = path.join(outDir, "review");

@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 const KEY = "cj-theme";
-const NEXT: Record<string, string> = { light: "dark", dark: "field", field: "light" };
+const NEXT: Record<string, string> = { light: "dark", dark: "light" };
 
-/** Cycles light → dark → field; the glyph morph is pure CSS (.tt-* rules). */
+/** Cycles light → dark; the glyph morph is pure CSS (.tt-* rules). */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<string | null>(null);
 
@@ -33,7 +33,6 @@ export function ThemeToggle() {
           <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
         </g>
         <path className="tt-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
-        <circle className="tt-field" cx="12" cy="12" r="6.2" />
       </svg>
     </button>
   );

@@ -10,6 +10,9 @@ Restyle of the Driller Hub (`apps/hub`) and the embedded C&J Well Viewer
 - Review shots: `screens/after/review/` (24 PNGs, live tiles)
 - Machine-readable a11y data: `audit/axe.json`, `audit/taps.json`, `audit/contrast.json`
 
+> Themes are light/dark only — the high-contrast field theme was removed
+> post-audit; field rows in the tables below were dropped.
+
 ## Before / after
 
 | Surface | Before | After |
@@ -34,18 +37,18 @@ bottom-sheet at 390 light + dark; viewer bore-loader state):
 | F3 | Hub | Generic header, default favicon | med | `.cj-topbar` (BrandMark + tag + app-switch + theme toggle), `icon.svg` from BrandMark | fixed |
 | F4 | Hub | Plain "Loading…" text states | med | Bore loader (`.cj-bore`) for Suspense fallback + `loading.tsx` | fixed |
 | F5 | Hub | ~655 palette utility classes / 154 hex literals in chrome | med | Chrome migrated to semantic tokens (`ink`, `surface`, `accent`, `ok`/`warn`/`bad`) | fixed |
-| F6 | Hub | No theme toggle | med | Light/dark/field cycle, `localStorage cj-theme`, no-flash init | fixed |
+| F6 | Hub | No theme toggle | med | Light/dark cycle, `localStorage cj-theme`, no-flash init (light/dark; field later removed) | fixed |
 | F7 | Hub | Nearest-wells strip squished to ~70px column (pre-existing) | med | Full-width card (`lg:col-span-12`), segmented control, readable card grid | fixed |
 | F8 | Hub | GFS source indicator lost pill styling | low | `FieldSegmentedToggle` restyle | fixed |
 | F9 | Hub | `/design` rendered a second sticky top bar | low | Static labeled specimen + header theme switcher | fixed |
 | F10 | Hub | Page title "Field — Driller Dashboard" | low | "Field — Driller Hub · C&J Well Co" | fixed |
 | F11 | Hub | Scrollable tables not keyboard-focusable (`.max-h-72` ×2, axe serious) | med | `tabIndex={0}` on weather table + modal log table scrollers | fixed |
 | F12 | Hub | No `h1` on `/` (axe moderate) | low | Visually-hidden `h1` | fixed |
-| F13 | Hub | Tap targets: zoom 30px, seg options 28px, checkboxes 20px, selects/sm-buttons 30px, topbar controls 36px | med | `--tap` floor (44px / 48px field) on `.btn*`, `.seg*`, `.input*`, `.select*`, theme toggle, app-switch, brand, leaflet zoom, checkbox label rows (24px box + ≥44 label target) | fixed |
+| F13 | Hub | Tap targets: zoom 30px, seg options 28px, checkboxes 20px, selects/sm-buttons 30px, topbar controls 36px | med | `--tap` floor (44px) on `.btn*`, `.seg*`, `.input*`, `.select*`, theme toggle, app-switch, brand, leaflet zoom, checkbox label rows (24px box + ≥44 label target) | fixed |
 | F14 | Viewer | system-ui font stack, no C&J chrome | high | Same `.cj-topbar` + page head (INDIANA DNR REGISTRY eyebrow, serif h1) | fixed |
 | F15 | Viewer | `--font-body: var(--f-body),…` invalid without `--f-*` → Times fallback for all chrome | **high** | `var()` fallbacks in `tokens.css`; font files self-hosted + verified loading | fixed |
 | F16 | Viewer | Stroked yellow "Use My Location" button (low contrast), equal-weight button stack, emoji icons, 98 inline styles | med | `.btn-accent` CTA + ghost/primary hierarchy, sprite icons, tokens | fixed |
-| F17 | Viewer | No dark mode | med | `data-theme` light/dark/field on all chrome | fixed |
+| F17 | Viewer | No dark mode | med | `data-theme` light/dark on all chrome | fixed |
 | F18 | Viewer | Plain loading panel above page header | med | Bore loader, placed after page head | fixed |
 | F19 | Viewer | Desktop not map-first (map at y≈1050) | med | CSS-only 4/8 sticky map column (rows 1–2 span, `top: var(--top)+s-4`) | fixed |
 | F20 | Viewer | Top bar overlap ≤420px (tag ↔ app-switch) | med | Tag hidden ≤420px, icon-only app-switch ≤560px; 0px overlap at 360/390/430/560 | fixed |
@@ -68,11 +71,9 @@ markers, and JS-built content). Before = baseline worktree on :3005
 | hub — before | 0 | 3 | 1 | 25 |
 | hub — light | 0 | 0 | 0 | 1 |
 | hub — dark | 0 | 0 | 0 | 128 |
-| hub — field | 0 | 0 | 0 | 26 |
 | viewer — before | 0 | 0 | 17 | 63 |
 | viewer — light | 0 | 0 | 0 | 46 |
 | viewer — dark | 0 | 0 | 0 | 51 |
-| viewer — field | 0 | 0 | 0 | 45 |
 
 Gate: no new serious/critical vs before — **met** (all non-locked findings
 resolved; 0 remaining). Remaining locked-scoped findings are all
@@ -95,22 +96,20 @@ Computed from `design/cj/tokens.css` values (`audit/contrast.json`).
 | light | surface | 17.48 | 9.81 | 6.28 | 5.54 | 5.92 | 9.28 |
 | dark | bg | 16.08 | 10.08 | 6.18 | 5.50 | 5.64 | 8.39 |
 | dark | surface | 15.47 | 9.70 | 5.94 | 5.29 | 5.42 | 8.07 |
-| field | bg/surface | 21.00 | 15.77 | 10.23 | 8.01 | 7.38 | 11.49 |
 
-All pairs ≥ 4.5:1 (min: light `ink-4` 5.26). Field body text ≥ 7:1 (min 7.38
-on accent). Meets AA + the field-app ≥7:1 rule.
+All pairs ≥ 4.5:1 (min: light `ink-4` 5.26). Meets WCAG AA.
 
 ## Tap targets — chrome controls (`audit/taps.json`)
 
-Floor: 44px light/dark, 48px field. Inputs wrapped in `<label>` report the
+Floor: 44px. Inputs wrapped in `<label>` report the
 label box (the real click target); raw checkbox squares are 24px.
 
 | Page × theme | controls | min height | under floor |
 |---|---|---|---|
 | hub — before | 30 | 20 | 24 of 30 |
 | viewer — before | 10 | 41 | 0 |
-| hub — light / dark / field | 28 | 44 / 44 / 48 | 0 |
-| viewer — light / dark / field | 9 | 44 / 44 / 48 | 0 |
+| hub — light / dark | 28 | 44 / 44 | 0 |
+| viewer — light / dark | 9 | 44 / 44 | 0 |
 
 ## Locked surfaces — verification evidence
 
@@ -155,8 +154,8 @@ rewrite) are untouched by design.
   (marker label contrast, unlabeled checkboxes); contrast items remain —
   data colors are locked. Checkbox labels were fixed via `aria-label`.
 - The `hub-dark` locked-scoped count (128) is higher than light (1) because
-  dark-theme chrome makes locked data colors legible only inside `.cj-plate`
-  surfaces; the plates themselves are the intentional containment.
+  dark-theme chrome needs the `.cj-data` paper-chip backing for legibility of
+  locked data colors; the chips themselves are the intentional affordance.
 
 ## Reproduce
 

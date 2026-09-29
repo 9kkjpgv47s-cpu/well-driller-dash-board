@@ -36,7 +36,7 @@ const fontMarker = Geist({
 // No-flash theme bootstrap — mirrors design/cj/theme-init.js verbatim.
 // Paper palettes: ?paper=limestone|sandstone|kraft|sage persists to
 // localStorage 'cj-paper' (?paper=none clears); applies under light only.
-const THEME_INIT = `(function(){try{var t=localStorage.getItem('cj-theme');if(t!=='light'&&t!=='dark'&&t!=='field'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='light'}try{var q=new URLSearchParams(location.search).get('paper');if(q==='none')localStorage.removeItem('cj-paper');else if(q)localStorage.setItem('cj-paper',q);var p=localStorage.getItem('cj-paper');if(p==='limestone'||p==='sandstone'||p==='kraft'||p==='sage'){document.documentElement.dataset.paper=p}}catch(e){}})();`;
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('cj-theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='light'}try{var q=new URLSearchParams(location.search).get('paper');if(q==='none')localStorage.removeItem('cj-paper');else if(q)localStorage.setItem('cj-paper',q);var p=localStorage.getItem('cj-paper');if(p==='limestone'||p==='sandstone'||p==='kraft'||p==='sage'){document.documentElement.dataset.paper=p}}catch(e){}})();`;
 
 export const metadata: Metadata = {
   title: "Driller Hub — C&J Well Co",

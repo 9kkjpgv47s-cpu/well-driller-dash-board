@@ -17,7 +17,7 @@ const COLOR_TOKENS = [
   "selection",
 ];
 
-const THEME_ORDER = ["light", "dark", "field"] as const;
+const THEME_ORDER = ["light", "dark"] as const;
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -77,8 +77,7 @@ export function DesignShowcase() {
           </h1>
           <p className="lede" style={{ marginBottom: "var(--s-7)" }}>
             Tokens, type, components and motion shared by the Driller Hub and the
-            C&J Well Viewer. Three themes — light, dark, and the high-contrast
-            field theme for daylight use.
+            C&J Well Viewer. Two themes — light and dark.
           </p>
         </div>
         <div

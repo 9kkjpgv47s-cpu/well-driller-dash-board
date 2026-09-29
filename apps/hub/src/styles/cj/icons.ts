@@ -23,9 +23,8 @@ export const ICONS = {
   "check": "<path d=\"M4.5 12.5l5 5L19.5 7\"/>",
   "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/> <path d=\"M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4\"/>",
   "moon": "<path d=\"M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z\"/>",
-  "field": "<circle cx=\"12\" cy=\"12\" r=\"6\" stroke-width=\"2.6\"/> <path d=\"M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6\"/>",
   "arrow-right": "<path d=\"M4 12h15\"/> <path d=\"M13.5 5.5 20 12l-6.5 6.5\"/>",
   "menu": "<path d=\"M4 7h16M4 12h16M4 17h16\"/>",
 } as const;
 export type IconName = keyof typeof ICONS;
-export const ICON_NAMES = ["locate", "elevation", "layers", "filter", "search", "well", "drill", "report", "external", "share", "close", "chevron-down", "chevron-right", "refresh", "weather", "radar", "map-pin", "info", "alert", "check", "sun", "moon", "field", "arrow-right", "menu"] as const;
+export const ICON_NAMES = ["locate", "elevation", "layers", "filter", "search", "well", "drill", "report", "external", "share", "close", "chevron-down", "chevron-right", "refresh", "weather", "radar", "map-pin", "info", "alert", "check", "sun", "moon", "arrow-right", "menu"] as const;

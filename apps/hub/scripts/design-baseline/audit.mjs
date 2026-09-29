@@ -45,7 +45,7 @@ function resolvePath(p) {
 }
 
 const TARGET = { lat: 39.763, lon: -86.399 };
-const THEMES = ["light", "dark", "field"];
+const THEMES = ["light", "dark"];
 // Tokens whose data/legend colors are locked — axe findings on nodes inside
 // these containers are reported separately, not gated.
 const LOCKED_SCOPE =
@@ -78,11 +78,6 @@ const TOKEN_TABLE = {
     bg: "#0A0F1A", surface: "#0E1420",
     ink: "#EDEBE6", "ink-2": "#B9BCC4", "ink-3": "#8B939F", "ink-4": "#828A96",
     accent: "#F2554D", "accent-ink": "#FF8A80",
-  },
-  field: {
-    bg: "#FFFFFF", surface: "#FFFFFF",
-    ink: "#000000", "ink-2": "#1E232C", "ink-3": "#3A4150", "ink-4": "#4A515C",
-    accent: "#B00000", "accent-ink": "#7A0000",
   },
 };
 

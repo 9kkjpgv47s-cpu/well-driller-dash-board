@@ -9,15 +9,15 @@ One design system for the Driller Hub (`apps/hub`) and the C&J Well Viewer
 
 | File | Purpose |
 |------|---------|
-| `design/cj/tokens.css` | scale tokens + light/dark/field theme values |
+| `design/cj/tokens.css` | scale tokens + light/dark theme values |
 | `design/cj/base.css` | reset, body/type, focus, selection, skip link, bg layer |
 | `design/cj/components.css` | top bar, buttons, forms, card, callout, badge, chip, empty, modal, progress |
 | `design/cj/motion.css` | reveal stagger, pop, slide-down, `.skel`, reduced-motion kill |
 | `design/cj/loader.css` | `.cj-bore` bore loader |
 | `design/cj/fonts.css` + `fonts/` | self-hosted woff2 + OFL licenses |
-| `design/cj/icons.svg` | 25-symbol sprite (`i-*`), 24px grid, 1.6 stroke |
+| `design/cj/icons.svg` | 24-symbol sprite (`i-*`), 24px grid, 1.6 stroke |
 | `design/cj/theme-init.js` | no-flash theme bootstrap (localStorage `cj-theme`) |
-| `design/cj/theme-toggle.js` | vanilla light→dark→field toggle for static surfaces |
+| `design/cj/theme-toggle.js` | vanilla light↔dark toggle for static surfaces |
 
 Sync destinations:
 
@@ -28,40 +28,40 @@ Sync destinations:
 
 ## Tokens
 
-| Token | light | dark | field |
-|-------|-------|------|-------|
-| `color-scheme` | light | dark | light |
-| `--bg` | `#F6F4EF` | `#0A0F1A` | `#FFFFFF` |
-| `--bg-2` | `#EFECE5` | `#0F1522` | `#F2F2F0` |
-| `--bg-3` | `#E7E3DA` | `#151C2B` | `#E6E5E1` |
-| `--surface` | `#FBFAF7` | `#0E1420` | `#FFFFFF` |
-| `--ink` | `#0F1522` | `#EDEBE6` | `#000000` |
-| `--ink-2` | `#3A4150` | `#B9BCC4` | `#1E232C` |
-| `--ink-3` | `#565E6A` | `#8B939F` | `#3A4150` |
-| `--ink-4` | `#5F6672` | `#828A96` | `#4A515C` |
-| `--line` | `rgba(15,21,34,.10)` | `rgba(237,235,230,.09)` | `rgba(0,0,0,.22)` |
-| `--line-strong` | `rgba(15,21,34,.22)` | `rgba(237,235,230,.20)` | `rgba(0,0,0,.45)` |
-| `--accent` | `#C60000` | `#F2554D` | `#B00000` |
-| `--accent-ink` | `#8F0000` | `#FF8A80` | `#7A0000` |
-| `--accent-soft` | `rgba(198,0,0,.09)` | `rgba(242,85,77,.12)` | `rgba(176,0,0,.10)` |
-| `--accent-2` | `#FFE90A` | `#FFE90A` | `#FFE90A` |
-| `--accent-2-ink` | `#7A6200` | `#FFE90A` | `#5C4A00` |
-| `--accent-2-soft` | `rgba(255,233,10,.16)` | `rgba(255,233,10,.16)` | `rgba(255,233,10,.28)` |
-| `--ok` | `#267030` | `#5BD39B` | `#1B5E20` |
-| `--ok-soft` | `rgba(15,123,79,.12)` | `rgba(91,211,155,.14)` | `rgba(27,94,32,.12)` |
-| `--warn` | `#94570F` | `#F2B85C` | `#7A4500` |
-| `--warn-soft` | `rgba(217,119,6,.14)` | `rgba(242,184,92,.14)` | `rgba(122,69,0,.12)` |
-| `--bad` | `#B3261E` | `#F28B82` | `#A50E0E` |
-| `--bad-soft` | `rgba(179,38,30,.10)` | `rgba(242,139,130,.14)` | `rgba(165,14,14,.10)` |
-| `--bad-ink` | `#fff` | `#241210` | `#fff` |
-| `--glass` | `rgba(246,244,239,.82)` | `rgba(10,15,26,.78)` | `#FFFFFF` (solid — no blur) |
-| `--selection` | `rgba(198,0,0,.18)` | `rgba(242,85,77,.28)` | `rgba(176,0,0,.20)` |
-| `--fs-base` | `1rem` | `1rem` | `1.0625rem` |
-| `--tap` | `44px` | `44px` | `48px` |
+| Token | light | dark |
+|-------|-------|------|
+| `color-scheme` | light | dark |
+| `--bg` | `#F6F4EF` | `#0A0F1A` |
+| `--bg-2` | `#EFECE5` | `#0F1522` |
+| `--bg-3` | `#E7E3DA` | `#151C2B` |
+| `--surface` | `#FBFAF7` | `#0E1420` |
+| `--ink` | `#0F1522` | `#EDEBE6` |
+| `--ink-2` | `#3A4150` | `#B9BCC4` |
+| `--ink-3` | `#565E6A` | `#8B939F` |
+| `--ink-4` | `#5F6672` | `#828A96` |
+| `--line` | `rgba(15,21,34,.10)` | `rgba(237,235,230,.09)` |
+| `--line-strong` | `rgba(15,21,34,.22)` | `rgba(237,235,230,.20)` |
+| `--accent` | `#C60000` | `#F2554D` |
+| `--accent-ink` | `#8F0000` | `#FF8A80` |
+| `--accent-soft` | `rgba(198,0,0,.09)` | `rgba(242,85,77,.12)` |
+| `--accent-2` | `#FFE90A` | `#FFE90A` |
+| `--accent-2-ink` | `#7A6200` | `#FFE90A` |
+| `--accent-2-soft` | `rgba(255,233,10,.16)` | `rgba(255,233,10,.16)` |
+| `--ok` | `#267030` | `#5BD39B` |
+| `--ok-soft` | `rgba(15,123,79,.12)` | `rgba(91,211,155,.14)` |
+| `--warn` | `#94570F` | `#F2B85C` |
+| `--warn-soft` | `rgba(217,119,6,.14)` | `rgba(242,184,92,.14)` |
+| `--bad` | `#B3261E` | `#F28B82` |
+| `--bad-soft` | `rgba(179,38,30,.10)` | `rgba(242,139,130,.14)` |
+| `--bad-ink` | `#fff` | `#241210` |
+| `--glass` | `rgba(246,244,239,.82)` | `rgba(10,15,26,.78)` |
+| `--selection` | `rgba(198,0,0,.18)` | `rgba(242,85,77,.28)` |
+| `--fs-base` | `1rem` | `1rem` |
+| `--tap` | `44px` | `44px` |
 
-light/dark values are verbatim from C&J OS globals.css. field is the
-sunlight-legibility theme: white ground, black ink, deep C&J red, solid
-surfaces (no translucency, no backdrop blur), 48px tap targets, +1px base type.
+light/dark values are verbatim from C&J OS globals.css. (The high-contrast
+field theme — white ground, black ink, 48px taps — was removed; the system is
+light/dark only.)
 
 ## Type / spacing / radii / motion
 
@@ -82,21 +82,21 @@ surfaces (no translucency, no backdrop blur), 48px tap targets, +1px base type.
 `stroke:currentColor`, `stroke-width:1.6`, round caps/joins, 2px safe padding.
 Names: locate, elevation, layers, filter, search, well, drill, report,
 external, share, close, chevron-down, chevron-right, refresh, weather, radar,
-map-pin, info, alert, check, sun, moon, field (bold sun ring), arrow-right,
+map-pin, info, alert, check, sun, moon, arrow-right,
 menu. In React use `<Icon name="…">` (`src/components/ui/Icon.tsx`), which
 inlines markup generated from the sprite by the sync script — one source of
 truth.
 
 ## Components
 
-- `.cj-shell` / `.cj-topbar` / `.cj-main` — sticky glass top bar (solid in
-  field), main column at `min(100%, var(--wrap))` with `--gutter` padding.
+- `.cj-shell` / `.cj-topbar` / `.cj-main` — sticky glass top bar,
+  main column at `min(100%, var(--wrap))` with `--gutter` padding.
 - `.cj-brand` = BrandMark + serif `.cj-brand-text` + mono `.cj-tag`
   (per-app identity: `DRILLER HUB`, `WELL VIEWER`).
 - `.cj-app-switch` — pill link to the sibling app; collapses to an
   icon-only round button ≤560px (keep an `aria-label` on the link), and
   `.cj-tag` hides ≤420px so the brand never collides with the actions.
-- `.theme-toggle` — 36px round button; the sun/moon/field morph is pure CSS.
+- `.theme-toggle` — 36px round button; the sun/moon morph is pure CSS.
 - Buttons: `.btn` + `.btn-primary` (ink) / `.btn-accent` (C&J red) /
   `.btn-ghost` / `.btn-danger` / `.btn-icon` / `.btn-sm`. `min-height: var(--tap)`.
   `.is-loading` swaps content for a 14px spinner without changing width.
@@ -115,7 +115,7 @@ truth.
   - Legend rows (hub filter cards; viewer elevation/yield/type bands): the
     colored ● dot / swatch and toggle slider keep their locked color; the
     label text is wrapped in `.cj-datalbl` and flips to `--ink-2` in dark
-    theme only (light + field keep the locked color).
+    theme only (light keeps the locked color).
   - Bare data-colored text with no background of its own (`.cj-data`:
     viewer list R/G/S chips, distance badges, colored type/elev/yield
     words; hub nearest-well token chips) gets a small light paper chip in
