@@ -615,6 +615,7 @@ export function WellDepthThermometer({
             onSelectWell={onSelectWell}
             selectedKey={selectedWellKey ?? hoveredKey}
             title={`Registry wells by depth · ${formatRadiusLabel(radiusMiles)}`}
+            listMode="byDepth"
             hint={
               bandWellRecords.length
                 ? `${bandWellRecords.length} plotted · scroll · tap for detail`

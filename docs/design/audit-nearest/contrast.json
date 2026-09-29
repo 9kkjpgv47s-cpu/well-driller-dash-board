@@ -1,0 +1,38 @@
+{
+  "light": {
+    "bg": {
+      "ink": 16.6,
+      "ink-2": 9.31,
+      "ink-3": 5.96,
+      "ink-4": 5.26,
+      "accent": 5.62,
+      "accent-ink": 8.81
+    },
+    "surface": {
+      "ink": 17.48,
+      "ink-2": 9.81,
+      "ink-3": 6.28,
+      "ink-4": 5.54,
+      "accent": 5.92,
+      "accent-ink": 9.28
+    }
+  },
+  "dark": {
+    "bg": {
+      "ink": 16.08,
+      "ink-2": 10.08,
+      "ink-3": 6.18,
+      "ink-4": 5.5,
+      "accent": 5.64,
+      "accent-ink": 8.39
+    },
+    "surface": {
+      "ink": 15.47,
+      "ink-2": 9.7,
+      "ink-3": 5.94,
+      "ink-4": 5.29,
+      "accent": 5.42,
+      "accent-ink": 8.07
+    }
+  }
+}

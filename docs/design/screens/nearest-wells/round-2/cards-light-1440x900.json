@@ -1,0 +1,200 @@
+{
+ "header": "REGISTRY WELLS Nearest registry wells (up to 25) Closest By depth 25 shown · scroll · tap for detail G gravel/aquifer S dry sand R rock top numbers in ft 01 DNR-185960 0.01 mi G1 4 84 ft DEPTH 10 gpm YIELD Unconsolidated 02 DNR-186211 0.05 mi G1 3 84 ft DEPTH 1 gpm YIELD Unconsolidated 03 DNR-186206",
+ "cards": [
+  {
+   "text": "01 DNR-185960 0.01 mi G1 4 84 ft DEPTH 10 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "02 DNR-186211 0.05 mi G1 3 84 ft DEPTH 1 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "03 DNR-186206 0.06 mi G1 5 73 ft DEPTH 35 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "04 DNR-185965 0.07 mi G1 3 83 ft DEPTH 10 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "05 DNR-185985 0.09 mi G1 36 82 ft DEPTH 8 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "06 DNR-18063 0.10 mi Well — depth DEPTH Estimated",
+   "chips": []
+  },
+  {
+   "text": "07 DNR-185980 0.12 mi Well 111 ft DEPTH 50 gpm YIELD Unconsolidated",
+   "chips": []
+  },
+  {
+   "text": "08 DNR-186454 0.12 mi G1 5 84 ft DEPTH 10 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "09 DNR-185950 0.12 mi G1 6 80 ft DEPTH 10 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "10 DNR-185932 0.15 mi G1 5 112 ft DEPTH 15 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "11 DNR-185939 0.15 mi G1 2 77 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "12 DNR-185948 0.15 mi G1 3 130 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "13 DNR-185954 0.15 mi G1 5 95 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "14 DNR-185964 0.15 mi G1 5 89 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "15 DNR-185969 0.15 mi G1 3 90 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "16 DNR-185974 0.15 mi Well 88 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": []
+  },
+  {
+   "text": "17 DNR-185979 0.15 mi G1 2 88 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "18 DNR-185983 0.15 mi G1 4 110 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "19 DNR-185984 0.15 mi G1 5 125 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "20 DNR-186003 0.15 mi G1 5 113 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "21 DNR-186009 0.15 mi Well 140 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": []
+  },
+  {
+   "text": "22 DNR-186028 0.15 mi Well 108 ft DEPTH Estimated",
+   "chips": []
+  },
+  {
+   "text": "23 DNR-186039 0.15 mi G1 5 119 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "24 DNR-49448 0.15 mi G1 4 93 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "color(srgb 0.900392 0.914118 0.946275)"
+    }
+   ]
+  },
+  {
+   "text": "25 DNR-186246 0.15 mi Well 102 ft DEPTH 10 gpm YIELD Unconsolidated",
+   "chips": []
+  }
+ ]
+}

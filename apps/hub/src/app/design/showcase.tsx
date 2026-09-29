@@ -250,6 +250,46 @@ export function DesignShowcase() {
             <div className="callout is-warn"><strong>Warn.</strong> Worth a second look.</div>
             <div className="callout is-bad"><strong>Bad.</strong> Something needs attention.</div>
           </div>
+          <div style={{ marginTop: "var(--s-4)", maxWidth: 340 }}>
+            <button type="button" className="well-card">
+              <span className="flex min-w-0 items-baseline gap-2">
+                <span className="font-mono text-[10px] tabular-nums text-ink-4">01</span>
+                <span className="truncate font-mono text-xs font-semibold text-ink">DNR-185960</span>
+                <span className="ml-auto whitespace-nowrap font-mono text-[10px] tabular-nums text-ink-3">0.12 mi</span>
+              </span>
+              <span className="flex min-h-[22px] flex-wrap items-end gap-x-1.5 gap-y-0.5">
+                <span className="well-tag well-tag-s" title="Dry sand S1 · 4 ft thick">
+                  <span className="text-[10px] font-bold text-amber-600">S1</span>
+                  <span className="text-[15px] font-extrabold leading-none text-amber-700"> 4</span>
+                </span>
+                <span className="well-tag well-tag-g" title="Aquifer G1 · 8 ft thick">
+                  <span className="text-[10px] font-bold text-blue-600">G1</span>
+                  <span className="text-[15px] font-extrabold leading-none text-blue-700"> 8</span>
+                </span>
+                <span className="well-tag well-tag-r" title="Rock top 90 ft">
+                  <span className="text-[10px] font-bold text-red-600">R</span>
+                  <span className="text-[15px] font-extrabold leading-none text-red-700">90</span>
+                </span>
+              </span>
+              <span className="well-card-stats flex items-end gap-4">
+                <span className="flex flex-col">
+                  <span className="font-mono text-[13px] font-semibold tabular-nums text-ink">84<span className="text-[10px] font-normal text-ink-3"> ft</span></span>
+                  <span className="well-card-microlabel">Depth</span>
+                </span>
+                <span className="flex flex-col">
+                  <span className="font-mono text-[13px] font-semibold tabular-nums text-ink">10<span className="text-[10px] font-normal text-ink-3"> gpm</span></span>
+                  <span className="well-card-microlabel">Yield</span>
+                </span>
+              </span>
+              <span className="well-depthbar" aria-hidden="true"><span className="well-depthbar-fill" style={{ width: "56%" }} /></span>
+              <span className="well-card-meta flex min-w-0 flex-col gap-0.5">
+                <span className="truncate text-[10px] text-ink-3">Unconsolidated sand &amp; gravel aquifer</span>
+              </span>
+            </button>
+            <p className="mt-2 text-[10px] text-ink-4">
+              Well card + paper tags — same tag in both themes; locked R/G/S colors unchanged.
+            </p>
+          </div>
         </Section>
 
         <Section title="Loading">

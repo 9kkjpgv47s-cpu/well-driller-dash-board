@@ -1192,6 +1192,7 @@ export function DrillingHubClient() {
                             ? demRefGroundElevFt
                             : undefined
                         }
+                        center={center}
                         selectedKey={selectedWellKey}
                         listMode={wellsListMode}
                         onListModeChange={setWellsListMode}
@@ -1218,7 +1219,6 @@ export function DrillingHubClient() {
                                 ? "No wells with lithology logs in radius matching current filters."
                                 : "No wells with depth in radius matching current filters."
                         }
-                        maxHeightClass="max-h-[13rem] md:max-h-[15rem]"
                       />
                       </div>
                     </div>

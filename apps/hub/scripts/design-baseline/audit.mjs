@@ -49,7 +49,7 @@ const THEMES = ["light", "dark"];
 // Tokens whose data/legend colors are locked — axe findings on nodes inside
 // these containers are reported separately, not gated.
 const LOCKED_SCOPE =
-  "#map, .leaflet-container, .cj-plate, .cj-filter-card, #wellsList, #modalBody, .toggle-wrap";
+  "#map, .leaflet-container, .cj-plate, .cj-filter-card, #wellsList, #modalBody, .toggle-wrap, .well-tag";
 
 // WCAG 2.x relative luminance + contrast ratio.
 function lum(hex) {
