@@ -1,0 +1,182 @@
+[
+ {
+  "label": "inhub-chromium-desk-1440-light",
+  "issues": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "dark",
+   "appSwitch": "/"
+  }
+ },
+ {
+  "label": "inhub-chromium-iphone-14pro-dark",
+  "issues": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "light",
+   "appSwitch": "/"
+  }
+ },
+ {
+  "label": "inhub-webkit-ipad-mini-light",
+  "issues": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "dark",
+   "appSwitch": "/"
+  }
+ },
+ {
+  "label": "inhub-webkit-desk-1440-light",
+  "issues": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "dark",
+   "appSwitch": "/"
+  }
+ },
+ {
+  "label": "standalone-chromium-desk-1440-light",
+  "issues": [],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (File not found)",
+   "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "dark",
+   "appSwitch": "http://localhost:3001/"
+  }
+ },
+ {
+  "label": "standalone-chromium-iphone-14pro-dark",
+  "issues": [],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (File not found)",
+   "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "light",
+   "appSwitch": "http://localhost:3001/"
+  }
+ },
+ {
+  "label": "standalone-webkit-ipad-mini-light",
+  "issues": [],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (File not found)",
+   "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "dark",
+   "appSwitch": "http://localhost:3001/"
+  }
+ },
+ {
+  "label": "standalone-webkit-desk-1440-light",
+  "issues": [],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (File not found)",
+   "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "markers": 800,
+   "toggles": 14,
+   "searchWorked": true,
+   "modal": true,
+   "dnrLinkSummary": null,
+   "logViewer": true,
+   "dnrLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "escCloses": true,
+   "geoOk": true,
+   "theme": "dark",
+   "appSwitch": "http://localhost:3001/"
+  }
+ }
+]

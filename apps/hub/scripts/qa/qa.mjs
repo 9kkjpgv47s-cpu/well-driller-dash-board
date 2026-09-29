@@ -362,7 +362,7 @@ async function viewerOne(browser, baseUrl, vp, theme, label) {
   await shot("load");
 
   // toggles count
-  rec.steps.toggles = await page.locator(".toggle-wrap button, .filter-row button, button.tgl, .cj-filter-card button").count();
+  rec.steps.toggles = await page.locator(".toggle-wrap input, .toggle-switch input, .toggle-wrap button, .cj-filter-card button, .cj-filter-card input").count();
   // search
   const search = page.locator("input[type=search], input[placeholder*='ddress'], input[placeholder*='earch'], #q").first();
   if (await search.count()) {
@@ -374,12 +374,15 @@ async function viewerOne(browser, baseUrl, vp, theme, label) {
   if (await row.count()) {
     await row.click(); await page.waitForTimeout(1200);
     rec.steps.modal = await page.locator("#wellModal:not(.hidden), #modalBody, [role=dialog]").count() > 0;
-    rec.steps.dnrLink = await page.locator("#modalBody a[href*='in.gov'], #wellModal a[href*='in.gov'], a[href*='dnr']").first().getAttribute("href").catch(() => null);
-    // log viewer
+    // summary carries an outbound DNR link only for wells without lithology;
+    // the authoritative check is inside the full-log view (btnViewLog → .cj-report)
+    rec.steps.dnrLinkSummary = await page.locator("#modalBody a[href*='in.gov'], #wellModal a[href*='in.gov']").first().getAttribute("href").catch(() => null);
     const logBtn = page.locator("#btnViewLog").first();
     if (await logBtn.count()) {
       await logBtn.click(); await page.waitForTimeout(800);
       rec.steps.logViewer = await page.locator("#logViewerSection").isVisible().catch(() => false);
+      rec.steps.dnrLink = await page.locator("#logViewerContent a[href*='in.gov'], #wellModal a[href*='in.gov']").first().getAttribute("href").catch(() => null);
+      if (!rec.steps.dnrLink) issues(rec, "med", "viewer modal/log has no outbound DNR report link");
     }
     await shot("modal");
     await page.keyboard.press("Escape"); await page.waitForTimeout(500);
