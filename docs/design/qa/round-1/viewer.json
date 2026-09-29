@@ -1,0 +1,74 @@
+[
+ {
+  "tag": "inhub-chromium-desk-1440-light",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: light — switch to dark\" aria-label=\"Theme: light — switch to dark\">…</but"
+   }
+  ]
+ },
+ {
+  "tag": "inhub-chromium-iphone-14pro-dark",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: dark — switch to light\" aria-label=\"Theme: dark — switch to light\">…</but"
+   }
+  ]
+ },
+ {
+  "tag": "inhub-webkit-ipad-mini-light",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: light — switch to dark\" aria-label=\"Theme: light — switch to dark\">…</but"
+   }
+  ]
+ },
+ {
+  "tag": "inhub-webkit-desk-1440-light",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: light — switch to dark\" aria-label=\"Theme: light — switch to dark\">…</but"
+   }
+  ]
+ },
+ {
+  "tag": "standalone-chromium-desk-1440-light",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: light — switch to dark\" aria-label=\"Theme: light — switch to dark\">…</but"
+   }
+  ]
+ },
+ {
+  "tag": "standalone-chromium-iphone-14pro-dark",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: dark — switch to light\" aria-label=\"Theme: dark — switch to light\">…</but"
+   }
+  ]
+ },
+ {
+  "tag": "standalone-webkit-ipad-mini-light",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: light — switch to dark\" aria-label=\"Theme: light — switch to dark\">…</but"
+   }
+  ]
+ },
+ {
+  "tag": "standalone-webkit-desk-1440-light",
+  "issues": [
+   {
+    "severity": "critical",
+    "msg": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button.theme-toggle').first()\n    - locator resolved to <button type=\"button\" class=\"theme-toggle\" data-cj-theme-toggle=\"\" title=\"Theme: light — switch to dark\" aria-label=\"Theme: light — switch to dark\">…</but"
+   }
+  ]
+ }
+]

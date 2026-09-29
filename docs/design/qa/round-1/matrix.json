@@ -1,0 +1,187 @@
+[
+ {
+  "key": "chromium/iphone-se/light",
+  "engine": "chromium",
+  "device": "iphone-se",
+  "theme": "light",
+  "issues": [
+   {
+    "severity": "high",
+    "msg": "horizontal overflow 32px",
+    "els": [
+     "DIV.bg-grid",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "g.[object.SVGAnimatedString]",
+     "path.[object.SVGAnimatedString]",
+     "DIV.flex.shrink-0.flex-wrap",
+     "DIV.flex.shrink-0.gap-1",
+     "BUTTON.btn.btn-ghost.btn-sm",
+     "TABLE.w-full.min-w-[620px].text-left"
+    ]
+   }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "htmlTheme": "light",
+  "markers": 14,
+  "cards": 25,
+  "overflowX": 32,
+  "smallTargets": [
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24"
+  ],
+  "shot": "matrix-chromium-iphone-se-light.png"
+ },
+ {
+  "key": "webkit/iphone-se/light",
+  "engine": "webkit",
+  "device": "iphone-se",
+  "theme": "light",
+  "issues": [
+   {
+    "severity": "high",
+    "msg": "horizontal overflow 32px",
+    "els": [
+     "DIV.leaflet-tile-container.leaflet-zoom-animated",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "g.[object.SVGAnimatedString]",
+     "path.[object.SVGAnimatedString]",
+     "DIV.flex.shrink-0.flex-wrap",
+     "DIV.flex.shrink-0.gap-1",
+     "BUTTON.btn.btn-ghost.btn-sm",
+     "TABLE.w-full.min-w-[620px].text-left"
+    ]
+   }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "htmlTheme": "light",
+  "markers": 14,
+  "cards": 25,
+  "overflowX": 32,
+  "smallTargets": [
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24"
+  ],
+  "shot": "matrix-webkit-iphone-se-light.png"
+ },
+ {
+  "key": "chromium/iphone-se/dark",
+  "engine": "chromium",
+  "device": "iphone-se",
+  "theme": "dark",
+  "issues": [
+   {
+    "severity": "high",
+    "msg": "horizontal overflow 32px",
+    "els": [
+     "DIV.bg-grid",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "g.[object.SVGAnimatedString]",
+     "path.[object.SVGAnimatedString]",
+     "DIV.flex.shrink-0.flex-wrap",
+     "DIV.flex.shrink-0.gap-1",
+     "BUTTON.btn.btn-ghost.btn-sm",
+     "TABLE.w-full.min-w-[620px].text-left"
+    ]
+   }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "htmlTheme": "dark",
+  "markers": 14,
+  "cards": 25,
+  "overflowX": 32,
+  "smallTargets": [
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24"
+  ],
+  "shot": "matrix-chromium-iphone-se-dark.png"
+ },
+ {
+  "key": "webkit/iphone-se/dark",
+  "engine": "webkit",
+  "device": "iphone-se",
+  "theme": "dark",
+  "issues": [
+   {
+    "severity": "high",
+    "msg": "horizontal overflow 32px",
+    "els": [
+     "DIV.leaflet-tile-container.leaflet-zoom-animated",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "IMG.leaflet-tile.leaflet-tile-loaded",
+     "g.[object.SVGAnimatedString]",
+     "path.[object.SVGAnimatedString]",
+     "DIV.flex.shrink-0.flex-wrap",
+     "DIV.flex.shrink-0.gap-1",
+     "BUTTON.btn.btn-ghost.btn-sm",
+     "TABLE.w-full.min-w-[620px].text-left"
+    ]
+   }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "htmlTheme": "dark",
+  "markers": 14,
+  "cards": 25,
+  "overflowX": 32,
+  "smallTargets": [
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24",
+   "h-5 w-5 shrink-0 rounded accent-[var(--accent)] 24x24"
+  ],
+  "shot": "matrix-webkit-iphone-se-dark.png"
+ },
+ {
+  "key": "field-legacy",
+  "issues": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "resolvedTheme": "light"
+ }
+]

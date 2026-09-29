@@ -1,0 +1,20 @@
+import { createRequire } from 'module';
+import fs from 'fs';
+const require = createRequire('/Users/dominiceasterling/Projects/cj-os/package.json');
+const { chromium } = require('playwright');
+const url = fs.readFileSync('/tmp/cj-demo/url.txt', 'utf8').trim().replace(/https?:\/\/[^/]+/, 'http://localhost:3006');
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+const p = await ctx.newPage();
+const reqs = [];
+p.on('request', r => { if (/wells-nearby|chunk|well-viewer/.test(r.url())) reqs.push(r.url().slice(0, 110)); });
+p.on('response', r => { if (/wells-nearby/.test(r.url())) console.log('API RESP', r.status(), r.url().slice(0,110)); });
+await p.route(/\/api\/wells-nearby/, route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"forced fallback"}' }));
+await p.goto(url, { waitUntil: 'domcontentloaded' });
+const t0 = Date.now();
+try { await p.waitForSelector('button.well-card', { timeout: 240000 }); } catch { console.log('NO CARDS'); }
+console.log('cards after', ((Date.now()-t0)/1000).toFixed(1)+'s');
+await p.waitForTimeout(2000);
+console.log('requests touching wells/chunk/viewer:', reqs.length);
+for (const r of reqs.slice(0, 20)) console.log(' ', r);
+await b.close();

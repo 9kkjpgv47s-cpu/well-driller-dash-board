@@ -188,7 +188,7 @@ export function JobWeatherPanel({
             breakdown, and field considerations.
           </p>
           {headerActions ? (
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               {headerActions}
             </div>
           ) : null}
@@ -239,7 +239,7 @@ export function JobWeatherPanel({
           ) : null}
         </div>
         {headerActions ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {fieldLayout && job ? (
               <button
                 type="button"

@@ -1,0 +1,179 @@
+[
+ {
+  "tag": "chromium-desk-1440-light",
+  "issues": [
+   {
+    "severity": "med",
+    "msg": "near-white boxes in dark theme",
+    "els": [
+     "A.skip-link"
+    ]
+   }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [
+   "http://localhost:3006/api/weather?lat=39.763&lon=-86.399&timezone=America%2FIndiana%2FIndianapolis&date=2026-09-29 :: net::ERR_ABORTED"
+  ],
+  "tileFailures": [],
+  "steps": {
+   "emptyH1": false,
+   "markersAfterGenerate": 18,
+   "section_brief": true,
+   "section_weather": true,
+   "section_wells": true,
+   "section_mapFilters": true,
+   "section_areaInsights": true,
+   "directionsLinks": 3,
+   "radius5": 18,
+   "lithoAt5": "Lithology intervals\n4532 / 4532",
+   "radius2": 18,
+   "lithoAt2": "Lithology intervals\n1125 / 1125",
+   "modalOpens": true,
+   "modalDNRLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "modalEscCloses": true,
+   "enterOpens": true,
+   "reloadPersists": true,
+   "themeAfterToggle": "dark"
+  },
+  "smallTargets": []
+ },
+ {
+  "tag": "chromium-iphone-14pro-light",
+  "issues": [
+   {
+    "severity": "med",
+    "msg": "near-white boxes in dark theme",
+    "els": [
+     "A.skip-link"
+    ]
+   }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [
+   "http://localhost:3006/api/weather?lat=39.763&lon=-86.399&timezone=America%2FIndiana%2FIndianapolis&date=2026-09-29 :: net::ERR_ABORTED"
+  ],
+  "tileFailures": [],
+  "steps": {
+   "emptyH1": false,
+   "markersAfterGenerate": 17,
+   "section_brief": true,
+   "section_weather": true,
+   "section_wells": true,
+   "section_mapFilters": true,
+   "section_areaInsights": true,
+   "directionsLinks": 3,
+   "radius5": 17,
+   "lithoAt5": "Lithology intervals\n4532 / 4532",
+   "radius2": 17,
+   "lithoAt2": "Lithology intervals\n1125 / 1125",
+   "modalOpens": true,
+   "modalDNRLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "modalEscCloses": true,
+   "enterOpens": true,
+   "reloadPersists": true,
+   "themeAfterToggle": "dark"
+  },
+  "smallTargets": []
+ },
+ {
+  "tag": "chromium-ipad-mini-dark",
+  "issues": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [
+   "http://localhost:3006/api/weather?lat=39.763&lon=-86.399&timezone=America%2FIndiana%2FIndianapolis&date=2026-09-29 :: net::ERR_ABORTED"
+  ],
+  "tileFailures": [
+   "https://a.tile.openstreetmap.org/13/2128/3107.png"
+  ],
+  "steps": {
+   "emptyH1": false,
+   "markersAfterGenerate": 18,
+   "section_brief": true,
+   "section_weather": true,
+   "section_wells": true,
+   "section_mapFilters": true,
+   "section_areaInsights": true,
+   "directionsLinks": 3,
+   "radius5": 18,
+   "lithoAt5": "Lithology intervals\n4532 / 4532",
+   "radius2": 18,
+   "lithoAt2": "Lithology intervals\n1125 / 1125",
+   "modalOpens": true,
+   "modalDNRLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "modalEscCloses": true,
+   "enterOpens": true,
+   "reloadPersists": true,
+   "themeAfterToggle": "light"
+  },
+  "smallTargets": []
+ },
+ {
+  "tag": "webkit-iphone-14pro-light",
+  "issues": [
+   {
+    "severity": "med",
+    "msg": "near-white boxes in dark theme",
+    "els": [
+     "A.skip-link"
+    ]
+   }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "emptyH1": false,
+   "markersAfterGenerate": 17,
+   "section_brief": true,
+   "section_weather": true,
+   "section_wells": true,
+   "section_mapFilters": true,
+   "section_areaInsights": true,
+   "directionsLinks": 3,
+   "radius5": 17,
+   "lithoAt5": "Lithology intervals\n4532 / 4532",
+   "radius2": 17,
+   "lithoAt2": "Lithology intervals\n1125 / 1125",
+   "modalOpens": true,
+   "modalDNRLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "modalEscCloses": true,
+   "enterOpens": true,
+   "reloadPersists": true,
+   "themeAfterToggle": "dark"
+  },
+  "smallTargets": []
+ },
+ {
+  "tag": "webkit-desk-1440-dark",
+  "issues": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "tileFailures": [],
+  "steps": {
+   "emptyH1": false,
+   "markersAfterGenerate": 18,
+   "section_brief": true,
+   "section_weather": true,
+   "section_wells": true,
+   "section_mapFilters": true,
+   "section_areaInsights": true,
+   "directionsLinks": 3,
+   "radius5": 18,
+   "lithoAt5": "Lithology intervals\n4532 / 4532",
+   "radius2": 18,
+   "lithoAt2": "Lithology intervals\n1125 / 1125",
+   "modalOpens": true,
+   "modalDNRLink": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Details",
+   "modalEscCloses": true,
+   "enterOpens": true,
+   "reloadPersists": true,
+   "themeAfterToggle": "light"
+  },
+  "smallTargets": []
+ }
+]

@@ -293,6 +293,10 @@ function Specimen({ paper }: { paper: Paper }) {
   );
 }
 
+/** Rendered per-request so the production notFound() returns a real 404
+ *  status instead of streaming a 200 with a 404 body. */
+export const dynamic = "force-dynamic";
+
 /** Dev-only palette mockup — 404 in production builds. */
 export default function PalettesPage() {
   if (process.env.NODE_ENV === "production") notFound();

@@ -20,7 +20,7 @@ function Row({
 }) {
   return (
     // Field-use sizing: >=14px labels and >=20px touch targets (gloves, sunlight).
-    <label className="flex cursor-pointer items-center gap-2 py-1">
+    <label className="flex min-h-11 cursor-pointer items-center gap-2 py-1">
       <input
         type="checkbox"
         checked={checked}
@@ -65,7 +65,7 @@ export function MapLabelToolbarControls({ value, onChange }: Props) {
 
   return (
     <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-line bg-bg-2 px-3 py-2">
-      <label className="flex cursor-pointer items-center gap-2">
+      <label className="flex min-h-11 cursor-pointer items-center gap-2">
         <input
           type="checkbox"
           checked={value.hideWellLabels}
