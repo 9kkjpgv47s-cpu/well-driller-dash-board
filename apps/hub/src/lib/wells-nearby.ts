@@ -13,8 +13,12 @@ export const MAX_RADIUS_MILES = 25;
 export const DEFAULT_WELLS_NEARBY_RADIUS_MILES = 5;
 export const DEFAULT_WELLS_NEARBY_LIMIT = 500;
 export const MAX_WELLS_NEARBY_LIMIT = 2000;
-/** Lithology logs are bulky, so `lithology=1` responses stay small. */
-export const MAX_WELLS_NEARBY_LITHOLOGY_LIMIT = 200;
+/**
+ * Lithology logs are bulky, so `lithology=1` responses are capped below the
+ * 2000-row general max — 800 rows covers the primary map/nearest-wells feed
+ * (which requests limit=800) plus the ASL depth-radius hydration.
+ */
+export const MAX_WELLS_NEARBY_LITHOLOGY_LIMIT = 800;
 
 /** Fields needed by map markers, depth/ASL views, and well detail. */
 export const MAP_WELL_FIELD_KEYS = [

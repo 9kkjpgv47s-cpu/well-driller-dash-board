@@ -439,7 +439,7 @@ export function DrillingHubClient() {
     setWellsProgress(null);
     fallbackAttemptedRef.current = false;
 
-    const wellsUrl = `/api/wells-nearby?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(fetchRadius))}&limit=800`;
+    const wellsUrl = `/api/wells-nearby?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(fetchRadius))}&limit=800&lithology=1`;
     const insightsUrl = `/api/area-insights?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(radiusMiles))}`;
     const depthInsightsUrl = `/api/area-insights?lat=${encodeURIComponent(String(center.lat))}&lon=${encodeURIComponent(String(center.lon))}&radius=${encodeURIComponent(String(depthRadiusMiles))}`;
 
