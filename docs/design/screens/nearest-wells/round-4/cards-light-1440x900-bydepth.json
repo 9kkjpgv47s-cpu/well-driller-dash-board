@@ -1,0 +1,282 @@
+{
+ "header": "REGISTRY · BY DEPTH Wells by depth · map 2 mi Closest By depth 25 shown · scroll · tap for detail G gravel/aquifer S dry sand R rock top numbers in ft 01 DNR-265079 1.5 mi G1 19 24 ft DEPTH Unconsolidated 02 DNR-172062 1.5 mi R 25 27 ft DEPTH 10 gpm YIELD Estimated 03 DNR-265099 1.5 mi G1 23 27 ft D",
+ "cards": [
+  {
+   "text": "01 DNR-265079 1.5 mi G1 19 24 ft DEPTH Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "02 DNR-172062 1.5 mi R 25 27 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(220, 38, 38)"
+    }
+   ]
+  },
+  {
+   "text": "03 DNR-265099 1.5 mi G1 23 27 ft DEPTH Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "04 DNR-264522 1.4 mi G1 21 28 ft DEPTH Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "05 DNR-420839 1.2 mi G1 3 G2 17 32 ft DEPTH 20 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "06 DNR-186504 1.4 mi G1 18 33 ft DEPTH 135 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "07 DNR-186163 0.68 mi G1 3 G2 4 35 ft DEPTH 8 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "08 DNR-186509 1.1 mi G1 2 G2 18 35 ft DEPTH Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "09 DNR-172301 1.6 mi G1 24 36 ft DEPTH 10 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "10 DNR-187059 1.3 mi S1 4 37 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    }
+   ]
+  },
+  {
+   "text": "11 DNR-420635 0.99 mi G1 7 37 ft DEPTH 25 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "12 DNR-186403 0.75 mi G1 1 G2 9 39 ft DEPTH 20 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "13 DNR-187016 1.5 mi G1 2 40 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "14 DNR-278712 1.5 mi G1 15 G2 5 40 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "15 DNR-186477 0.76 mi G1 6 41 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "16 DNR-187001 1.5 mi G1 5 G2 5 G3 16 43 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "17 DNR-187031 1.6 mi G1 5 G2 5 43 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "18 DNR-172336 1.5 mi S1 9 44 ft DEPTH 10 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    }
+   ]
+  },
+  {
+   "text": "19 DNR-266950 1.6 mi S1 1 S2 1 S3 2 44 ft DEPTH 1 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    }
+   ]
+  },
+  {
+   "text": "20 DNR-343728 0.79 mi G1 8 G2 3 G3 5 45 ft DEPTH 50 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "21 DNR-22612 1.5 mi G1 15 46 ft DEPTH 1 gpm YIELD Unconsolidated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(37, 99, 235)"
+    }
+   ]
+  },
+  {
+   "text": "22 DNR-186198 0.69 mi S1 2 S2 5 48 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    },
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    }
+   ]
+  },
+  {
+   "text": "23 DNR-187074 1.3 mi S1 5 48 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(253, 224, 71)"
+    }
+   ]
+  },
+  {
+   "text": "24 DNR-186002 1.4 mi R 110 49 ft DEPTH Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(220, 38, 38)"
+    }
+   ]
+  },
+  {
+   "text": "25 DNR-172083 1.5 mi R 42 50 ft DEPTH 10 gpm YIELD Estimated",
+   "chips": [
+    {
+     "cls": "",
+     "bg": "rgb(220, 38, 38)"
+    }
+   ]
+  }
+ ]
+}

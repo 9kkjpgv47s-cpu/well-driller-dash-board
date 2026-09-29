@@ -55,6 +55,29 @@ Verified by geometry probe + card dumps:
 - Thermometer caller keeps `maxHeightClass` (`max-h-[22rem] md:max-h-[26rem]`) and now passes
   `listMode="byDepth"` so its eyebrow matches its by-depth title.
 
+## Round 4 — DNR marker color code (Dom: "more vibrant, like the map colors")
+
+Layout untouched; only color treatment changed:
+
+- `.well-tag` is now a solid marker chip in BOTH themes: G `#2563eb`/white,
+  R `#dc2626`/white, S `#fde047`/`#422006`; radius 6, no ring,
+  `inset 0 -1px rgba(0,0,0,.12)` depth line. Token text + order unchanged.
+- Contrast: white/#2563eb = **5.17**, white/#dc2626 = **4.83**,
+  `#422006`/#fde047 = **10.8** — all ≥4.5 at full opacity (85% prefix opacity
+  would drop white-on-blue below 4.5, so prefixes stay full white).
+- Card type stripe: 4px `border-left` in `wellTypeColorViewer(w)` — verified
+  live: unconsolidated wells `#2563eb`, estimated wells `#16a34a`, matching the
+  markers. Inline style wins over `:hover` border-color, so the stripe persists
+  on hover while the other three sides go accent.
+- Depth bar fill = same `wellTypeColorViewer(w)` color on `--line` track,
+  bar 4px.
+- Selected = 1.5px inset accent ring (no left rule) so it can't fight the stripe.
+- Chips are locked data colors → `.well-tag` was already in the audit's
+  `LOCKED_SCOPE`; prefix findings stay in the locked bucket.
+- Measured identical tag fills/text colors in light and dark; legend chips
+  render the same style. Sandstone paper: chips keep DNR hues, card surfaces
+  follow the paper tokens — reads correctly.
+
 ## Round 3 — final polish + gates
 
 - Truncation: ID `truncate`, aquifer `truncate`, hint `truncate`+`min-w-0`,

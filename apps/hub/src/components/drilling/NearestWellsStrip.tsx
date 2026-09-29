@@ -7,6 +7,7 @@ import {
   getOrderedTagTokensViewer,
   getWellDisplayDepthFtViewer,
   getYieldGpmForWellViewer,
+  wellTypeColorViewer,
   wellTypeLabelViewer,
 } from "@/lib/viewer-well-map";
 import { FieldSegmentedToggle } from "./FieldSegmentedToggle";
@@ -26,11 +27,12 @@ type Props = {
   onListModeChange?: (mode: "nearest" | "byDepth") => void;
 };
 
-/** Locked chip colors (R/G/S face chips) — token text must not change. */
+/** Locked chip colors — solid map-marker fills; text white (R/G) or dark
+ *  amber-brown on yellow (S). Token text must not change. */
 const CHIP = {
-  r: { prefix: "text-red-600", value: "text-red-700" },
-  g: { prefix: "text-blue-600", value: "text-blue-700" },
-  s: { prefix: "text-amber-600", value: "text-amber-700" },
+  r: { prefix: "text-white", value: "text-white" },
+  g: { prefix: "text-white", value: "text-white" },
+  s: { prefix: "text-[#422006]", value: "text-[#422006]" },
 } as const;
 
 function TagChip({ tok, ti }: { tok: string; ti: number }) {
@@ -216,6 +218,7 @@ export function NearestWellsStrip({
               const typeLb = wellTypeLabelViewer(w);
               const aq = primaryAquiferText(w);
               const k = rowKey(w);
+              const typeColor = wellTypeColorViewer(w);
               const demFt = demElevFtByKey?.get(k);
               const diff =
                 demFt != null && refElevFt != null ? demFt - refElevFt : null;
@@ -249,6 +252,10 @@ export function NearestWellsStrip({
                   className={`well-card ${
                     selectedKey === k ? "is-selected" : ""
                   }`}
+                  style={{
+                    borderLeftColor: typeColor,
+                    borderLeftWidth: 4,
+                  }}
                 >
                   <span className="flex min-w-0 items-baseline gap-2">
                     <span className="font-mono text-[10px] tabular-nums text-ink-4">
@@ -315,7 +322,10 @@ export function NearestWellsStrip({
                     <span className="well-depthbar" aria-hidden="true">
                       <span
                         className="well-depthbar-fill"
-                        style={{ width: `${depthPct}%` }}
+                        style={{
+                          width: `${depthPct}%`,
+                          background: typeColor,
+                        }}
                       />
                     </span>
                   ) : null}
