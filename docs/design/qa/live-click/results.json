@@ -1,0 +1,2226 @@
+[
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "skip link focus",
+  "status": "PASS",
+  "evidence": "first Tab → skip-link",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "skip link activates",
+  "status": "PASS",
+  "evidence": "location.hash=\"#main\"",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "theme toggle",
+  "status": "PASS",
+  "evidence": "light → dark",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "theme persists across reload",
+  "status": "PASS",
+  "evidence": "after reload: dark",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "well-viewer topbar link",
+  "status": "PASS",
+  "evidence": "href=/well-viewer/index.html",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Generate job brief (typed dispatch)",
+  "status": "PASS",
+  "evidence": "markers=18 cards=25",
+  "shot": "shots/hub-chromium-desk-1440-generated.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Clear saved dispatch",
+  "status": "PASS",
+  "evidence": "textarea=\"\" markers=0",
+  "shot": "shots/hub-chromium-desk-1440-cleared.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Open GPS in Maps",
+  "status": "PASS",
+  "evidence": "https://www.google.com/maps?q=39.763,-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Google Maps",
+  "status": "PASS",
+  "evidence": "https://www.google.com/maps/dir/?api=1&destination=39.763%2C-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Apple Maps",
+  "status": "PASS",
+  "evidence": "https://maps.apple.com/?daddr=39.763%2C-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Waze",
+  "status": "PASS",
+  "evidence": "https://www.waze.com/ul?ll=39.763%2C-86.399&navigate=yes → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Copy address",
+  "status": "PASS",
+  "evidence": "clip=\"1234 E County Road 100 N, Avon, IN 46123 United States\"",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Copy lat/long",
+  "status": "PASS",
+  "evidence": "clip=\"39.76300, -86.39900\"",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "radius select all options",
+  "status": "PASS",
+  "evidence": "¼ mile→2 ½ mile→4 1 miles→9 1½ miles→19 2 miles→18 3 miles→18 4 miles→18 5 miles→18",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "section Up/Down #1",
+  "status": "PASS",
+  "evidence": "down moved:true restored:false (upEn=false dnEn=true)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "section Up/Down #2",
+  "status": "PASS",
+  "evidence": "down moved:true restored:false (upEn=true dnEn=true)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "section Up/Down #3",
+  "status": "PASS",
+  "evidence": "up moved:true restored:false (upEn=true dnEn=false)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● Unconsolidated / Gravel\"",
+  "status": "PASS",
+  "evidence": "markers 18→21 (delta 3)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● Bedrock / Rock\"",
+  "status": "PASS",
+  "evidence": "markers 18→19 (delta 1)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● Bucket / Hand Dug\"",
+  "status": "PASS",
+  "evidence": "markers 18→17 (delta -1)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● Dry Hole\"",
+  "status": "PASS",
+  "evidence": "markers 18→18 (delta 0)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● Estimated / Unverified Location (green\"",
+  "status": "PASS",
+  "evidence": "markers 18→18 (delta 0)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● 0.01–10 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→26 (delta 8)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● 10.01–25 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→16 (delta -2)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● 25.01–50 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→13 (delta -5)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"● 50.01+ GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→8 (delta -10)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "filter \"Hide labels\"",
+  "status": "PASS",
+  "evidence": "markers 18→1 (delta -17)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "label size +/−",
+  "status": "PASS",
+  "evidence": "font 12px → 12px",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Leaflet zoom +/−",
+  "status": "PASS",
+  "evidence": "markers 18→57 (reclustered)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "map pan drag",
+  "status": "PASS",
+  "evidence": "pane translate3d(0px, 0px, 0px) → translate3d(149px, 74px, 0px)",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "cluster click",
+  "status": "PASS",
+  "evidence": "clicked=true markers 18→18",
+  "shot": "shots/hub-chromium-desk-1440-cluster.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "tab Depth",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-chromium-desk-1440-tab-Depth.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "tab ASL",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-chromium-desk-1440-tab-ASL.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "tab Map",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-chromium-desk-1440-tab-Map.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Ground elevation",
+  "status": "PASS",
+  "evidence": "btn \"Ground elevation\"→\"Ground elevation\" req=cache/none",
+  "shot": "shots/hub-chromium-desk-1440-ground-elev.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "ASL ground elevations",
+  "status": "SKIP",
+  "evidence": "no Load/Refresh button — elevations already loaded=true",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Closest ↔ By depth",
+  "status": "PASS",
+  "evidence": "first card \"01\nDNR-185960\n0.01 mi\nG1\n8\n84 \" → \"01\nDNR-265079\n1.5 mi\nG1\n19\n24 \"",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "well card #1 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185960",
+  "shot": "shots/hub-chromium-desk-1440-card1-modal.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "well card #5 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185985",
+  "shot": "shots/hub-chromium-desk-1440-card5-modal.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "well card #10 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185932",
+  "shot": "shots/hub-chromium-desk-1440-card10-modal.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "well card #15 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185969",
+  "shot": "shots/hub-chromium-desk-1440-card15-modal.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "well card #25 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-186246",
+  "shot": "shots/hub-chromium-desk-1440-card25-modal.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "card keyboard Enter opens detail",
+  "status": "PASS",
+  "evidence": "Enter opened detail",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "modal DNR record link",
+  "status": "PASS",
+  "evidence": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Deta → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "modal Add to job queue",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "modal Close button",
+  "status": "PASS",
+  "evidence": "closed",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "modal backdrop click",
+  "status": "PASS",
+  "evidence": "clicked outside dialog",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Refresh weather",
+  "status": "PASS",
+  "evidence": "request=https://driller-hub.vercel.app/api/weather?lat=39.763&lon=-86.399&timezone=Ameri",
+  "shot": null
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "weather tab GFS",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-chromium-desk-1440-wx-GFS.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "weather tab ECMWF",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-chromium-desk-1440-wx-ECMWF.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "weather tab NWS",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-chromium-desk-1440-wx-NWS.png"
+ },
+ {
+  "device": "hub-chromium-desk-1440",
+  "area": "hub",
+  "control": "Open field map",
+  "status": "PASS",
+  "evidence": "href=/?lat=39.763&lon=-86.399",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "skip link focus",
+  "status": "SKIP",
+  "evidence": "touch device — no Tab nav (link exists + activates)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "skip link activates",
+  "status": "PASS",
+  "evidence": "location.hash=\"#main\" (anchor click on touch)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "theme toggle",
+  "status": "PASS",
+  "evidence": "light → dark",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "theme persists across reload",
+  "status": "PASS",
+  "evidence": "after reload: dark",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "well-viewer topbar link",
+  "status": "PASS",
+  "evidence": "href=/well-viewer/index.html",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Generate job brief (typed dispatch)",
+  "status": "PASS",
+  "evidence": "markers=17 cards=25",
+  "shot": "shots/hub-webkit-iphone-14pro-generated.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Clear saved dispatch",
+  "status": "PASS",
+  "evidence": "textarea=\"\" markers=0",
+  "shot": "shots/hub-webkit-iphone-14pro-cleared.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Open GPS in Maps",
+  "status": "PASS",
+  "evidence": "https://www.google.com/maps?q=39.763,-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Google Maps",
+  "status": "PASS",
+  "evidence": "https://www.google.com/maps/dir/?api=1&destination=39.763%2C-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Apple Maps",
+  "status": "PASS",
+  "evidence": "https://maps.apple.com/?daddr=39.763%2C-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Waze",
+  "status": "PASS",
+  "evidence": "https://www.waze.com/ul?ll=39.763%2C-86.399&navigate=yes → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Copy address",
+  "status": "PASS",
+  "evidence": "clip=\"1234 E County Road 100 N, Avon, IN 46123 United States\"",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Copy lat/long",
+  "status": "PASS",
+  "evidence": "clip=\"39.76300, -86.39900\"",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "radius select all options",
+  "status": "PASS",
+  "evidence": "¼ mile→2 ½ mile→4 1 miles→9 1½ miles→19 2 miles→17 3 miles→17 4 miles→17 5 miles→17",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "section Up/Down #1",
+  "status": "PASS",
+  "evidence": "down moved:true restored:false (upEn=false dnEn=true)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "section Up/Down #2",
+  "status": "PASS",
+  "evidence": "down moved:true restored:false (upEn=true dnEn=true)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "section Up/Down #3",
+  "status": "PASS",
+  "evidence": "up moved:true restored:false (upEn=true dnEn=false)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● Unconsolidated / Gravel\"",
+  "status": "PASS",
+  "evidence": "markers 17→19 (delta 2)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● Bedrock / Rock\"",
+  "status": "PASS",
+  "evidence": "markers 17→19 (delta 2)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● Bucket / Hand Dug\"",
+  "status": "PASS",
+  "evidence": "markers 17→17 (delta 0)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● Dry Hole\"",
+  "status": "PASS",
+  "evidence": "markers 17→17 (delta 0)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● Estimated / Unverified Location (green\"",
+  "status": "PASS",
+  "evidence": "markers 17→17 (delta 0)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● 0.01–10 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 17→23 (delta 6)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● 10.01–25 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 17→14 (delta -3)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● 25.01–50 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 17→12 (delta -5)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"● 50.01+ GPM\"",
+  "status": "PASS",
+  "evidence": "markers 17→6 (delta -11)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "filter \"Hide labels\"",
+  "status": "PASS",
+  "evidence": "markers 17→1 (delta -16)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "label size +/−",
+  "status": "PASS",
+  "evidence": "font 12px → 12px",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Leaflet zoom +/−",
+  "status": "PASS",
+  "evidence": "markers 17→18 (reclustered)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "map pan drag",
+  "status": "PASS",
+  "evidence": "pane translate3d(0px, 0px, 0px) → translate3d(3758.073622px, 1896.3175px, 0px)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "cluster click",
+  "status": "SKIP",
+  "evidence": "no cluster markers at current zoom (markers=17)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "tab Depth",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-webkit-iphone-14pro-tab-Depth.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "tab ASL",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-webkit-iphone-14pro-tab-ASL.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "tab Map",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-webkit-iphone-14pro-tab-Map.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Ground elevation",
+  "status": "PASS",
+  "evidence": "btn \"Ground elevation\"→\"Ground elevation\" req=cache/none",
+  "shot": "shots/hub-webkit-iphone-14pro-ground-elev.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "ASL ground elevations",
+  "status": "SKIP",
+  "evidence": "no Load/Refresh button — elevations already loaded=true",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Closest ↔ By depth",
+  "status": "PASS",
+  "evidence": "first card \"01\nDNR-185960\n0.01 mi\nG1\n8\n84 \" → \"01\nDNR-265079\n1.5 mi\nG1\n19\n24 \"",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "well card #1 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185960",
+  "shot": "shots/hub-webkit-iphone-14pro-card1-modal.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "well card #5 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185985",
+  "shot": "shots/hub-webkit-iphone-14pro-card5-modal.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "well card #10 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185932",
+  "shot": "shots/hub-webkit-iphone-14pro-card10-modal.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "well card #15 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185969",
+  "shot": "shots/hub-webkit-iphone-14pro-card15-modal.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "well card #25 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-186246",
+  "shot": "shots/hub-webkit-iphone-14pro-card25-modal.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "card keyboard Enter opens detail",
+  "status": "PASS",
+  "evidence": "Enter opened detail",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "modal DNR record link",
+  "status": "PASS",
+  "evidence": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Deta → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "modal Add to job queue",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "modal Close button",
+  "status": "PASS",
+  "evidence": "closed",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "modal backdrop click",
+  "status": "PASS",
+  "evidence": "clicked outside dialog",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Refresh weather",
+  "status": "PASS",
+  "evidence": "request=https://driller-hub.vercel.app/api/weather?lat=39.763&lon=-86.399&timezone=Ameri",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "weather tab GFS",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-webkit-iphone-14pro-wx-GFS.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "weather tab ECMWF",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-webkit-iphone-14pro-wx-ECMWF.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "weather tab NWS",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-webkit-iphone-14pro-wx-NWS.png"
+ },
+ {
+  "device": "hub-webkit-iphone-14pro",
+  "area": "hub",
+  "control": "Open field map",
+  "status": "PASS",
+  "evidence": "href=/?lat=39.763&lon=-86.399",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "skip link focus",
+  "status": "SKIP",
+  "evidence": "touch device — no Tab nav (link exists + activates)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "skip link activates",
+  "status": "PASS",
+  "evidence": "location.hash=\"#main\" (anchor click on touch)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "theme toggle",
+  "status": "PASS",
+  "evidence": "light → dark",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "theme persists across reload",
+  "status": "PASS",
+  "evidence": "after reload: dark",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "well-viewer topbar link",
+  "status": "PASS",
+  "evidence": "href=/well-viewer/index.html",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Generate job brief (typed dispatch)",
+  "status": "PASS",
+  "evidence": "markers=18 cards=25",
+  "shot": "shots/hub-webkit-ipad-mini-generated.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Clear saved dispatch",
+  "status": "PASS",
+  "evidence": "textarea=\"\" markers=0",
+  "shot": "shots/hub-webkit-ipad-mini-cleared.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Open GPS in Maps",
+  "status": "PASS",
+  "evidence": "https://www.google.com/maps?q=39.763,-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Google Maps",
+  "status": "PASS",
+  "evidence": "https://www.google.com/maps/dir/?api=1&destination=39.763%2C-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Apple Maps",
+  "status": "PASS",
+  "evidence": "https://maps.apple.com/?daddr=39.763%2C-86.399 → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Waze",
+  "status": "PASS",
+  "evidence": "https://www.waze.com/ul?ll=39.763%2C-86.399&navigate=yes → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Copy address",
+  "status": "PASS",
+  "evidence": "clip=\"1234 E County Road 100 N, Avon, IN 46123 United States\"",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Copy lat/long",
+  "status": "PASS",
+  "evidence": "clip=\"39.76300, -86.39900\"",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "radius select all options",
+  "status": "PASS",
+  "evidence": "¼ mile→2 ½ mile→4 1 miles→9 1½ miles→19 2 miles→18 3 miles→18 4 miles→18 5 miles→18",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "section Up/Down #1",
+  "status": "PASS",
+  "evidence": "down moved:true restored:false (upEn=false dnEn=true)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "section Up/Down #2",
+  "status": "PASS",
+  "evidence": "down moved:true restored:false (upEn=true dnEn=true)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "section Up/Down #3",
+  "status": "PASS",
+  "evidence": "up moved:true restored:false (upEn=true dnEn=false)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● Unconsolidated / Gravel\"",
+  "status": "PASS",
+  "evidence": "markers 18→21 (delta 3)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● Bedrock / Rock\"",
+  "status": "PASS",
+  "evidence": "markers 18→19 (delta 1)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● Bucket / Hand Dug\"",
+  "status": "PASS",
+  "evidence": "markers 18→17 (delta -1)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● Dry Hole\"",
+  "status": "PASS",
+  "evidence": "markers 18→18 (delta 0)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● Estimated / Unverified Location (green\"",
+  "status": "PASS",
+  "evidence": "markers 18→18 (delta 0)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● 0.01–10 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→26 (delta 8)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● 10.01–25 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→16 (delta -2)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● 25.01–50 GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→13 (delta -5)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"● 50.01+ GPM\"",
+  "status": "PASS",
+  "evidence": "markers 18→8 (delta -10)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "filter \"Hide labels\"",
+  "status": "PASS",
+  "evidence": "markers 18→1 (delta -17)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "label size +/−",
+  "status": "PASS",
+  "evidence": "font 12px → 12px",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Leaflet zoom +/−",
+  "status": "PASS",
+  "evidence": "markers 18→45 (reclustered)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "map pan drag",
+  "status": "PASS",
+  "evidence": "pane translate3d(0px, 0px, 0px) → translate3d(3753.181129px, 1858.9205px, 0px)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "cluster click",
+  "status": "SKIP",
+  "evidence": "no cluster markers at current zoom (markers=18)",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "tab Depth",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-webkit-ipad-mini-tab-Depth.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "tab ASL",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-webkit-ipad-mini-tab-ASL.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "tab Map",
+  "status": "PASS",
+  "evidence": "aria-selected=true",
+  "shot": "shots/hub-webkit-ipad-mini-tab-Map.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Ground elevation",
+  "status": "PASS",
+  "evidence": "btn \"Ground elevation\"→\"Ground elevation\" req=cache/none",
+  "shot": "shots/hub-webkit-ipad-mini-ground-elev.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "ASL ground elevations",
+  "status": "SKIP",
+  "evidence": "no Load/Refresh button — elevations already loaded=true",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Closest ↔ By depth",
+  "status": "PASS",
+  "evidence": "first card \"01\nDNR-185960\n0.01 mi\nG1\n8\n84 \" → \"01\nDNR-265079\n1.5 mi\nG1\n19\n24 \"",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "well card #1 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185960",
+  "shot": "shots/hub-webkit-ipad-mini-card1-modal.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "well card #5 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185985",
+  "shot": "shots/hub-webkit-ipad-mini-card5-modal.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "well card #10 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185932",
+  "shot": "shots/hub-webkit-ipad-mini-card10-modal.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "well card #15 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-185969",
+  "shot": "shots/hub-webkit-ipad-mini-card15-modal.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "well card #25 click → detail",
+  "status": "PASS",
+  "evidence": "detail shows DNR-186246",
+  "shot": "shots/hub-webkit-ipad-mini-card25-modal.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "card keyboard Enter opens detail",
+  "status": "PASS",
+  "evidence": "Enter opened detail",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "modal DNR record link",
+  "status": "PASS",
+  "evidence": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_action=Deta → HTTP 200 target=_blank",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "modal Add to job queue",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "modal Close button",
+  "status": "PASS",
+  "evidence": "closed",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "modal backdrop click",
+  "status": "PASS",
+  "evidence": "clicked outside dialog",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Refresh weather",
+  "status": "PASS",
+  "evidence": "request=https://driller-hub.vercel.app/api/weather?lat=39.763&lon=-86.399&timezone=Ameri",
+  "shot": null
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "weather tab GFS",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-webkit-ipad-mini-wx-GFS.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "weather tab ECMWF",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-webkit-ipad-mini-wx-ECMWF.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "weather tab NWS",
+  "status": "PASS",
+  "evidence": "switched",
+  "shot": "shots/hub-webkit-ipad-mini-wx-NWS.png"
+ },
+ {
+  "device": "hub-webkit-ipad-mini",
+  "area": "hub",
+  "control": "Open field map",
+  "status": "PASS",
+  "evidence": "href=/?lat=39.763&lon=-86.399",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "Use My Location",
+  "status": "PASS",
+  "evidence": "geolocation accepted",
+  "shot": "shots/viewer-inhub-chromium-desk-1440-geo.png"
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "address search 'Avon, IN'",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": "shots/viewer-inhub-chromium-desk-1440-search.png"
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "coords Go",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "depth filter 80–120",
+  "status": "PASS",
+  "evidence": "wellCount \"1150\" → \"593\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "text search '185960'",
+  "status": "PASS",
+  "evidence": "list has match=true len=1478",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeUncon",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"527\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeRock",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"354\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeBucket",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"30\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeDry",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"133\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeEstimated",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"651\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"1002\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"367\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"284\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"271\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"298\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"65\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"0\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"0\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #hideWells",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"1150\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "label size ＋/－",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "leaflet zoom +/−",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "list card → modal",
+  "status": "PASS",
+  "evidence": "modal visible=true",
+  "shot": "shots/viewer-inhub-chromium-desk-1440-modal.png"
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "log viewer opens",
+  "status": "PASS",
+  "evidence": "visible=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "DNR report link",
+  "status": "PASS",
+  "evidence": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_a → 200",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "modal close button",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "modal Escape close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "modal backdrop close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "theme toggle",
+  "status": "PASS",
+  "evidence": "light→dark",
+  "shot": "shots/viewer-inhub-chromium-desk-1440-dark.png"
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "app-switch href",
+  "status": "PASS",
+  "evidence": "href=/",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-chromium-desk-1440",
+  "area": "viewer",
+  "control": "Get ground elevations",
+  "status": "PASS",
+  "evidence": "fired",
+  "shot": "shots/viewer-inhub-chromium-desk-1440-elev.png"
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "Use My Location",
+  "status": "PASS",
+  "evidence": "geolocation accepted",
+  "shot": "shots/viewer-inhub-webkit-iphone-14pro-geo.png"
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "address search 'Avon, IN'",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": "shots/viewer-inhub-webkit-iphone-14pro-search.png"
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "coords Go",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "depth filter 80–120",
+  "status": "PASS",
+  "evidence": "wellCount \"\" → \"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "text search '185960'",
+  "status": "PASS",
+  "evidence": "list has match=false len=0",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeUncon",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeRock",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeBucket",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeDry",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeEstimated",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #hideWells",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "label size ＋/－",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "leaflet zoom +/−",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "list card → modal",
+  "status": "PASS",
+  "evidence": "modal visible=true",
+  "shot": "shots/viewer-inhub-webkit-iphone-14pro-modal.png"
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "log viewer opens",
+  "status": "PASS",
+  "evidence": "visible=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "DNR report link",
+  "status": "PASS",
+  "evidence": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_a → 200",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "modal close button",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "modal Escape close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "modal backdrop close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "theme toggle",
+  "status": "PASS",
+  "evidence": "light→dark",
+  "shot": "shots/viewer-inhub-webkit-iphone-14pro-dark.png"
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "app-switch href",
+  "status": "PASS",
+  "evidence": "href=/",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "errors",
+  "control": "pageerror",
+  "status": "FAIL",
+  "evidence": "Fetch API cannot load https: /api.opentopodata.org/v1/srtm90m?locations=39.763%2C-86.399%7C39.763087017521634%2C-86.39908133428195%7C39.76137030789026%2C-86.39989593803567%7C39.762227923069744%2C-86.3",
+  "shot": null
+ },
+ {
+  "device": "viewer-inhub-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "Get ground elevations",
+  "status": "PASS",
+  "evidence": "fired",
+  "shot": "shots/viewer-inhub-webkit-iphone-14pro-elev.png"
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "Use My Location",
+  "status": "PASS",
+  "evidence": "geolocation accepted",
+  "shot": "shots/viewer-standalone-chromium-desk-1440-geo.png"
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "address search 'Avon, IN'",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": "shots/viewer-standalone-chromium-desk-1440-search.png"
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "coords Go",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "depth filter 80–120",
+  "status": "PASS",
+  "evidence": "wellCount \"1150\" → \"593\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "text search '185960'",
+  "status": "PASS",
+  "evidence": "list has match=true len=1478",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeUncon",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"527\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeRock",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"354\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeBucket",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"30\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeDry",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"133\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #typeEstimated",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"651\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"1002\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"367\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"284\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #yieldRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"271\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"298\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"65\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"0\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #elevRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"0\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "toggle #hideWells",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"1150\"→\"1150\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "label size ＋/－",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "leaflet zoom +/−",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "list card → modal",
+  "status": "PASS",
+  "evidence": "modal visible=true",
+  "shot": "shots/viewer-standalone-chromium-desk-1440-modal.png"
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "log viewer opens",
+  "status": "PASS",
+  "evidence": "visible=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "DNR report link",
+  "status": "PASS",
+  "evidence": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_a → 200",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "modal close button",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "modal Escape close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "modal backdrop close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "theme toggle",
+  "status": "PASS",
+  "evidence": "light→dark",
+  "shot": "shots/viewer-standalone-chromium-desk-1440-dark.png"
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "app-switch href",
+  "status": "PASS",
+  "evidence": "href=https://driller-hub.vercel.app/",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-chromium-desk-1440",
+  "area": "viewer",
+  "control": "Get ground elevations",
+  "status": "PASS",
+  "evidence": "fired",
+  "shot": "shots/viewer-standalone-chromium-desk-1440-elev.png"
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "Use My Location",
+  "status": "PASS",
+  "evidence": "geolocation accepted",
+  "shot": "shots/viewer-standalone-webkit-iphone-14pro-geo.png"
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "address search 'Avon, IN'",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": "shots/viewer-standalone-webkit-iphone-14pro-search.png"
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "coords Go",
+  "status": "PASS",
+  "evidence": "submitted",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "depth filter 80–120",
+  "status": "PASS",
+  "evidence": "wellCount \"\" → \"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "text search '185960'",
+  "status": "PASS",
+  "evidence": "list has match=false len=0",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeUncon",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeRock",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeBucket",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeDry",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #typeEstimated",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #yieldRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevBlue",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevGreen",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevOrange",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #elevRed",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "toggle #hideWells",
+  "status": "PASS",
+  "evidence": "false→true wellCount \"\"→\"\"",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "label size ＋/－",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "leaflet zoom +/−",
+  "status": "PASS",
+  "evidence": "clicked",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "list card → modal",
+  "status": "PASS",
+  "evidence": "modal visible=true",
+  "shot": "shots/viewer-standalone-webkit-iphone-14pro-modal.png"
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "log viewer opens",
+  "status": "PASS",
+  "evidence": "visible=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "DNR report link",
+  "status": "PASS",
+  "evidence": "https://secure.in.gov/apps/dnr/water/dnr_waterwell?refNo=185960&_from=SUMMARY&_a → 200",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "modal close button",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "modal Escape close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "modal backdrop close",
+  "status": "PASS",
+  "evidence": "hidden=true",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "theme toggle",
+  "status": "PASS",
+  "evidence": "light→dark",
+  "shot": "shots/viewer-standalone-webkit-iphone-14pro-dark.png"
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "app-switch href",
+  "status": "PASS",
+  "evidence": "href=https://driller-hub.vercel.app/",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "errors",
+  "control": "pageerror",
+  "status": "FAIL",
+  "evidence": "Fetch API cannot load https: /api.opentopodata.org/v1/srtm90m?locations=39.763%2C-86.399%7C39.763087017521634%2C-86.39908133428195%7C39.76137030789026%2C-86.39989593803567%7C39.762227923069744%2C-86.3",
+  "shot": null
+ },
+ {
+  "device": "viewer-standalone-webkit-iphone-14pro",
+  "area": "viewer",
+  "control": "Get ground elevations",
+  "status": "PASS",
+  "evidence": "fired",
+  "shot": "shots/viewer-standalone-webkit-iphone-14pro-elev.png"
+ }
+]
