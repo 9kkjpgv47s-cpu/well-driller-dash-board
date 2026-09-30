@@ -387,6 +387,9 @@ export function DrillingHubClient() {
             setWellsProgress(p);
           })
             .then((fullWells) => {
+              // Phase 2 upgrade: swap base records for lithology-bearing ones so
+              // cards, marker labels, and the ASL/depth views see the merged data.
+              setAreaWells(fullWells);
               const inRadius = wellsWithinRadiusIndexed(
                 fullWells,
                 site.lat,

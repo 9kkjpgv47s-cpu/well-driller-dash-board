@@ -111,7 +111,8 @@ export async function hasSplitChunks(): Promise<boolean> {
 /**
  * Merge litho chunk rows into base rows by well `id`.
  * Only fields present in litho rows (lithology_json, lithology_source) are
- * copied onto the corresponding base row.
+ * copied onto the corresponding base row. Copy-on-write: getLithLayers
+ * memoizes per-record in a WeakMap, so never mutate lithology_json in place.
  */
 function mergeLithoIntoBase(
   base: WellRecord[],
@@ -122,15 +123,24 @@ function mergeLithoIntoBase(
     const id = String(row.id ?? "").trim();
     if (id) lithoMap.set(id, row);
   }
-  for (const w of base) {
+  let changed = false;
+  const merged = base.map((w) => {
     const id = String(w.id ?? "").trim();
     const lithoRow = id ? lithoMap.get(id) : undefined;
-    if (lithoRow) {
-      if (lithoRow.lithology_json != null) w.lithology_json = lithoRow.lithology_json;
-      if (lithoRow.lithology_source != null) w.lithology_source = lithoRow.lithology_source;
-    }
-  }
-  return base;
+    if (!lithoRow) return w;
+    const json = lithoRow.lithology_json;
+    const src = lithoRow.lithology_source;
+    const jsonChanged =
+      json != null && json !== "" && json !== w.lithology_json;
+    const srcChanged = src != null && src !== w.lithology_source;
+    if (!jsonChanged && !srcChanged) return w;
+    changed = true;
+    const next: WellRecord = { ...w };
+    if (jsonChanged) next.lithology_json = json;
+    if (srcChanged) next.lithology_source = src;
+    return next;
+  });
+  return changed ? merged : base;
 }
 
 /** Load all DNR gzip chunks from hub public/well-viewer (server-side). */

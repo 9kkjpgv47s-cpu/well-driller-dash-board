@@ -312,22 +312,39 @@ async function fetchAndParseChunks(
 
 /**
  * Merge litho chunk rows into base rows by well `id`.
+ * Copy-on-write: merged wells get new object identities. `getLithLayers`
+ * memoizes parsed intervals in a WeakMap keyed by the record object — mutating
+ * lithology_json in place leaves wells that were already read (base-only
+ * render pass) permanently cached as "no lithology" (stale G1 4 labels,
+ * 0/1125 interval counts).
  */
-function mergeLithoIntoBase(base: WellRecord[], litho: WellRecord[]): WellRecord[] {
+export function mergeLithoIntoBase(base: WellRecord[], litho: WellRecord[]): WellRecord[] {
   const lithoMap = new Map<string, WellRecord>();
   for (const row of litho) {
     const id = String(row.id ?? "").trim();
     if (id) lithoMap.set(id, row);
   }
-  for (const w of base) {
+  let changed = false;
+  const merged = base.map((w) => {
     const id = String(w.id ?? "").trim();
     const lithoRow = id ? lithoMap.get(id) : undefined;
-    if (lithoRow) {
-      if (lithoRow.lithology_json != null) w.lithology_json = lithoRow.lithology_json;
-      if (lithoRow.lithology_source != null) w.lithology_source = lithoRow.lithology_source;
-    }
-  }
-  return base;
+    if (!lithoRow) return w;
+    const json = lithoRow.lithology_json;
+    const src = lithoRow.lithology_source;
+    const jsonChanged =
+      json != null &&
+      json !== "" &&
+      json !== w.lithology_json;
+    const srcChanged =
+      src != null && src !== w.lithology_source;
+    if (!jsonChanged && !srcChanged) return w;
+    changed = true;
+    const next: WellRecord = { ...w };
+    if (jsonChanged) next.lithology_json = json;
+    if (srcChanged) next.lithology_source = src;
+    return next;
+  });
+  return changed ? merged : base;
 }
 
 /**

@@ -466,7 +466,7 @@ async function collectStrip(page) {
 async function parity() {
   const browser = await chromium.launch();
   // API path
-  const { ctx: c1, page: p1 } = await newPage(browser, { viewport: { width: 1440, height: 900 } }, null);
+  const { ctx: c1, page: p1 } = await newPage(browser, { viewport: { width: 1440, height: 900 } }, null, { serviceWorkers: "block" });
   const rec = { api: { issues: [], consoleErrors: [], pageErrors: [], failedRequests: [], tileFailures: [] }, fallback: { issues: [], consoleErrors: [], pageErrors: [], failedRequests: [], tileFailures: [] } };
   watch(p1, rec.api);
   await p1.goto(JOB_URL, { waitUntil: "domcontentloaded" });
@@ -477,7 +477,9 @@ async function parity() {
   await c1.close();
 
   // Forced-fallback path: 503 the API
-  const { ctx: c2, page: p2 } = await newPage(browser, { viewport: { width: 1440, height: 900 } }, null);
+  // Block service workers: the hub's sw.js network-first API cache would serve
+  // the api leg's cached wells-nearby response and silently defeat the forced 503.
+  const { ctx: c2, page: p2 } = await newPage(browser, { viewport: { width: 1440, height: 900 } }, null, { serviceWorkers: "block" });
   watch(p2, rec.fallback);
   await p2.route(/\/api\/wells-nearby/, (route) =>
     route.fulfill({ status: 503, contentType: "application/json", body: '{"error":"forced fallback"}' }));
