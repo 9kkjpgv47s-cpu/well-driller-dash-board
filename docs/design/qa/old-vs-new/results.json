@@ -1,0 +1,1290 @@
+[
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "initial load",
+  "input": "url lat/lon",
+  "value": "totalWells=\"65\" in 0s"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "initial view",
+  "input": "lat=39.763 lon=-86.399",
+  "value": "wc=65 markers=0 ow=0 ids=DNR-184649,DNR-184610,DNR-184659,DNR-184654,DNR-403612,DNR-404334,DNR-404375,DNR-184644,DNR-184639,DNR-185341 rows=DNR-184649Gravel · 82 ft— || DNR-184610Gravel · 82 ft— || DNR-184659Gravel · 82 ft— || DNR-184654Gravel · 101 ft— || DNR-403612Gravel · 80 ft— || DNR-404334r729 ftRock · 729 ft— || DNR-404375Gravel · banner=\"\""
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "address search",
+  "input": "Avon, IN",
+  "value": "wc=1141 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-18063,DNR-185985,DNR-185965,DNR-186236,DNR-186201,DNR-186251 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=800"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "address search",
+  "input": "1234 E County Road 100 N, Avon, IN 46123",
+  "value": "wc=1091 ids=DNR-71643,DNR-186005,DNR-300930,DNR-395385,DNR-171615,DNR-185973,DNR-185978,DNR-186023,DNR-186020,DNR-171635 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.1 mi\" markers=800"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "address search",
+  "input": "Coatesville, IN",
+  "value": "wc=247 ids=DNR-184765,DNR-174733,DNR-174718,DNR-184749,DNR-184824,DNR-184755,DNR-332230,DNR-184750,DNR-184745,DNR-184819 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=247"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "coords search",
+  "input": "39.763, -86.399",
+  "value": "btn=\"Go\" wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "text search",
+  "input": "185960",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "text search",
+  "input": "BURCH",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "text search",
+  "input": "Hendricks",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "Use My Location",
+  "input": "geo 39.763,-86.399",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "depth filter",
+  "input": "80–120",
+  "value": "wc=616 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932,DNR-185954"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeUncon",
+  "value": "false→true wc=224"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeRock",
+  "value": "false→true wc=122"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeBucket",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeDry",
+  "value": "false→true wc=133"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeEstimated",
+  "value": "false→true wc=671"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldBlue",
+  "value": "false→true wc=1002"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldGreen",
+  "value": "false→true wc=367"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldOrange",
+  "value": "false→true wc=284"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldRed",
+  "value": "false→true wc=271"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevBlue",
+  "value": "false→true wc=298"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevGreen",
+  "value": "false→true wc=65"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevOrange",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevRed",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#hideWells",
+  "value": "false→true wc=1150"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "Get ground elevations",
+  "input": "click",
+  "value": "banner=\"Your ground elevation: 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: You 840 ft, well 840 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Gr"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "initial load",
+  "input": "url lat/lon",
+  "value": "totalWells=\"65\" in 0s"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "initial view",
+  "input": "lat=39.763 lon=-86.399",
+  "value": "wc=65 markers=0 ow=0 ids=DNR-18464982,DNR-18461082,DNR-18465982,DNR-184654101,DNR-40361280,DNR-404334729,DNR-40437535,DNR-184644140,DNR-184639155,DNR-18534165 rows=DNR-18464982 ft— || DNR-18461082 ft— || DNR-18465982 ft— || DNR-184654101 ft— || DNR-40361280 ft— || DNR-404334729 ft— || DNR-40437535 ft— || DNR-184644140 ft— || DNR-184639155 ft— || DNR-18534165 ft— banner=\"\""
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "address search",
+  "input": "Avon, IN",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=801"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "address search",
+  "input": "1234 E County Road 100 N, Avon, IN 46123",
+  "value": "wc=1091 ids=DNR-71643,DNR-186005,DNR-300930,DNR-395385,DNR-171615,DNR-185973,DNR-185978,DNR-186023,DNR-186020,DNR-171635 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.1 mi\" markers=800"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "address search",
+  "input": "Coatesville, IN",
+  "value": "wc=247 ids=DNR-184765,DNR-174733,DNR-174718,DNR-184749,DNR-184824,DNR-184755,DNR-332230,DNR-184750,DNR-184745,DNR-184819 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=247"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "coords search",
+  "input": "39.763, -86.399",
+  "value": "btn=\" Go \" wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "text search",
+  "input": "185960",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "text search",
+  "input": "BURCH",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "text search",
+  "input": "Hendricks",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "Use My Location",
+  "input": "geo 39.763,-86.399",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "depth filter",
+  "input": "80–120",
+  "value": "wc=593 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-185985,DNR-185965,DNR-185932,DNR-185954,DNR-185964"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeUncon",
+  "value": "false→true wc=527"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeRock",
+  "value": "false→true wc=354"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeBucket",
+  "value": "false→true wc=30"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeDry",
+  "value": "false→true wc=133"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeEstimated",
+  "value": "false→true wc=651"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldBlue",
+  "value": "false→true wc=1002"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldGreen",
+  "value": "false→true wc=367"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldOrange",
+  "value": "false→true wc=284"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldRed",
+  "value": "false→true wc=271"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevBlue",
+  "value": "false→true wc=298"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevGreen",
+  "value": "false→true wc=65"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevOrange",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevRed",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#hideWells",
+  "value": "false→true wc=1150"
+ },
+ {
+  "dev": "desk",
+  "side": "new-inhub",
+  "feature": "Get ground elevations",
+  "input": "click",
+  "value": "banner=\"Your ground elevation: 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: You 840 ft, well 840 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Gr"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "initial load",
+  "input": "url lat/lon",
+  "value": "totalWells=\"65\" in 0s"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "initial view",
+  "input": "lat=39.763 lon=-86.399",
+  "value": "wc=65 markers=0 ow=0 ids=DNR-18464982,DNR-18461082,DNR-18465982,DNR-184654101,DNR-40361280,DNR-404334729,DNR-40437535,DNR-184644140,DNR-184639155,DNR-18534165 rows=DNR-18464982 ft— || DNR-18461082 ft— || DNR-18465982 ft— || DNR-184654101 ft— || DNR-40361280 ft— || DNR-404334729 ft— || DNR-40437535 ft— || DNR-184644140 ft— || DNR-184639155 ft— || DNR-18534165 ft— banner=\"\""
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "address search",
+  "input": "Avon, IN",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=801"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "address search",
+  "input": "1234 E County Road 100 N, Avon, IN 46123",
+  "value": "wc=1091 ids=DNR-71643,DNR-186005,DNR-300930,DNR-395385,DNR-171615,DNR-185973,DNR-185978,DNR-186023,DNR-186020,DNR-171635 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.1 mi\" markers=800"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "address search",
+  "input": "Coatesville, IN",
+  "value": "wc=247 ids=DNR-184765,DNR-174733,DNR-174718,DNR-184749,DNR-184824,DNR-184755,DNR-332230,DNR-184750,DNR-184745,DNR-184819 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=247"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "coords search",
+  "input": "39.763, -86.399",
+  "value": "btn=\" Go \" wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "text search",
+  "input": "185960",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "text search",
+  "input": "BURCH",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "text search",
+  "input": "Hendricks",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "Use My Location",
+  "input": "geo 39.763,-86.399",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "depth filter",
+  "input": "80–120",
+  "value": "wc=593 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-185985,DNR-185965,DNR-185932,DNR-185954,DNR-185964"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeUncon",
+  "value": "false→true wc=527"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeRock",
+  "value": "false→true wc=354"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeBucket",
+  "value": "false→true wc=30"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeDry",
+  "value": "false→true wc=133"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeEstimated",
+  "value": "false→true wc=651"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldBlue",
+  "value": "false→true wc=1002"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldGreen",
+  "value": "false→true wc=367"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldOrange",
+  "value": "false→true wc=284"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldRed",
+  "value": "false→true wc=271"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevBlue",
+  "value": "false→true wc=298"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevGreen",
+  "value": "false→true wc=65"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevOrange",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevRed",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#hideWells",
+  "value": "false→true wc=1150"
+ },
+ {
+  "dev": "desk",
+  "side": "new-standalone",
+  "feature": "Get ground elevations",
+  "input": "click",
+  "value": "banner=\"Your ground elevation: 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: You 840 ft, well 840 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Gr"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "dispatch generate",
+  "input": "synthetic text",
+  "value": "addr=\"1234 E County Road 100 N, Avon, IN 46123 United States\" latlon=\"39.76300, -86.39900\" feet=\"120 ft off drive\""
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "nearest wells",
+  "input": "first 10",
+  "value": "DNR-185960Well84 ft · 10 gpmUnconsolidated || DNR-186211Well84 ft · 1 gpmUnconsolidated || DNR-186206Well73 ft · 35 gpmUnconsolidated || DNR-185965Well83 ft · 10 gpmUnconsolidated || DNR-185985Well82 ft · 8 gpmUnconsolidated || DNR-18063Well— depthEstimated || DNR-185980Well111 ft · 50 gpmUnconsolidated || DNR-186454Well84 ft · 10 gpmUnconsolidated || DNR-185950Well80 ft · 10 gpmUnconsolidated || "
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "area insights",
+  "input": "radius 2mi",
+  "value": "Depth ;; depth ;; depth ;; lithology intervals. ;; Lithology intervals ;; lithology intervals and/or chunk vein/rock fields (`vein_size_ft`, `gravel_thickness_ft`, ;; depth_bedrock`): 0% show three or more sand/gravel/drift intervals (≥1′ each), 96% sh ;; avg 14.5 GPM across those wells). Across all 1125 wells in the radius, 23% have no"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "Ground elevation",
+  "input": "click",
+  "value": "Ground elevation"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "ASL tab",
+  "input": "open",
+  "value": "refs=\"ground elevation and lithology logs ;; ft ASL) so gravel and rock tops line up across the neighborhood — ;; ground elevation differs. 4 well(s) missing ground elevation. 40 well(s) have no parseable ;; ground elevations\" svg/canvas=false"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "Depth tab",
+  "input": "open",
+  "value": "Depth ;; DEPTH (FT) ;; DEPTH · 0.3 MI ;; depth ;; depth_bedrock`): 0% show three or more sand/gravel/drift intervals (≥1′ eac"
+ },
+ {
+  "dev": "desk",
+  "side": "old",
+  "feature": "weather",
+  "input": "providers",
+  "value": "tabs="
+ },
+ {
+  "dev": "desk",
+  "side": "new",
+  "feature": "dispatch generate",
+  "input": "synthetic text",
+  "value": "addr=\"1234 E County Road 100 N, Avon, IN 46123 United States\" latlon=\"39.76300, -86.39900\" feet=\"120 ft off drive\""
+ },
+ {
+  "dev": "desk",
+  "side": "new",
+  "feature": "nearest wells",
+  "input": "first 10",
+  "value": "01DNR-1859600.01 miG1 884 ft · 10 gpm84 ftDepth10 gpmYieldUnconsolidated || 02DNR-1862110.05 miG1 984 ft · 1 gpm84 ftDepth1 gpmYieldUnconsolidated || 03DNR-1862060.06 miG1 873 ft · 35 gpm73 ftDepth35 gpmYieldUnconsolidated || 04DNR-1859650.07 miS1 5G1 1383 ft · 10 gpm83 ftDepth10 gpmYieldUnconsolidated || 05DNR-1859850.09 miG1 10G2 5G3 782 ft · 8 gpm82 ftDepth8 gpmYieldUnconsolidated || 06DNR-1806"
+ },
+ {
+  "dev": "desk",
+  "side": "new",
+  "feature": "area insights",
+  "input": "radius 2mi",
+  "value": "Depth ;; depth ;; DEPTH ;; DEPTH ;; DEPTH ;; DEPTH ;; DEPTH ;; DEPTH"
+ },
+ {
+  "dev": "desk",
+  "side": "new",
+  "feature": "Ground elevation",
+  "input": "click",
+  "value": "Ground elevation"
+ },
+ {
+  "dev": "desk",
+  "side": "new",
+  "feature": "ASL tab",
+  "input": "open",
+  "value": "refs=\"ft ASL) within 0.3 mi. Showing 24 of 44 wells with logs. ;; ft ASL shared ;; ft ASL shared ;; ft ASL shared\" svg/canvas=true"
+ },
+ {
+  "dev": "desk",
+  "side": "new",
+  "feature": "Depth tab",
+  "input": "open",
+  "value": "Depth ;; DEPTH (FT) ;; DEPTH ;; depth · 0.3 mi ;; depth"
+ },
+ {
+  "dev": "desk",
+  "side": "new",
+  "feature": "weather",
+  "input": "providers",
+  "value": "tabs=GFS,ECMWF,NWS"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "initial load",
+  "input": "url lat/lon",
+  "value": "totalWells=\"65\" in 0s"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "initial view",
+  "input": "lat=39.763 lon=-86.399",
+  "value": "wc=1150 markers=800 ow=0 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rows=DNR-185960Gravel · 84 ftGround elev: Ref …, well …0.0 mi || DNR-186454Gravel · 84 ftGround elev: Ref …, well …0.1 mi || DNR-186206Gravel · 73 ftGround elev: Ref …, well …0.1 mi || DNR-186211Gravel · 8 banner=\"Tap Get ground elevations to compare with wells."
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "address search",
+  "input": "Avon, IN",
+  "value": "wc=1141 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-18063,DNR-185985,DNR-185965,DNR-186236,DNR-186201,DNR-186251 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=800"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "address search",
+  "input": "1234 E County Road 100 N, Avon, IN 46123",
+  "value": "wc=1091 ids=DNR-71643,DNR-186005,DNR-300930,DNR-395385,DNR-171615,DNR-185973,DNR-185978,DNR-186023,DNR-186020,DNR-171635 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.1 mi\" markers=800"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "address search",
+  "input": "Coatesville, IN",
+  "value": "wc=247 ids=DNR-184765,DNR-174733,DNR-174718,DNR-184749,DNR-184824,DNR-184755,DNR-332230,DNR-184750,DNR-184745,DNR-184819 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=247"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "coords search",
+  "input": "39.763, -86.399",
+  "value": "btn=\"Go\" wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "text search",
+  "input": "185960",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "text search",
+  "input": "BURCH",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "text search",
+  "input": "Hendricks",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "Use My Location",
+  "input": "geo 39.763,-86.399",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "depth filter",
+  "input": "80–120",
+  "value": "wc=616 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932,DNR-185954"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeUncon",
+  "value": "false→true wc=224"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeRock",
+  "value": "false→true wc=122"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeBucket",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeDry",
+  "value": "false→true wc=133"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#typeEstimated",
+  "value": "false→true wc=671"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldBlue",
+  "value": "false→true wc=1002"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldGreen",
+  "value": "false→true wc=367"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldOrange",
+  "value": "false→true wc=284"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#yieldRed",
+  "value": "false→true wc=271"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevBlue",
+  "value": "false→true wc=298"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevGreen",
+  "value": "false→true wc=65"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevOrange",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#elevRed",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "toggle",
+  "input": "#hideWells",
+  "value": "false→true wc=1150"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "Get ground elevations",
+  "input": "click",
+  "value": "banner=\"Your ground elevation: 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: You 840 ft, well 840 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Gr"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "initial load",
+  "input": "url lat/lon",
+  "value": "totalWells=\"65\" in 0s"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "initial view",
+  "input": "lat=39.763 lon=-86.399",
+  "value": "wc=0 markers=0 ow=273 ids= rows= banner=\"\""
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "address search",
+  "input": "Avon, IN",
+  "value": "wc=1141 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-18063,DNR-185985,DNR-185965,DNR-186236,DNR-186201,DNR-186251 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=800"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "address search",
+  "input": "1234 E County Road 100 N, Avon, IN 46123",
+  "value": "wc=1091 ids=DNR-71643,DNR-186005,DNR-300930,DNR-395385,DNR-171615,DNR-185973,DNR-185978,DNR-186023,DNR-186020,DNR-171635 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.1 mi\" markers=800"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "address search",
+  "input": "Coatesville, IN",
+  "value": "wc=247 ids=DNR-184765,DNR-174733,DNR-174718,DNR-184749,DNR-184824,DNR-184755,DNR-332230,DNR-184750,DNR-184745,DNR-184819 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=247"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "coords search",
+  "input": "39.763, -86.399",
+  "value": "btn=\" Go \" wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "text search",
+  "input": "185960",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "text search",
+  "input": "BURCH",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "text search",
+  "input": "Hendricks",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "Use My Location",
+  "input": "geo 39.763,-86.399",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "depth filter",
+  "input": "80–120",
+  "value": "wc=593 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-185985,DNR-185965,DNR-185932,DNR-185954,DNR-185964"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeUncon",
+  "value": "false→true wc=527"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeRock",
+  "value": "false→true wc=354"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeBucket",
+  "value": "false→true wc=30"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeDry",
+  "value": "false→true wc=133"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#typeEstimated",
+  "value": "false→true wc=651"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldBlue",
+  "value": "false→true wc=1002"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldGreen",
+  "value": "false→true wc=367"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldOrange",
+  "value": "false→true wc=284"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#yieldRed",
+  "value": "false→true wc=271"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevBlue",
+  "value": "false→true wc=298"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevGreen",
+  "value": "false→true wc=65"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevOrange",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#elevRed",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "toggle",
+  "input": "#hideWells",
+  "value": "false→true wc=1150"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-inhub",
+  "feature": "Get ground elevations",
+  "input": "click",
+  "value": "banner=\"Your ground elevation: 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: You 840 ft, well 840 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Gr"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "initial load",
+  "input": "url lat/lon",
+  "value": "totalWells=\"65\" in 0s"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "initial view",
+  "input": "lat=39.763 lon=-86.399",
+  "value": "wc=0 markers=0 ow=273 ids= rows= banner=\"\""
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "address search",
+  "input": "Avon, IN",
+  "value": "wc=1141 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-18063,DNR-185985,DNR-185965,DNR-186236,DNR-186201,DNR-186251 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=800"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "address search",
+  "input": "1234 E County Road 100 N, Avon, IN 46123",
+  "value": "wc=1091 ids=DNR-71643,DNR-186005,DNR-300930,DNR-395385,DNR-171615,DNR-185973,DNR-185978,DNR-186023,DNR-186020,DNR-171635 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.1 mi\" markers=800"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "address search",
+  "input": "Coatesville, IN",
+  "value": "wc=247 ids=DNR-184765,DNR-174733,DNR-174718,DNR-184749,DNR-184824,DNR-184755,DNR-332230,DNR-184750,DNR-184745,DNR-184819 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\" markers=247"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "coords search",
+  "input": "39.763, -86.399",
+  "value": "btn=\" Go \" wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "text search",
+  "input": "185960",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "text search",
+  "input": "BURCH",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "text search",
+  "input": "Hendricks",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rowsN=25"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "Use My Location",
+  "input": "geo 39.763,-86.399",
+  "value": "wc=1150 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "depth filter",
+  "input": "80–120",
+  "value": "wc=593 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-185985,DNR-185965,DNR-185932,DNR-185954,DNR-185964"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeUncon",
+  "value": "false→true wc=527"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeRock",
+  "value": "false→true wc=354"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeBucket",
+  "value": "false→true wc=30"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeDry",
+  "value": "false→true wc=133"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#typeEstimated",
+  "value": "false→true wc=651"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldBlue",
+  "value": "false→true wc=1002"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldGreen",
+  "value": "false→true wc=367"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldOrange",
+  "value": "false→true wc=284"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#yieldRed",
+  "value": "false→true wc=271"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevBlue",
+  "value": "false→true wc=298"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevGreen",
+  "value": "false→true wc=65"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevOrange",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#elevRed",
+  "value": "false→true wc=0"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "toggle",
+  "input": "#hideWells",
+  "value": "false→true wc=1150"
+ },
+ {
+  "dev": "iphone",
+  "side": "new-standalone",
+  "feature": "Get ground elevations",
+  "input": "click",
+  "value": "banner=\"Your ground elevation: 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: You 840 ft, well 840 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 846 ft | Ground elev: You 840 ft, well 837 ft | Ground elev: You 840 ft, well 846 ft | Gr"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "dispatch generate",
+  "input": "synthetic text",
+  "value": "addr=\"1234 E County Road 100 N, Avon, IN 46123 United States\" latlon=\"39.76300, -86.39900\" feet=\"120 ft off drive\""
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "nearest wells",
+  "input": "first 10",
+  "value": "DNR-185960Well84 ft · 10 gpmUnconsolidated || DNR-186211Well84 ft · 1 gpmUnconsolidated || DNR-186206Well73 ft · 35 gpmUnconsolidated || DNR-185965Well83 ft · 10 gpmUnconsolidated || DNR-185985Well82 ft · 8 gpmUnconsolidated || DNR-18063Well— depthEstimated || DNR-185980Well111 ft · 50 gpmUnconsolidated || DNR-186454Well84 ft · 10 gpmUnconsolidated || DNR-185950Well80 ft · 10 gpmUnconsolidated || "
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "area insights",
+  "input": "radius 2mi",
+  "value": "Depth ;; depth ;; depth ;; lithology intervals. ;; Lithology intervals ;; lithology intervals and/or chunk vein/rock fields (`vein_size_ft`, `gravel_thickness_ft`, ;; depth_bedrock`): 0% show three or more sand/gravel/drift intervals (≥1′ each), 96% sh ;; avg 14.5 GPM across those wells). Across all 1125 wells in the radius, 23% have no"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "Ground elevation",
+  "input": "click",
+  "value": "Ground elevation"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "ASL tab",
+  "input": "open",
+  "value": "refs=\"ground elevation and lithology logs ;; ft ASL) so gravel and rock tops line up across the neighborhood — ;; ground elevation differs. 4 well(s) missing ground elevation. 40 well(s) have no parseable ;; ground elevations\" svg/canvas=false"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "Depth tab",
+  "input": "open",
+  "value": "Depth ;; DEPTH (FT) ;; DEPTH · 0.3 MI ;; depth ;; depth_bedrock`): 0% show three or more sand/gravel/drift intervals (≥1′ eac"
+ },
+ {
+  "dev": "iphone",
+  "side": "old",
+  "feature": "weather",
+  "input": "providers",
+  "value": "tabs="
+ },
+ {
+  "dev": "iphone",
+  "side": "new",
+  "feature": "dispatch generate",
+  "input": "synthetic text",
+  "value": "addr=\"1234 E County Road 100 N, Avon, IN 46123 United States\" latlon=\"39.76300, -86.39900\" feet=\"120 ft off drive\""
+ },
+ {
+  "dev": "iphone",
+  "side": "new",
+  "feature": "nearest wells",
+  "input": "first 10",
+  "value": "01DNR-1859600.01 miG1 884 ft · 10 gpm84 ftDepth10 gpmYieldUnconsolidated || 02DNR-1862110.05 miG1 984 ft · 1 gpm84 ftDepth1 gpmYieldUnconsolidated || 03DNR-1862060.06 miG1 873 ft · 35 gpm73 ftDepth35 gpmYieldUnconsolidated || 04DNR-1859650.07 miS1 5G1 1383 ft · 10 gpm83 ftDepth10 gpmYieldUnconsolidated || 05DNR-1859850.09 miG1 10G2 5G3 782 ft · 8 gpm82 ftDepth8 gpmYieldUnconsolidated || 06DNR-1806"
+ },
+ {
+  "dev": "iphone",
+  "side": "new",
+  "feature": "area insights",
+  "input": "radius 2mi",
+  "value": "Depth ;; depth ;; Lithology intervals ;; lithology intervals and/or chunk vein/rock fields (`vein_size_ft`, `gravel_thickness_ft`, ;; depth_bedrock`): 18% show three or more sand/gravel/drift intervals (≥1′ each), 49% s ;; avg 14.5 GPM across those wells). Across all 1125 wells in the radius, 23% have no ;; avg 15.1 GPM). ;; avg 12.3 GPM)."
+ },
+ {
+  "dev": "iphone",
+  "side": "new",
+  "feature": "Ground elevation",
+  "input": "click",
+  "value": "Ground elevation"
+ },
+ {
+  "dev": "iphone",
+  "side": "new",
+  "feature": "ASL tab",
+  "input": "open",
+  "value": "refs=\"ft ASL) within 0.3 mi. Showing 24 of 44 wells with logs. ;; ft ASL shared ;; ft ASL shared ;; ft ASL shared\" svg/canvas=true"
+ },
+ {
+  "dev": "iphone",
+  "side": "new",
+  "feature": "Depth tab",
+  "input": "open",
+  "value": "Depth ;; DEPTH (FT) ;; DEPTH ;; depth · 0.3 mi ;; depth"
+ },
+ {
+  "dev": "iphone",
+  "side": "new",
+  "feature": "weather",
+  "input": "providers",
+  "value": "tabs=GFS,ECMWF,NWS"
+ }
+]
