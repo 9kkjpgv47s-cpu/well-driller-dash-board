@@ -1,0 +1,380 @@
+[
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "served fix",
+    "input": "css+html",
+    "value": "min-width:0 in viewer.css=true minmax in index.html=true cssLen=12607"
+  },
+  {
+    "dev": "desk",
+    "side": "live-standalone",
+    "feature": "served fix",
+    "input": "css+html",
+    "value": "min-width:0 in viewer.css=true minmax in index.html=true cssLen=12607"
+  },
+  {
+    "dev": "iPhone 14 Pro",
+    "side": "live-inhub",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=0 loadMs=6 OK"
+  },
+  {
+    "dev": "iPhone 14 Pro",
+    "side": "live-standalone",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=0 loadMs=4 OK"
+  },
+  {
+    "dev": "iPhone SE",
+    "side": "live-inhub",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=0 loadMs=5 OK"
+  },
+  {
+    "dev": "iPhone SE",
+    "side": "live-standalone",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=1150 loadMs=5 OK"
+  },
+  {
+    "dev": "iPad Mini",
+    "side": "live-inhub",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=52 loadMs=12 OK"
+  },
+  {
+    "dev": "iPad Mini",
+    "side": "live-standalone",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=52 loadMs=7 OK"
+  },
+  {
+    "dev": "Pixel 7",
+    "side": "live-inhub",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=0 loadMs=4 OK"
+  },
+  {
+    "dev": "Pixel 7",
+    "side": "live-standalone",
+    "feature": "overflow",
+    "input": "load+ow",
+    "value": "ow=0 wc=0 loadMs=3 OK"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-inhub",
+    "feature": "wellCount",
+    "input": "load",
+    "value": "wc=0 tw=65"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-inhub",
+    "feature": "text search",
+    "input": "185960",
+    "value": "ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rows=25 OK"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-inhub",
+    "feature": "elev toggle",
+    "input": "elevBlue",
+    "value": "wc 1150→298 OK"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-inhub",
+    "feature": "ground elev",
+    "input": "click",
+    "value": "banner=\"Reference elevation (search point): 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevFt=840 OK"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-standalone",
+    "feature": "wellCount",
+    "input": "load",
+    "value": "wc=0 tw=65"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-standalone",
+    "feature": "text search",
+    "input": "185960",
+    "value": "ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-185950,DNR-185980,DNR-18063,DNR-185985,DNR-185965,DNR-185932 rows=25 OK"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-standalone",
+    "feature": "elev toggle",
+    "input": "elevBlue",
+    "value": "wc 1150→298 OK"
+  },
+  {
+    "dev": "iphone",
+    "side": "live-standalone",
+    "feature": "ground elev",
+    "input": "click",
+    "value": "banner=\"Reference elevation (search point): 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevFt=840 OK"
+  },
+  {
+    "dev": "desk1440",
+    "side": "live-inhub",
+    "feature": "layout geometry",
+    "input": "grid",
+    "value": "ow=0 cols=82px 82px 82px 82px 82px 82px 82px 82px 82px 82px 82px 82px o1=400x640@96,223 o2=824x804@520,223 o3=400x421@96,1051 o4=400x635@96,1496"
+  },
+  {
+    "dev": "desk1440",
+    "side": "live-standalone",
+    "feature": "layout geometry",
+    "input": "grid",
+    "value": "ow=0 cols=82px 82px 82px 82px 82px 82px 82px 82px 82px 82px 82px 82px o1=400x640@96,223 o2=824x804@520,223 o3=400x421@96,1051 o4=400x635@96,1496"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#typeUncon",
+    "value": "false→true wc=0"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#typeRock",
+    "value": "false→true wc=354"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#typeBucket",
+    "value": "false→true wc=30"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#typeDry",
+    "value": "false→true wc=133"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#typeEstimated",
+    "value": "false→true wc=651"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#yieldBlue",
+    "value": "false→true wc=1002"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#yieldGreen",
+    "value": "false→true wc=367"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#yieldOrange",
+    "value": "false→true wc=284"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#yieldRed",
+    "value": "false→true wc=271"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#elevBlue",
+    "value": "false→true wc=298"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#elevGreen",
+    "value": "false→true wc=65"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#elevOrange",
+    "value": "false→true wc=0"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#elevRed",
+    "value": "false→true wc=0"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "toggle",
+    "input": "#hideWells",
+    "value": "false→true wc=1150"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "depth filter",
+    "input": "80–120",
+    "value": "wc=593 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-185985,DNR-185965,DNR-185932,DNR-185954,DNR-185964"
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "address search",
+    "input": "Avon, IN",
+    "value": "wc=1141 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-18063,DNR-185985,DNR-185965,DNR-186236,DNR-186201,DNR-186251 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+  },
+  {
+    "dev": "desk",
+    "side": "old-inhub",
+    "feature": "ground elev",
+    "input": "click",
+    "value": "banner=\"Reference elevation (search point): 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: Ref 840 ft, well 840 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 846 ft | Ground elev: Ref 840 ft, well 840 ft | Ground elev: Ref 840 ft, wel"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#typeUncon",
+    "value": "false→true wc=527"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#typeRock",
+    "value": "false→true wc=354"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#typeBucket",
+    "value": "false→true wc=30"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#typeDry",
+    "value": "false→true wc=133"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#typeEstimated",
+    "value": "false→true wc=651"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#yieldBlue",
+    "value": "false→true wc=1002"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#yieldGreen",
+    "value": "false→true wc=367"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#yieldOrange",
+    "value": "false→true wc=284"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#yieldRed",
+    "value": "false→true wc=271"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#elevBlue",
+    "value": "false→true wc=298"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#elevGreen",
+    "value": "false→true wc=65"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#elevOrange",
+    "value": "false→true wc=0"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#elevRed",
+    "value": "false→true wc=0"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "toggle",
+    "input": "#hideWells",
+    "value": "false→true wc=1150"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "depth filter",
+    "input": "80–120",
+    "value": "wc=593 ids=DNR-185960,DNR-186454,DNR-186211,DNR-185950,DNR-185980,DNR-185985,DNR-185965,DNR-185932,DNR-185954,DNR-185964"
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "address search",
+    "input": "Avon, IN",
+    "value": "wc=1141 ids=DNR-185960,DNR-186454,DNR-186206,DNR-186211,DNR-18063,DNR-185985,DNR-185965,DNR-186236,DNR-186201,DNR-186251 banner=\"Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi\""
+  },
+  {
+    "dev": "desk",
+    "side": "live-inhub",
+    "feature": "ground elev",
+    "input": "click",
+    "value": "banner=\"Reference elevation (search point): 840 ft · Wells within 2 mi — Nearest: 0.0 mi\" elevRows=Ground elev: Ref 840 ft, well 840 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 837 ft | Ground elev: Ref 840 ft, well 846 ft | Ground elev: Ref 840 ft, well 840 ft | Ground elev: Ref 840 ft, wel"
+  }
+]

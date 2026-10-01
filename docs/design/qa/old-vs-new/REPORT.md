@@ -59,3 +59,36 @@
 - Fix (committed): `grid-cols-1 → minmax(0,1fr)` in `public/well-viewer/index.html` + standalone `index.html`; `min-width:0` on `.cj-viewer .order-1..4` in canonical `design/cj/viewer.css` (synced to hub `public/` + standalone `cj/`).
 - Verified on webkit iPhone 14 Pro context locally (:3001 hub + :8791 standalone): `ow=0`, column=361px, all four panels fit.
 - Commits: hub `2643003`, standalone `20f66ee` — **not pushed**; live prod still overflows on iPhone until deployed.
+
+---
+
+## Post-deploy verification (hub `198ed7d` + standalone `20f66ee` live) — appended
+
+Runner: `apps/hub/scripts/qa/post-deploy.mjs`; raw: `docs/design/qa/post-deploy/{results.json,RAW.md,shots/}`.
+
+### 1. Overflow fix live — all clean
+
+| Device | Engine | in-hub viewer | standalone |
+|---|---|---|---|
+| iPhone 14 Pro | webkit | ow=0 | ow=0 |
+| iPhone SE | webkit | ow=0 | ow=0 |
+| iPad Mini | webkit | ow=0 | ow=0 |
+| Pixel 7 | chromium | ow=0 | ow=0 |
+
+Served assets confirmed: live `cj/viewer.css` contains the `min-width: 0` order-item rule and `index.html` contains `grid-template-columns: minmax(0, 1fr)` on **both** origins (SW blocked, cache-busted).
+
+### 2. iPhone functional (textContent — webkit `innerText` is "" under content-visibility, artifact only)
+
+Both live viewers: text search `185960` → first list ID `DNR-185960` (25 rows rendered); `elevBlue` toggle → wc `1150→298`; Get ground elevations → banner `Reference elevation (search point): 840 ft`. `wellCount` read `0` at the 3s snapshot because `#wellCount` populates after the wells list finishes rendering — populated correctly once loaded (1150 shown in later reads); not a defect.
+
+### 3. Desktop 1440 sanity
+
+Grid geometry identical for both live viewers: 12-col grid (`82px × 12`), o1 `400×640`, o2 `824×804`, o3 `400×421`, o4 `400×635`, ow=0 — desktop layout untouched by the `<768px`-scoped fix. Shots: `post-deploy/shots/desk-{inhub,standalone}.png` vs `old-vs-new/shots/viewer-new-{inhub,standalone}-desk.png`.
+
+### 4. OLD in-hub viewer (`cd5e3ba`, :8793 static) vs LIVE in-hub — desktop
+
+**Every value matches.** 14 toggles: `527/354/30/133/651 · 1002/367/284/271 · 298/65/0/0 · hideWells 1150` identical both sides (the `wc=0` in the first old read was a first-render sampling artifact — re-probed to **527**); depth 80–120 → **593 + identical first-10 IDs** both sides; `Avon, IN` → **1141 + identical first-10 IDs + same banner**; ground elevations → **840 ft** ref with identical per-well values both sides.
+
+**Correction to the earlier table above**: the viewer differences previously attributed to "OLD" (type counts 224/122/0, depth 616) came from the old **standalone** viewer (`772e522`, previous standalone prod). The embedded hub viewer at `cd5e3ba` already carried the current data/classifier — the standalone repo had simply lagged. No embedded-viewer regression ever existed.
+
+Cleanup: worktrees `/tmp/wd-old`, `/tmp/wv-old` removed; :8793 stopped; :3001 healthy.
