@@ -1,0 +1,283 @@
+{
+ "meta": {
+  "base": "https://driller-hub.vercel.app/well-viewer/index.html",
+  "at": "2026-10-08T17:59:42.007Z",
+  "buildStamp": "2026-10-08-show-wells-toggle",
+  "darkLabel": {
+   "theme": "dark",
+   "color": "rgb(185, 188, 196)",
+   "text": "Show wells on map"
+  },
+  "iphoneEngine": "webkit",
+  "errorsCaptured": [],
+  "errorsFromPage": []
+ },
+ "checks": [
+  {
+   "scenario": "A",
+   "check": "build stamp",
+   "expected": "2026-10-08-show-wells-toggle",
+   "actual": "2026-10-08-show-wells-toggle",
+   "pass": true
+  },
+  {
+   "scenario": "A",
+   "check": "#showMapWells exists",
+   "expected": "true",
+   "actual": "true",
+   "pass": true
+  },
+  {
+   "scenario": "A",
+   "check": "#showMapWells unchecked",
+   "expected": "false",
+   "actual": "false",
+   "pass": true
+  },
+  {
+   "scenario": "A",
+   "check": "#hideWells unchecked",
+   "expected": "false",
+   "actual": "false",
+   "pass": true
+  },
+  {
+   "scenario": "A",
+   "check": "marker count (cold, no pin, toggle off)",
+   "expected": "0",
+   "actual": "0",
+   "pass": true
+  },
+  {
+   "scenario": "A",
+   "check": "#wellCount > 0 (sidebar list not gated)",
+   "expected": ">0",
+   "actual": "31764",
+   "pass": true
+  },
+  {
+   "scenario": "A",
+   "check": "#totalWells > 100000",
+   "expected": ">100000",
+   "actual": "414953 (raw \"414,953\", 10s)",
+   "pass": true
+  },
+  {
+   "scenario": "G/desk",
+   "check": "no horizontal overflow (toggle off)",
+   "expected": "scrollWidth<=innerWidth",
+   "actual": "1440<=1440",
+   "pass": true
+  },
+  {
+   "scenario": "G/desk",
+   "check": ".map-bottom-bar inside #map (toggle off)",
+   "expected": "inside",
+   "actual": "inside=true bar={\"x\":765.6,\"y\":977.6,\"w\":332.9,\"h\":37.2} map={\"x\":520,\"y\":222.8,\"w\":824,\"h\":804}",
+   "pass": true
+  },
+  {
+   "scenario": "G/desk",
+   "check": "both toggle labels visible (toggle off)",
+   "expected": "2 labels offsetWidth>0",
+   "actual": "\"Show wells on map\":true, \"Hide well labels\":true",
+   "pass": true
+  },
+  {
+   "scenario": "B",
+   "check": "marker count after toggle ON",
+   "expected": "1..800",
+   "actual": "800",
+   "pass": true
+  },
+  {
+   "scenario": "B",
+   "check": "#wellCount > 0",
+   "expected": ">0",
+   "actual": "31764",
+   "pass": true
+  },
+  {
+   "scenario": "G/desk",
+   "check": "no horizontal overflow (toggle on)",
+   "expected": "scrollWidth<=innerWidth",
+   "actual": "1440<=1440",
+   "pass": true
+  },
+  {
+   "scenario": "G/desk",
+   "check": ".map-bottom-bar inside #map (toggle on)",
+   "expected": "inside",
+   "actual": "inside=true bar={\"x\":765.6,\"y\":977.6,\"w\":332.9,\"h\":37.2} map={\"x\":520,\"y\":222.8,\"w\":824,\"h\":804}",
+   "pass": true
+  },
+  {
+   "scenario": "G/desk",
+   "check": "both toggle labels visible (toggle on)",
+   "expected": "2 labels offsetWidth>0",
+   "actual": "\"Show wells on map\":true, \"Hide well labels\":true",
+   "pass": true
+  },
+  {
+   "scenario": "C",
+   "check": "marker count after toggle OFF",
+   "expected": "0",
+   "actual": "0",
+   "pass": true
+  },
+  {
+   "scenario": "F",
+   "check": "reload #totalWells > 100000",
+   "expected": ">100000",
+   "actual": "414953",
+   "pass": true
+  },
+  {
+   "scenario": "F",
+   "check": "marker count after coords Go",
+   "expected": "1..800",
+   "actual": "800",
+   "pass": true
+  },
+  {
+   "scenario": "F",
+   "check": "all markers within 2.0 mi of (39.763,-86.399) — page haversine rounds toFixed(1), gate admits <=2.05",
+   "expected": "maxDist<=2.05",
+   "actual": "max=2.050 n=800",
+   "pass": true
+  },
+  {
+   "scenario": "D",
+   "check": "marker count with pin",
+   "expected": "1..800",
+   "actual": "800",
+   "pass": true
+  },
+  {
+   "scenario": "D",
+   "check": "all markers within 2.0 mi of pin — page haversine rounds toFixed(1), gate admits <=2.05",
+   "expected": "maxDist<=2.05",
+   "actual": "max=2.050",
+   "pass": true
+  },
+  {
+   "scenario": "D",
+   "check": "#locationBanner text",
+   "expected": "contains 'Wells within 2 mi'",
+   "actual": "Tap Get ground elevations to compare with wells. Wells within 2 mi — Nearest: 0.0 mi",
+   "pass": true
+  },
+  {
+   "scenario": "D",
+   "check": "toggle ON: pin pool unchanged",
+   "expected": "count=800, maxDist<=2.05",
+   "actual": "count=800, max=2.050",
+   "pass": true
+  },
+  {
+   "scenario": "D",
+   "check": "toggle OFF: pin pool unchanged",
+   "expected": "count=800, maxDist<=2.05",
+   "actual": "count=800, max=2.050",
+   "pass": true
+  },
+  {
+   "scenario": "E",
+   "check": "hideWells ON -> 0 markers",
+   "expected": "0",
+   "actual": "0",
+   "pass": true
+  },
+  {
+   "scenario": "E",
+   "check": "hideWells OFF -> markers back",
+   "expected": ">0",
+   "actual": "800",
+   "pass": true
+  },
+  {
+   "scenario": "DARK",
+   "check": "html[data-theme] = dark",
+   "expected": "dark",
+   "actual": "dark",
+   "pass": true
+  },
+  {
+   "scenario": "DARK",
+   "check": "Show-wells .cj-datalbl color flipped (not light #047857)",
+   "expected": "!= rgb(4, 120, 87)",
+   "actual": "Show wells on map -> rgb(185, 188, 196)",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": "marker count cold (toggle off)",
+   "expected": "0",
+   "actual": "0",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": "no horizontal overflow (toggle off)",
+   "expected": "scrollWidth<=innerWidth",
+   "actual": "393<=393",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": ".map-bottom-bar inside #map (toggle off)",
+   "expected": "inside",
+   "actual": "inside=true bar={\"x\":60,\"y\":1278.3,\"w\":273,\"h\":35.6} map={\"x\":16,\"y\":903.5,\"w\":361,\"h\":422.4}",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": "both toggle labels visible (toggle off)",
+   "expected": "2 labels offsetWidth>0",
+   "actual": "\"Show wells on map\":true, \"Hide well labels\":true",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": "marker count toggle ON",
+   "expected": "1..800",
+   "actual": "800",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": "no horizontal overflow (toggle on)",
+   "expected": "scrollWidth<=innerWidth",
+   "actual": "393<=393",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": ".map-bottom-bar inside #map (toggle on)",
+   "expected": "inside",
+   "actual": "inside=true bar={\"x\":60,\"y\":1278.3,\"w\":273,\"h\":35.6} map={\"x\":16,\"y\":903.5,\"w\":361,\"h\":422.4}",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": "both toggle labels visible (toggle on)",
+   "expected": "2 labels offsetWidth>0",
+   "actual": "\"Show wells on map\":true, \"Hide well labels\":true",
+   "pass": true
+  },
+  {
+   "scenario": "G/iphone",
+   "check": "#totalWells > 100000",
+   "expected": ">100000",
+   "actual": "414953",
+   "pass": true
+  },
+  {
+   "scenario": "ALL",
+   "check": "no console.error/pageerror from index.html",
+   "expected": "0",
+   "actual": "0",
+   "pass": true
+  }
+ ]
+}

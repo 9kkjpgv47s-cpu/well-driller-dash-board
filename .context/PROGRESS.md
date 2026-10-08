@@ -13,6 +13,7 @@
 ### Verification
 - `apps/hub/scripts/qa/show-wells-toggle.mjs` (Playwright, chromium desk + webkit iPhone 14 Pro) against the static viewer on :8794 — 38/38 PASS: cold load 0 markers / list 31,764 in view; toggle on → 800; off → 0; `?lat&lon` pin → 800 markers all ≤ 2.05 mi (page `haversine()` rounds to 0.1 mi, pre-existing); pin wins over toggle; hide labels → 0; dark-theme label flips to ink; no overflow desk/iPhone; 0 console errors. Evidence: `docs/design/qa/show-wells-toggle/`.
 - Not changed (not regressions): hub radius select, viewer 2-mi pool logic, sidebar list gating (never gated).
+- **Deployed 2026-10-08** via Vercel CLI from clean worktrees of hub `0d22c3b` / standalone `07edc8d` (GitHub push blocked — no git credentials on this Mac; `gh` token invalid). Live re-run of the same script against both origins: 38/38 each, build stamp `2026-10-08-show-wells-toggle` served, 0 console errors. Evidence: `docs/design/qa/show-wells-toggle/live/{inhub,standalone}/`. Follow-up: push `main` in both repos once `gh auth login` is redone (Vercel git-main integration will rebuild the same code).
 
 ## 2026-08-18 — Performance audit + improvements
 
