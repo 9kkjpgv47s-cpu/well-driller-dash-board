@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta name="apple-mobile-web-app-title" content="C&J Well co">
     <!-- BUILD_STAMP: bump when deploying so you can View Source and confirm live HTML -->
-    <meta name="cj-build" content="2026-09-27-cj-universal" />
+    <meta name="cj-build" content="2026-10-08-show-wells-toggle" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F6F4EF">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0A0F1A">
     <title>C&J Well Co — Well Viewer</title>
@@ -402,7 +402,7 @@
                 <span class="cj-bore__bit"></span>
             </div>
         </div>
-        <strong>Loading well data…</strong> <span id="loadingDnrStatus" class="cj-bore__status">DNR chunks load in the background. Use My Location / address / coordinates to focus the map.</span>
+        <strong>Loading well data…</strong> <span id="loadingDnrStatus" class="cj-bore__status">DNR chunks load in the background. Map markers stay off until you use “Show wells on map” or Use My Location / address / coordinates.</span>
     </div>
     <div id="loadFailedPanel" hidden aria-hidden="true">
         <h2>Map didn’t load</h2>
@@ -532,6 +532,10 @@
             <div class="map-shell">
                 <div id="map"></div>
                 <div class="map-bottom-bar" role="group" aria-label="Map display options">
+                    <div class="toggle-wrap">
+                        <label class="toggle-switch"><input type="checkbox" id="showMapWells" aria-label="Show wells on map" onchange="onShowMapWellsChange()"><span class="toggle-slider" style="background:#34d399;"></span></label>
+                        <div><div class="toggle-label" style="color:#047857;font-weight:700;"><span class="cj-datalbl">Show wells on map</span></div></div>
+                    </div>
                     <div class="toggle-wrap">
                         <label class="toggle-switch"><input type="checkbox" id="hideWells" aria-label="Hide well labels" onchange="refreshMap()"><span class="toggle-slider" style="background:#d1d5db;"></span></label>
                         <div><div class="toggle-label" style="color:#dc2626;font-weight:700;">Hide well labels</div></div>
@@ -711,7 +715,7 @@
             var status = document.getElementById('loadingDnrStatus');
             var strong = panel ? panel.querySelector('strong') : null;
             if (strong) strong.textContent = 'Loading well data in the background…';
-            if (status) status.textContent = 'Fetching DNR chunks (map stays light). Use 📍 / address / coordinates to focus wells near your point.';
+            if (status) status.textContent = 'Fetching DNR chunks (map stays light — turn on “Show wells on map” or use 📍 / address / coordinates to plot wells).';
             if (panel) {
                 panel.classList.add('bg-emerald-100', 'border-emerald-300', 'text-emerald-800');
                 panel.classList.remove('bg-slate-50', 'border-slate-200', 'text-slate-700');
@@ -745,7 +749,7 @@
                     return;
                 }
                 if (u.searchParams.get('cj_litho_g') === '1' || window.CJ_LITHO_G_URL === true) {
-                    /* Load data + debug panel only (keeps map light). */
+                    /* Load data + debug panel only — do not auto-check “Show wells on map” (keeps map light). */
                     ensureFullDnrDatasetLoaded();
                     return;
                 }
@@ -763,11 +767,28 @@
             }
             ensureFullDnrDatasetLoaded();
         }
-        /** Wells on map + list: always on unless Hide well labels is enabled. */
+        /** Wells on map + list: location/search pin, or explicit “Show wells on map” (unless Hide well labels). */
         function userRequestedWellMarkers() {
             var hideWells = document.getElementById('hideWells') && document.getElementById('hideWells').checked;
             if (hideWells) return false;
-            return true;
+            if (searchCenter) return true;
+            var smw = document.getElementById('showMapWells');
+            return !!(smw && smw.checked);
+        }
+        function onShowMapWellsChange() {
+            var sm = document.getElementById('showMapWells');
+            var on = sm && sm.checked;
+            if (on) {
+                ensureFullDnrDatasetLoaded();
+            }
+            refreshMap();
+            if (on) {
+                setTimeout(function() {
+                    if (typeof cjFitMapToWellsIfNoneVisible === 'function') cjFitMapToWellsIfNoneVisible();
+                    updateWellsList();
+                    if (typeof refreshMap === 'function') refreshMap();
+                }, 50);
+            }
         }
         /** Makes combo-marker + depth/g-r tag text bigger/smaller (map +/− is separate Leaflet control). */
         var markerLabelScale = 1;
@@ -826,7 +847,7 @@
          * window.CJ_DISABLE_MODAL_DNR_API is true. file:// has no API unless you set window.CJ_DNR_REPORT_API.
          */
         var CJ_STATIC_DEPLOY = (typeof window !== 'undefined' && typeof window.CJ_STATIC_DEPLOY === 'boolean') ? window.CJ_STATIC_DEPLOY : true;
-        var APP_BUILD_STAMP = '2026-07-23-viewer-parity';
+        var APP_BUILD_STAMP = '2026-10-08-show-wells-toggle';
         /**
          * Gravel “g” + ft policy (2026-04):
          * Map/list g uses WELL_G_FT_BY_REF (manual) then lithology-derived thickness.
@@ -3207,6 +3228,7 @@
                     cjSaveWellsToStorage();
                     var totalEl = document.getElementById('totalWells');
                     if (totalEl) totalEl.textContent = wells.length.toLocaleString();
+                    var smw = document.getElementById('showMapWells'); if (smw) smw.checked = true;
                     addMarkersInRadius();
                     updateWellsList();
                     alert('Loaded ' + wells.length + ' wells. Use address, coordinates, or Use My Location to see wells within ' + RADIUS_MI + ' mi.');
@@ -3220,6 +3242,7 @@
                 _lithoCache = {};
                 searchCenter = null;
                 _dnrFullLoadStarted = false;
+                var smw = document.getElementById('showMapWells'); if (smw) smw.checked = false;
                 localStorage.removeItem('cjWells');
                 clearMarkers();
                 if (tempMarker && map) map.removeLayer(tempMarker);
@@ -3273,6 +3296,8 @@
             if (typeof L === 'undefined' || !map) return;
             if (!wells || !wells.length) return;
             if (searchCenter) return;
+            var smw = document.getElementById('showMapWells');
+            if (!smw || !smw.checked) return;
             var hideWells = document.getElementById('hideWells') && document.getElementById('hideWells').checked;
             if (hideWells) return;
             try {
