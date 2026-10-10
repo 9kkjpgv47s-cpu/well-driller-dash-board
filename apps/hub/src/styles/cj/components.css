@@ -254,12 +254,17 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 
 /* ---------- Data chips — containers that hold locked data colors ----------
    Legend swatches, R/G/S chips and other well-data encodings keep their
-   exact locked colors; the container itself follows the theme like any
-   card (--plate* resolve to --surface/--ink/--line). In dark theme only:
+   exact locked colors in light theme; the container itself follows the
+   theme like any card (--plate* resolve to --surface/--ink/--line).
+   In dark theme:
    - .cj-datalbl marks legend label TEXT — it flips to --ink-2 while the
      colored dot/swatch keeps its locked color;
-   - .cj-data marks bare data-colored text — it sits on a small light paper
-     chip (--data-chip) so the locked color stays legible. */
+   - .cj-dc marks a data-colored element whose locked color was moved to
+     --dc (viewer cjDataColorize): the hue keeps its exact value in light,
+     in dark it is lifted to L>=0.76 with chroma eased 15% so paper-tuned
+     colors read on dark surfaces without a light chip;
+   - .cj-data marks a data-value chip — dark-mode fill is a soft tint of
+     the chip's own hue (currentColor), not a light paper swatch. */
 .cj-plate {
   background: var(--plate);
   color: var(--plate-ink);
@@ -270,10 +275,19 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 
 [data-theme="dark"] .cj-datalbl { color: var(--ink-2); }
 
+.cj-dc { color: var(--dc); }
+@supports (color: oklch(from red calc(l + 0.1) c h)) {
+  [data-theme="dark"] .cj-dc { color: oklch(from var(--dc) max(l, 0.76) calc(c * 0.85) h); }
+}
+
 [data-theme="dark"] .cj-data {
-  background: var(--data-chip);
-  border-radius: 4px;
-  padding: 0 4px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 4px; padding: 0 5px;
+}
+/* Browsers without relative color syntax keep the legible paper fallback. */
+@supports not (color: oklch(from red calc(l + 0.1) c h)) {
+  [data-theme="dark"] .cj-data { background: var(--data-chip); box-shadow: none; }
 }
 
 /* ---------- Callouts — left rule, tinted ground ---------- */

@@ -147,6 +147,14 @@ body.cj-viewer { font-family: var(--font-body); }
 }
 /* Block-level data chips (badge column) keep the pill tight + right-aligned. */
 [data-theme="dark"] #wellsList div.cj-data { display: inline-block; }
+/* Dark: Tailwind utility colors in list cards map to theme tokens so the
+   paper-tuned palette stays legible on the dark plate. Inline data colors
+   (R/G/S chips, elev/yield values) go through .cj-dc in components.css. */
+[data-theme="dark"] #wellsList .text-emerald-600 { color: var(--ok); }
+[data-theme="dark"] #wellsList .text-slate-800,
+[data-theme="dark"] #wellsList .text-slate-900 { color: var(--ink); }
+[data-theme="dark"] #wellsList .text-gray-500 { color: var(--ink-3); }
+[data-theme="dark"] #wellsList .text-gray-600 { color: var(--ink-2); }
 .cj-viewer #wellsList .card:hover { border-color: var(--accent); }
 
 /* ---------- Loading / failure / tip states ---------- */
@@ -198,19 +206,27 @@ body.cj-viewer { font-family: var(--font-body); }
   box-shadow: var(--shadow);
 }
 #modalTitle { font-family: var(--font-display); font-weight: 400; color: var(--ink); }
-/* Modal data body follows the theme; bare data-colored text inside gets
-   the dark-theme paper chip (.cj-data / data-color links below). */
+/* Modal data body follows the theme. Data-colored text inside is plain
+   lifted text — .cj-dc (components.css) carries inline data colors via
+   --dc, the Tailwind classes below map to theme tokens. No chips here:
+   the modal is a value table and chip fills would be noise. */
 #modalBody { background: var(--plate); color: var(--plate-ink); }
 #modalBody .border-b { border-color: var(--plate-line); }
+[data-theme="dark"] #modalBody .text-gray-400,
+[data-theme="dark"] #modalBody .text-gray-500 { color: var(--ink-3); }
+[data-theme="dark"] #modalBody .text-gray-600,
+[data-theme="dark"] #modalBody .text-gray-700 { color: var(--ink-2); }
+[data-theme="dark"] #modalBody .text-gray-900 { color: var(--ink); }
 [data-theme="dark"] #modalBody .text-emerald-800,
-[data-theme="dark"] #modalBody .text-emerald-600,
+[data-theme="dark"] #modalBody .text-emerald-600 { color: var(--ok); }
 [data-theme="dark"] #modalBody .text-blue-600,
-[data-theme="dark"] #modalBody .cj-report,
-[data-theme="dark"] #modalBody [style*="color:"] {
-  background: var(--data-chip);
-  border-radius: 4px;
-  padding: 0 4px;
+[data-theme="dark"] #modalBody .cj-report {
+  color: #8ab4ff;
+  color: oklch(from #2563eb 0.76 calc(c * 0.85) h);
 }
+[data-theme="dark"] #modalBody .bg-gray-100 { background: var(--bg-3); }
+[data-theme="dark"] #modalBody .border-gray-100,
+[data-theme="dark"] #modalBody .border-gray-200 { border-color: var(--line); }
 /* The "no well log" amber notice is chrome, not data — theme it as a warn
    callout in dark so it never renders as a light slab. */
 [data-theme="dark"] #modalBody .bg-amber-50 {

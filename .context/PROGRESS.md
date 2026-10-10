@@ -1,5 +1,11 @@
 # Progress ledger
 
+## 2026-10-10 — Dark theme: data chips lose the light "paper" fill (viewer list + modal)
+
+- Problem: in dark, `.cj-data` and the `#modalBody` inline-color rules put locked light-tuned data hexes on a cream chip (`--data-chip #EFE9DF`) — bright rectangles on every well card. Dom: remove them.
+- Decision (Radix step-11 / Primer dark-fg / Material "lighter tones on dark"): keep the hue (the encoding), lift lightness for dark, tint the chip with its own hue. Viewer `cjDataColorize` (MutationObserver on `#wellsList` + `#modalBody`) moves inline `color:` onto `--dc` + class `.cj-dc`; `components.css`: `.cj-dc { color: var(--dc) }`, dark `oklch(from var(--dc) max(l, 0.76) calc(c*0.85) h)` under `@supports`, dark `.cj-data` = `currentColor` 12% fill + 24% inset ring; paper fill kept only as the no-relative-color fallback. `viewer.css`: list/modal Tailwind color classes mapped to tokens (`--ok`, `--ink*`, lifted blue), modal values are plain lifted text (no chips). R/G/S outer chip spans now carry the face color so the tint follows the hue. Light theme unchanged (computed colors identical for every inner text span).
+- Evidence: `docs/design/qa/dark-data-chips/` — dark contrast min 6.17:1 across 103 chips/values (was paper-dependent); show-wells QA 38/38; lint 0; build clean; copies in sync.
+
 ## 2026-10-10 — Mobile audit + fixes (hub + both viewer copies)
 
 ### Audit (prod, read-only first)

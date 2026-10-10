@@ -114,7 +114,8 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -16px rgba(0, 0, 0, 0.6);
   --glass: rgba(10, 15, 26, 0.78);
   --selection: rgba(242, 85, 77, 0.28);
-  /* Data chips: bare locked-color text sits on a small light paper chip. */
+  /* Data chips: fallback fill only for browsers without relative color
+     syntax — modern browsers tint .cj-data with the chip's own hue. */
   --data-chip: #EFE9DF;
 }
 

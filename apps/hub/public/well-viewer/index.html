@@ -3556,25 +3556,25 @@
             return tokens.map(function(tok) {
                 var mr = /^r(\d+)$/i.exec(tok);
                 if (mr) {
-                    return '<span class="cj-data inline-flex items-end mr-2" title="Rock top ' + escFace(mr[1]) + ' ft">' +
+                    return '<span class="cj-data inline-flex items-end mr-2" style="color:#dc2626" title="Rock top ' + escFace(mr[1]) + ' ft">' +
                         '<span style="font-size:10px;font-weight:700;color:#dc2626">R</span>' +
                         '<span style="font-size:15px;font-weight:800;line-height:1;color:#b91c1c">' + escFace(mr[1]) + '</span></span>';
                 }
                 var mg = /^g(\d+)\s+(\d+)$/i.exec(tok);
                 if (mg) {
-                    return '<span class="cj-data inline-flex items-end mr-2" title="Aquifer G' + escFace(mg[1]) + ' · ' + escFace(mg[2]) + ' ft thick">' +
+                    return '<span class="cj-data inline-flex items-end mr-2" style="color:#2563eb" title="Aquifer G' + escFace(mg[1]) + ' · ' + escFace(mg[2]) + ' ft thick">' +
                         '<span style="font-size:10px;font-weight:700;color:#2563eb">G' + escFace(mg[1]) + '</span>' +
                         '<span style="font-size:15px;font-weight:800;line-height:1;color:#1d4ed8">&nbsp;' + escFace(mg[2]) + '</span></span>';
                 }
                 var ms = /^s(\d+)\s+(\d+)$/i.exec(tok);
                 if (ms) {
-                    return '<span class="cj-data inline-flex items-end mr-2" title="Dry sand S' + escFace(ms[1]) + ' · ' + escFace(ms[2]) + ' ft thick">' +
+                    return '<span class="cj-data inline-flex items-end mr-2" style="color:#d97706" title="Dry sand S' + escFace(ms[1]) + ' · ' + escFace(ms[2]) + ' ft thick">' +
                         '<span style="font-size:10px;font-weight:700;color:#d97706">S' + escFace(ms[1]) + '</span>' +
                         '<span style="font-size:15px;font-weight:800;line-height:1;color:#b45309">&nbsp;' + escFace(ms[2]) + '</span></span>';
                 }
                 var mf = /^g(\d+)$/i.exec(tok);
                 if (mf) {
-                    return '<span class="cj-data inline-flex items-end mr-2">' +
+                    return '<span class="cj-data inline-flex items-end mr-2" style="color:#2563eb">' +
                         '<span style="font-size:10px;font-weight:700;color:#2563eb">G</span>' +
                         '<span style="font-size:15px;font-weight:800;line-height:1;color:#1d4ed8">' + escFace(mf[1]) + '</span></span>';
                 }
@@ -4289,6 +4289,28 @@
 
             updateWellsList();
         }
+
+        /* Dark theme reads locked data colors via --dc (see .cj-dc in cj/components.css):
+           move inline `color:` onto --dc so CSS can lift lightness per theme. */
+        function cjDataColorize(root) {
+            if (!root) return;
+            var els = root.querySelectorAll('[style*="color:"]');
+            for (var i = 0; i < els.length; i++) {
+                var el = els[i], c = el.style.color;
+                if (!c || el.classList.contains('cj-dc')) continue;
+                el.style.setProperty('--dc', c);
+                el.style.color = '';
+                el.classList.add('cj-dc');
+            }
+        }
+        function cjWatchDataColors(id) {
+            var root = document.getElementById(id);
+            if (!root || !window.MutationObserver) return;
+            cjDataColorize(root);
+            new MutationObserver(function () { cjDataColorize(root); }).observe(root, { childList: true, subtree: true });
+        }
+        cjWatchDataColors('wellsList');
+        cjWatchDataColors('modalBody');
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initMap);
