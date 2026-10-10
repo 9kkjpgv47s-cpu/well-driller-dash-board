@@ -1,5 +1,24 @@
 # Progress ledger
 
+## 2026-10-10 — Mobile audit + fixes (hub + both viewer copies)
+
+### Audit (prod, read-only first)
+- Runner `apps/hub/scripts/qa/mobile-audit.mjs` — 5 touch profiles (iPhone SE 3rd gen, iPhone 14 Pro portrait+landscape, Pixel 7, iPad Mini; webkit/chromium) × light/dark × hub job flow / embedded viewer / viewer with pin / standalone viewer; checks overflow, tap targets, text size, iOS input zoom, meta, map geometry, modal scroll restore, toggle text tap, gestures, SW, console errors, throttled perf (Pixel 7, 1.6 Mbps/150 ms/4× CPU). Prod evidence: `docs/design/qa/mobile-audit/{RESULTS.json,RAW.md}` (430 rows).
+- Passed on prod: no horizontal overflow (50/50), tap targets ≥ 24 px, safe-area + 16 px inputs already in the design system, viewer console clean.
+- Failed on prod: viewer well modal jumped the page to the top and never restored scroll (6/6 phone cells); hub well dialog let the background scroll on Pixel 7; viewer toggle text was not clickable (only the 44×24 switch); iPad `.select-sm` at 11.5 px (iOS zoom on focus); iPhone-landscape viewer map taller than the viewport (320 px in 343); map bottom bar clipped "Hide well labels" under the label-size stack on every phone; hub zoom buttons 30×30; hub viewport missing `viewport-fit=cover`/theme-color; SW cached `/well-viewer/cj/*.css` cache-first forever; viewer modal footer label overflowed its pill at 375 px.
+- Dom's UX calls: two-finger map pan + hint (chosen over expand-map button); keep hub phone page order; keep C&J OS verbatim text sizes; API cold-start 503s → separate pass after this one.
+
+### Fixed
+- **Viewer (canonical `~/Projects/well-viewer/index.html`, mirrored into `apps/hub/public/well-viewer/index.html`; diff = app-switch href only):** `cjLockBodyScroll/cjUnlockBodyScroll` keep `scrollY` across the modal (A=C exact on all cells); all 15 toggle texts are now `<label for>`; map created with `dragging: false` on `(pointer: coarse)` + `cjInstallGestureHint` overlay ("Use two fingers to move the map"); phone media block moved after the zoom-stack base rule — bar `max-width: calc(100% - 24px)`, stack `bottom: 72px` (no overlap at 375/393/412); `window.__cjMap` exposed for QA.
+- **design/cj (synced to hub `src/styles/cj`, `public/well-viewer/cj`, standalone `cj/`):** `components.css` — `.input-sm/.select-sm` 16 px also under `(pointer: coarse)`; `.modal-dialog { overscroll-behavior: contain }`; `.cj-main` safe-area gutters; touch-ergonomics block pins `touch-action: pan-x pan-y` on coarse maps + `.cj-map-gesture-hint` styles. `viewer.css` — phone map `min-height: clamp(200px, 100svh − top − s-4, 320px)` (i14-land 320 → 263), 768–1023 sticky map `min-height: min(400px, …)`, `#wellModal .btn` wraps on phones.
+- **Hub:** `layout.tsx` viewport `viewportFit: "cover"` + light/dark `themeColor` (= `--bg`); `WellDetailModal` uses new `lib/use-body-scroll-lock.ts` (fixed-body lock, scroll restored); `DrillingMap` `dragging: !coarse` + `map-gesture-hint.ts`; `globals.css` zoom buttons 44 px via `.leaflet-container.leaflet-touch .leaflet-bar a` (previous `.leaflet-bar a` lost to leaflet.css specificity); `public/sw.js` → `driller-hub-v2`, "everything else" stale-while-revalidate (v1 caches purged on activate).
+
+### Verification (local prod build :3005 + static viewer :8795)
+- `npm run lint` 0 errors, `tsc --noEmit` clean, `vitest` 164/164, `next build` clean; `scripts/sync-cj-design.sh --check` OK; standalone `cj/` byte-identical to `design/cj`.
+- Mobile runner re-run: 494 rows — modal scroll 9/9, input-zoom 50/50, overflow 50/50, map-geometry 40/40 (`touch-action: pan-x pan-y`, no trap), gesture 42/42 (Pixel 7 real CDP one-finger drag scrolls the page 185 px with 0 m map pan; two-finger synthetic pan moves the map 1.7–7 km; desktop mouse drag still pans), toggle-text-tap 8/8, bottom-bar 24/24, tap targets 50/50 incl. 44×44 zoom buttons. Remaining FAILs are the 50 sub-12 px text rows Dom chose to keep + 3 `dnr-report` 404s from the static dev server (serverless route). `show-wells-toggle.mjs` still 38/38. SW: `caches.keys()` = `driller-hub-v2-shell` only. Evidence: `docs/design/qa/mobile-audit/local-fixed/` (curated shots; full set archived in `/tmp/driller-audit/mobile-shots-archive/`).
+- Chromium caveat: Playwright device emulation does not flip `(pointer: coarse)` reliably, so Pixel 7 gesture cells stub `matchMedia` (documented in the runner); WebKit profiles report coarse natively.
+- Not deployed yet (needs Dom's go). GitHub push still blocked (no credentials).
+
 ## 2026-10-08 — Post-design-migration regression audit: viewer "Show wells on map" toggle restored
 
 ### Audit (what the C&J design migration changed structurally)

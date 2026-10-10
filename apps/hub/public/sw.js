@@ -2,8 +2,9 @@
  * Driller Hub Service Worker
  *
  * Caching strategy:
- * - App shell (HTML/JS/CSS): stale-while-revalidate — instant load from cache,
- *   update in background
+ * - App shell + non-hashed assets (HTML navigations, /well-viewer/cj/*.css,
+ *   index.html sub-resources): stale-while-revalidate — instant load from
+ *   cache, update in background
  * - DNR chunk CSVs (.csv.gz): cache-first — immutable ETL artifacts, never
  *   change in place. Once cached, served instantly with no network round-trip.
  * - API routes: network-first, fall back to cache — keeps data fresh when
@@ -11,7 +12,7 @@
  * - Weather/geocode APIs: network-only — external data, no offline value.
  */
 
-const SW_VERSION = "driller-hub-v1";
+const SW_VERSION = "driller-hub-v2";
 const SHELL_CACHE = `${SW_VERSION}-shell`;
 const CHUNK_CACHE = `${SW_VERSION}-chunks`;
 const API_CACHE = `${SW_VERSION}-api`;
@@ -98,8 +99,9 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 7. Everything else — try cache, fall back to network
-  event.respondWith(cacheFirst(req, SHELL_CACHE));
+  // 7. Everything else (non-hashed assets like /well-viewer/cj/*.css,
+  //    index.html sub-resources) — stale-while-revalidate
+  event.respondWith(staleWhileRevalidate(req, SHELL_CACHE));
 });
 
 async function cacheFirst(req, cacheName) {

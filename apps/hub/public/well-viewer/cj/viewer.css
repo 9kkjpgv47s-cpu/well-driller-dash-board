@@ -316,12 +316,20 @@ body.cj-viewer { font-family: var(--font-body); }
   .cj-viewer .map-shell {
     height: 64vh;                    /* fallback */
     height: min(64svh, 560px);
-    min-height: 320px;
+    /* Landscape phones (e.g. 734×343) land in this block: cap below the
+       sticky topbar so the map can never exceed the viewport. */
+    min-height: clamp(200px, calc(100svh - var(--top) - var(--s-4)), 320px);
   }
   .cj-viewer .order-3,
   .cj-viewer .order-4 {
     content-visibility: auto;
     contain-intrinsic-size: auto 600px;
+  }
+  /* Modal footer pills: "View full DNR detailed report" overflows a 48px
+     nowrap pill at 375px — let the label wrap and the button grow. */
+  .cj-viewer #wellModal .btn {
+    white-space: normal; line-height: 1.2;
+    height: auto !important; min-height: 48px;
   }
 }
 
@@ -342,6 +350,6 @@ body.cj-viewer { font-family: var(--font-body); }
     position: sticky;
     top: calc(var(--top) + var(--s-4));
     height: calc(100svh - var(--top) - 2 * var(--s-4));
-    min-height: 400px;
+    min-height: min(400px, calc(100svh - var(--top) - 2 * var(--s-4)));
   }
 }

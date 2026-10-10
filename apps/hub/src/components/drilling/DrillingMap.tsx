@@ -20,6 +20,7 @@ import type {
 import { useEffect, useMemo, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "./drilling-map-viewer.css";
+import { installMapGestureHint } from "./map-gesture-hint";
 
 /** Runtime style injection — guarantees type rings even if CSS bundling drops map rules. */
 const MAP_MARKER_STYLE_ID = "vj-map-marker-styles-g-before-r";
@@ -283,6 +284,7 @@ export function DrillingMap({
   useEffect(() => {
     if (!containerRef.current) return;
     let cancelled = false;
+    let removeGestureHint: (() => void) | undefined;
     ensureMapMarkerStyles();
 
     void import("leaflet")
@@ -293,10 +295,16 @@ export function DrillingMap({
         leafletRef.current = L;
         // Prefer not to steal keyboard focus — on iOS Safari map focus was
         // yanking the document scroll back to the top after dispatch load.
+        const coarse =
+          window.matchMedia?.("(pointer: coarse)").matches ?? false;
         const map = L.map(containerRef.current, {
           // Keep default interaction; we only avoid auto-focus scroll.
+          // On touch devices dragging stays off: one finger scrolls the page,
+          // two fingers pan/zoom the map (Leaflet TouchZoom).
+          dragging: !coarse,
         }).setView([center.lat, center.lon], 13, { animate: false });
         const mapEl = map.getContainer();
+        if (coarse) removeGestureHint = installMapGestureHint(mapEl);
         mapEl.setAttribute("tabindex", "-1");
         // Leaflet sometimes focuses the map container on create/setView.
         mapEl.blur();
@@ -312,6 +320,7 @@ export function DrillingMap({
           fillOpacity: 0.07,
         }).addTo(map);
         mapRef.current = map;
+        (window as unknown as { __cjMap?: LeafletMap }).__cjMap = map;
         setMapZoom(map.getZoom());
         map.on("zoomend", () => setMapZoom(map.getZoom()));
         // Re-cull markers for the new viewport after pans (zoom changes
@@ -323,9 +332,11 @@ export function DrillingMap({
     const markersByKey = markersByKeyRef.current;
     return () => {
       cancelled = true;
+      removeGestureHint?.();
       setMapReady(false);
       mapRef.current?.remove();
       mapRef.current = null;
+      (window as unknown as { __cjMap?: LeafletMap }).__cjMap = undefined;
       leafletRef.current = null;
       markersRef.current = null;
       markersByKey.clear();

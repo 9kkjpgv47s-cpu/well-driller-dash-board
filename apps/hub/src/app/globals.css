@@ -216,8 +216,11 @@
 }
 
 /* Tap-target floor: Leaflet zoom buttons ship at 30px; checkbox labels wrap
-   their input so the row is the real click target. */
-.leaflet-bar a {
+   their input so the row is the real click target. leaflet.css's
+   `.leaflet-touch .leaflet-bar a` is (0,2,1) so we need (0,3,1) to win
+   regardless of stylesheet order; the first selector covers L_NO_TOUCH. */
+.leaflet-container .leaflet-bar a,
+.leaflet-container.leaflet-touch .leaflet-bar a {
   width: var(--tap);
   height: var(--tap);
   line-height: var(--tap);

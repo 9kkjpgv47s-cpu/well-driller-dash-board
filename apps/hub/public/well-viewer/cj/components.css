@@ -205,7 +205,7 @@
 /* compact variants — smaller type/padding, tap floor still holds */
 .input-sm, .select-sm { min-height: var(--tap); padding: 0.25rem 0.55rem; font-size: var(--fs-xs); }
 .select-sm { padding-right: 1.8rem; background-position: calc(100% - 13px) 50%, calc(100% - 8px) 50%; }
-@media (max-width: 760px) { .input-sm, .select-sm { font-size: 16px; } }
+@media (max-width: 760px), (pointer: coarse) { .input-sm, .select-sm { font-size: 16px; } }
 .form-row { display: flex; gap: var(--s-3); align-items: flex-end; flex-wrap: wrap; }
 .form-row .field { flex: 0 0 auto; }
 .form-row .field.grow { flex: 1 1 260px; }
@@ -335,6 +335,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 }
 .modal-dialog {
   width: min(560px, 100%); max-height: 84vh; overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface); color: var(--ink);
   border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
@@ -366,6 +367,13 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 
 /* ---------- Layout helpers ---------- */
 .cj-main { flex: 1; min-width: 0; padding: 0 var(--gutter) var(--s-8); }
+@supports (padding: env(safe-area-inset-left)) {
+  .cj-main {
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+    padding-bottom: calc(var(--s-8) + env(safe-area-inset-bottom));
+  }
+}
 .cj-main > * { width: min(100%, var(--wrap)); margin-left: auto; margin-right: auto; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-4); margin-bottom: var(--s-4); }
 .section-head h2 { font-size: var(--fs-lg); }
@@ -373,8 +381,10 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 .section-head .actions { display: flex; gap: var(--s-2); align-items: center; }
 
 /* ---------- Touch ergonomics ----------
-   Kill the tap delay + tap highlight on controls. #map keeps Leaflet's own
-   touch-action: none so gestures still own the map surface. */
+   Kill the tap delay + tap highlight on controls. On coarse-pointer devices
+   both maps run with Leaflet dragging off (two-finger pan/zoom via TouchZoom);
+   the map container gets touch-action: pan-x pan-y so one finger scrolls the
+   page natively, and .cj-map-gesture-hint explains the gesture. */
 .cj-viewer a, .cj-viewer button, .cj-viewer input, .cj-viewer select,
 .cj-viewer label, .cj-viewer textarea,
 .cj-shell a, .cj-shell button, .cj-shell input, .cj-shell select,
@@ -387,6 +397,28 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 .cj-viewer #map label, .cj-viewer #map select {
   touch-action: auto;
 }
+/* Two-finger map model on touch: with dragging off Leaflet's own class CSS
+   already yields pan-x pan-y (no .leaflet-touch-drag); pin it here so a
+   vendored leaflet.css or stylesheet order can never bring back
+   touch-action: none. */
+@media (pointer: coarse) {
+  .cj-viewer #map,
+  .cj-shell .leaflet-container.leaflet-touch-zoom { touch-action: pan-x pan-y; }
+}
+.cj-map-gesture-hint {
+  position: absolute; inset: 0; z-index: 1200;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--s-4);
+  pointer-events: none;
+  opacity: 0; transition: opacity var(--dur-fast);
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
+}
+.cj-map-gesture-hint span {
+  background: var(--ink); color: var(--bg);
+  font: 500 var(--fs-sm)/1.3 var(--font-body);
+  padding: 0.55rem 0.95rem; border-radius: 999px; text-align: center;
+}
+.leaflet-container.is-gesture-hint .cj-map-gesture-hint { opacity: 1; }
 
 /* ---------- Well cards (nearest/registry wells strips) ----------
    Button cards in a scroll grid. Chips use the map's marker color code —

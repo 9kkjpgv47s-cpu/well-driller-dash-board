@@ -32,6 +32,12 @@ Real parsed: 97.476% (target 90%). Parseable JSON: 100%. See `npm run verify:lit
 
 - Auth + storage + moderation hooks (blocked on Dom policy — confirmed 2026-08-30)
 
+### N6 — API cold start: `/api/wells-nearby` + `/api/area-insights` 503 on prod — NEXT (Dom 2026-10-10: "tackle after mobile fixes")
+
+- Repro 2026-10-10: 6/6 prod requests → 503 `DNR chunk load timed out after 4000ms (serverless cold start)` (one 500). `dnr-wells-server-cache.ts` races the full-registry load against `DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS = 4000`; no instance stays warm long enough, so every phone falls back to downloading ~19 MB of base chunks client-side (~35 MB with lithology).
+- Direction: spatially shard the registry (grid cells / tiles under `public/well-viewer/` or a server-side index) so a radius query loads only its cells and cold-starts in < 1 s; keep client-chunk fallback. Must not change viewer marker semantics (pin → 2 mi, "Show wells on map" toggle).
+- Done when: prod `/api/wells-nearby` p95 < 1.5 s cold, 0 × 503 over a 20-request cold/warm sweep, hub mobile first load no longer fetches `dnr_wells_base_chunk_*.csv.gz` when the API succeeds.
+
 ## Non-work during `/ce`
 
 - No product feature implementation in this bootstrap  

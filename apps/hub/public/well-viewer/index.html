@@ -183,7 +183,7 @@
         .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
         .modal-backdrop { background: rgba(0,0,0,.75); }
         .z-50 { z-index: 50; }
-        body.modal-open { overflow: hidden; position: fixed; width: 100%; left: 0; top: 0; }
+        body.modal-open { overflow: hidden; position: fixed; width: 100%; left: 0; }
         #wellModal .modal-dialog-inner { display: flex; flex-direction: column; max-height: 90vh; min-height: 0; flex: 1 1 auto; }
         #modalBody { padding-bottom: 120px; -webkit-overflow-scrolling: touch; }
         #wellModal .modal-footer-buttons { flex-shrink: 0; }
@@ -247,6 +247,7 @@
         .safari-banner { display: none !important; }
         .toggle-wrap { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; }
         .toggle-label { font-size: 0.8rem; font-weight: 600; color: #374151; line-height: 1.2; }
+        label.toggle-label { display: block; cursor: pointer; }
         .toggle-sublabel { font-size: 0.65rem; color: #6b7280; font-weight: 400; }
         .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
@@ -288,10 +289,6 @@
         }
         .map-bottom-bar .toggle-wrap { padding: 0; gap: 0.5rem; }
         .map-bottom-bar .toggle-label { font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        @media (max-width: 640px) {
-            .leaflet-container .map-bottom-bar { max-width: calc(100% - 88px); padding: 0.3rem 0.5rem 0.3rem 0.4rem; }
-            .leaflet-container .map-bottom-bar .toggle-label { font-size: 0.65rem; max-width: 42vw; }
-        }
         .elev-marker { min-width: 32px; padding: 1px 3px; border-radius: 6px; font-size: 8px; font-weight: 700; text-align: center; color: #fff; line-height: 1.3; white-space: nowrap; border: 1.5px solid rgba(255,255,255,0.8); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         .combo-marker {
             display: block;
@@ -329,6 +326,13 @@
         .cj-chip-g { color: #2563eb; font-weight: 800; }
         .cj-chip-s { color: #ca8a04; font-weight: 800; }
         .leaflet-container .map-zoom-stack { position: absolute; bottom: 24px; right: 12px; z-index: 1100; }
+        /* Phone: lift the label-size stack above the bottom bar (must come
+           after the base rule above — same specificity, source order wins). */
+        @media (max-width: 640px) {
+            .leaflet-container .map-bottom-bar { max-width: calc(100% - 24px); padding: 0.3rem 0.5rem 0.3rem 0.4rem; }
+            .leaflet-container .map-bottom-bar .toggle-label { font-size: 0.65rem; max-width: 42vw; }
+            .leaflet-container .map-zoom-stack { bottom: 72px; }
+        }
         #modalFooter { flex-wrap: wrap; }
         #modalFooter button { flex: 1 1 140px !important; }
     </style>
@@ -467,19 +471,19 @@
                 <p class="eyebrow plain" style="margin-bottom:0.4rem;">Well Bottom Elevation (ft ASL)</p>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="elevBlue" aria-label="Bottom elevation 700+ ft" onchange="refreshMap()"><span class="toggle-slider" style="background:#93c5fd;"></span></label>
-                    <div><div class="toggle-label" style="color:#1d4ed8;">&#9679; <span class="cj-datalbl">700+ ft</span></div></div>
+                    <div><label class="toggle-label" for="elevBlue" style="color:#1d4ed8;">&#9679; <span class="cj-datalbl">700+ ft</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="elevGreen" aria-label="Bottom elevation 600 to 699 ft" onchange="refreshMap()"><span class="toggle-slider" style="background:#86efac;"></span></label>
-                    <div><div class="toggle-label" style="color:#059669;">&#9679; <span class="cj-datalbl">600&ndash;699 ft</span></div></div>
+                    <div><label class="toggle-label" for="elevGreen" style="color:#059669;">&#9679; <span class="cj-datalbl">600&ndash;699 ft</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="elevOrange" aria-label="Bottom elevation 500 to 599 ft" onchange="refreshMap()"><span class="toggle-slider" style="background:#fdba74;"></span></label>
-                    <div><div class="toggle-label" style="color:#d97706;">&#9679; <span class="cj-datalbl">500&ndash;599 ft</span></div></div>
+                    <div><label class="toggle-label" for="elevOrange" style="color:#d97706;">&#9679; <span class="cj-datalbl">500&ndash;599 ft</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="elevRed" aria-label="Bottom elevation below 500 ft" onchange="refreshMap()"><span class="toggle-slider" style="background:#fca5a5;"></span></label>
-                    <div><div class="toggle-label" style="color:#dc2626;">&#9679; <span class="cj-datalbl">Below 500 ft</span></div></div>
+                    <div><label class="toggle-label" for="elevRed" style="color:#dc2626;">&#9679; <span class="cj-datalbl">Below 500 ft</span></label></div>
                 </div>
             </div>
 
@@ -487,19 +491,19 @@
                 <p class="eyebrow plain" style="margin-bottom:0.4rem;">Well Yield / GPM</p>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="yieldBlue" aria-label="Yield 0.01 to 10 GPM" onchange="refreshMap()"><span class="toggle-slider" style="background:#93c5fd;"></span></label>
-                    <div><div class="toggle-label" style="color:#1d4ed8;">&#9679; <span class="cj-datalbl">0.01&ndash;10 GPM</span></div></div>
+                    <div><label class="toggle-label" for="yieldBlue" style="color:#1d4ed8;">&#9679; <span class="cj-datalbl">0.01&ndash;10 GPM</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="yieldGreen" aria-label="Yield 10.01 to 25 GPM" onchange="refreshMap()"><span class="toggle-slider" style="background:#86efac;"></span></label>
-                    <div><div class="toggle-label" style="color:#059669;">&#9679; <span class="cj-datalbl">10.01&ndash;25 GPM</span></div></div>
+                    <div><label class="toggle-label" for="yieldGreen" style="color:#059669;">&#9679; <span class="cj-datalbl">10.01&ndash;25 GPM</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="yieldOrange" aria-label="Yield 25.01 to 50 GPM" onchange="refreshMap()"><span class="toggle-slider" style="background:#fdba74;"></span></label>
-                    <div><div class="toggle-label" style="color:#d97706;">&#9679; <span class="cj-datalbl">25.01&ndash;50 GPM</span></div></div>
+                    <div><label class="toggle-label" for="yieldOrange" style="color:#d97706;">&#9679; <span class="cj-datalbl">25.01&ndash;50 GPM</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="yieldRed" aria-label="Yield 50.01+ GPM" onchange="refreshMap()"><span class="toggle-slider" style="background:#fca5a5;"></span></label>
-                    <div><div class="toggle-label" style="color:#dc2626;">&#9679; <span class="cj-datalbl">50.01+ GPM</span></div></div>
+                    <div><label class="toggle-label" for="yieldRed" style="color:#dc2626;">&#9679; <span class="cj-datalbl">50.01+ GPM</span></label></div>
                 </div>
             </div>
 
@@ -507,23 +511,23 @@
                 <p class="eyebrow plain" style="margin-bottom:0.4rem;">Well Type Filter</p>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="typeUncon" aria-label="Unconsolidated or gravel wells" onchange="refreshMap()"><span class="toggle-slider" style="background:#93bbfd;"></span></label>
-                    <div><div class="toggle-label" style="color:#2563eb;">&#9679; <span class="cj-datalbl">Unconsolidated / Gravel</span></div></div>
+                    <div><label class="toggle-label" for="typeUncon" style="color:#2563eb;">&#9679; <span class="cj-datalbl">Unconsolidated / Gravel</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="typeRock" aria-label="Bedrock or rock wells" onchange="refreshMap()"><span class="toggle-slider" style="background:#fca5a5;"></span></label>
-                    <div><div class="toggle-label" style="color:#dc2626;">&#9679; <span class="cj-datalbl">Bedrock / Rock</span></div></div>
+                    <div><label class="toggle-label" for="typeRock" style="color:#dc2626;">&#9679; <span class="cj-datalbl">Bedrock / Rock</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="typeBucket" aria-label="Bucket or hand dug wells" onchange="refreshMap()"><span class="toggle-slider" style="background:#fdba74;"></span></label>
-                    <div><div class="toggle-label" style="color:#f97316;">&#9679; <span class="cj-datalbl">Bucket / Hand Dug</span></div></div>
+                    <div><label class="toggle-label" for="typeBucket" style="color:#f97316;">&#9679; <span class="cj-datalbl">Bucket / Hand Dug</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="typeDry" aria-label="Dry hole wells" onchange="refreshMap()"><span class="toggle-slider" style="background:#a1a1aa;"></span></label>
-                    <div><div class="toggle-label" style="color:#111827;">&#9679; <span class="cj-datalbl">Dry Hole</span></div></div>
+                    <div><label class="toggle-label" for="typeDry" style="color:#111827;">&#9679; <span class="cj-datalbl">Dry Hole</span></label></div>
                 </div>
                 <div class="toggle-wrap" style="padding:0.2rem 0;">
                     <label class="toggle-switch"><input type="checkbox" id="typeEstimated" aria-label="Estimated or unverified locations" onchange="refreshMap()"><span class="toggle-slider" style="background:#86efac;"></span></label>
-                    <div><div class="toggle-label" style="color:#16a34a;">&#9679; <span class="cj-datalbl">Estimated / Unverified Location</span></div></div>
+                    <div><label class="toggle-label" for="typeEstimated" style="color:#16a34a;">&#9679; <span class="cj-datalbl">Estimated / Unverified Location</span></label></div>
                 </div>
             </div>
         </div>
@@ -534,11 +538,11 @@
                 <div class="map-bottom-bar" role="group" aria-label="Map display options">
                     <div class="toggle-wrap">
                         <label class="toggle-switch"><input type="checkbox" id="showMapWells" aria-label="Show wells on map" onchange="onShowMapWellsChange()"><span class="toggle-slider" style="background:#34d399;"></span></label>
-                        <div><div class="toggle-label" style="color:#047857;font-weight:700;"><span class="cj-datalbl">Show wells on map</span></div></div>
+                        <div><label class="toggle-label" for="showMapWells" style="color:#047857;font-weight:700;"><span class="cj-datalbl">Show wells on map</span></label></div>
                     </div>
                     <div class="toggle-wrap">
                         <label class="toggle-switch"><input type="checkbox" id="hideWells" aria-label="Hide well labels" onchange="refreshMap()"><span class="toggle-slider" style="background:#d1d5db;"></span></label>
-                        <div><div class="toggle-label" style="color:#dc2626;font-weight:700;">Hide well labels</div></div>
+                        <div><label class="toggle-label" for="hideWells" style="color:#dc2626;font-weight:700;">Hide well labels</label></div>
                     </div>
                 </div>
                 <div class="map-zoom-stack bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden" title="Bigger / smaller well labels (not map zoom)">
@@ -900,6 +904,21 @@
             });
         }
 
+        var cjCoarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+        function cjInstallGestureHint(map) {
+            var el = map.getContainer();
+            if (el.querySelector('.cj-map-gesture-hint')) return;
+            var hint = document.createElement('div');
+            hint.className = 'cj-map-gesture-hint'; hint.setAttribute('aria-hidden', 'true');
+            hint.innerHTML = '<span>Use two fingers to move the map</span>';
+            el.appendChild(hint);
+            var timer = null;
+            function hide() { el.classList.remove('is-gesture-hint'); }
+            function show() { el.classList.add('is-gesture-hint'); clearTimeout(timer); timer = setTimeout(hide, 1400); }
+            el.addEventListener('touchmove', function (e) { if (e.touches.length === 1) show(); else hide(); }, { passive: true });
+            el.addEventListener('touchcancel', function () { clearTimeout(timer); timer = setTimeout(hide, 1200); }, { passive: true });
+            el.addEventListener('touchend', function () { clearTimeout(timer); timer = setTimeout(hide, 900); }, { passive: true });
+        }
         function initMap() {
             if (typeof L === 'undefined') {
                 var el = document.getElementById('loadFailedPanel');
@@ -912,7 +931,9 @@
             }
             if (map) return;
             if (!wellLayer) wellLayer = L.featureGroup();
-            map = L.map('map', { scrollWheelZoom: false, zoomControl: false }).setView([39.7628, -86.3997], 11);
+            map = L.map('map', { scrollWheelZoom: false, zoomControl: false, dragging: !cjCoarsePointer }).setView([39.7628, -86.3997], 11);
+            window.__cjMap = map;
+            if (cjCoarsePointer) cjInstallGestureHint(map);
             L.control.zoom({ position: 'topright' }).addTo(map);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, minZoom: 8, attribution: '© OpenStreetMap | C&J Well co' }).addTo(map);
             map.addLayer(wellLayer);
@@ -3136,7 +3157,7 @@
             document.getElementById('modalContent').innerHTML = buildSummaryHtml(w, { loading: true });
             hideLogViewer();
             document.getElementById('wellModal').classList.remove('hidden');
-            document.body.classList.add('modal-open');
+            cjLockBodyScroll();
             var api = dnrApiUrl(refNo);
             var shardUrls = lithoShardUrls(refNo);
             if (hasLithCsv) {
@@ -3164,10 +3185,13 @@
             });
         }
 
+        var cjModalScrollY = 0;
+        function cjLockBodyScroll() { cjModalScrollY = window.pageYOffset || document.documentElement.scrollTop || 0; document.body.style.top = '-' + cjModalScrollY + 'px'; document.body.classList.add('modal-open'); }
+        function cjUnlockBodyScroll() { document.body.classList.remove('modal-open'); document.body.style.top = ''; window.scrollTo(0, cjModalScrollY); }
         function closeModal() {
             hideLogViewer();
             document.getElementById('wellModal').classList.add('hidden');
-            document.body.classList.remove('modal-open');
+            cjUnlockBodyScroll();
         }
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && !document.getElementById('wellModal').classList.contains('hidden')) closeModal();

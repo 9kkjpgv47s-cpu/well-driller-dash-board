@@ -6,6 +6,7 @@ import { getLithLayers } from "@/lib/area-well-analytics";
 import { fetchJsonOrFallback } from "@/lib/http/fetch-json";
 import { resolveWellRefNo } from "@/lib/well-identity";
 import { getWellDisplayDepthFtViewer } from "@/lib/viewer-well-map";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { Icon } from "@/components/ui/Icon";
 
 type DnrApi = {
@@ -75,6 +76,10 @@ export function WellDetailModal({ well, onClose, onAddToJob }: Props) {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+
+  // Lock document scroll while the dialog is open — stops the background
+  // scrolling under touch drags (scroll chaining past the sheet).
+  useBodyScrollLock(well != null);
 
   // Escape-to-close + focus trap while the dialog is open; restores the
   // previously focused element (usually the map marker trigger) on close.
