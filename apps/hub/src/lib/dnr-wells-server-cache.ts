@@ -3,6 +3,11 @@ import {
   loadBaseChunksFromDisk,
   loadFullChunksFromDisk,
 } from "@/lib/dnr-chunk-server";
+import {
+  hasWellTiles,
+  loadWellsForRadiusFromTiles,
+  resetWellTileCache,
+} from "@/lib/dnr-tile-server";
 
 /** Local/dev budget for loading gz chunks from disk. */
 export const DNR_WELLS_SERVER_LOAD_TIMEOUT_MS = 20_000;
@@ -81,6 +86,43 @@ export function getDnrWellsFullCachedForApi(): Promise<WellRecord[]> {
   );
 }
 
+// --- Radius reads: 0.1° tiles when built, whole registry otherwise ---
+
+export type WellsForRadius = {
+  wells: WellRecord[];
+  /** "tiles" = only the 0.1° tiles the query bbox touches were read. */
+  source: "tiles" | "registry";
+  /** Base tiles read (0 for the registry path). */
+  tiles: number;
+};
+
+/**
+ * Radius-scoped well load for the API routes.  When the tile set exists under
+ * public/well-viewer/tiles/ only the intersecting tiles are parsed — small
+ * enough to finish inside the Vercel cold-start budget.  Otherwise falls back
+ * to the legacy whole-registry caches under the same timeout.
+ */
+export async function getDnrWellsForRadiusCachedForApi(
+  lat: number,
+  lon: number,
+  radiusMiles: number,
+  opts: { lithology: boolean },
+  timeoutMs = getDnrWellsServerLoadTimeoutMs(),
+): Promise<WellsForRadius> {
+  if (await hasWellTiles()) {
+    const loaded = await getDnrWellsServerCachedWithTimeout(
+      loadWellsForRadiusFromTiles(lat, lon, radiusMiles, opts),
+      timeoutMs,
+    );
+    return { wells: loaded.wells, source: "tiles", tiles: loaded.tiles };
+  }
+  const wells = await getDnrWellsServerCachedWithTimeout(
+    opts.lithology ? getDnrWellsFullCached() : getDnrWellsBaseCached(),
+    timeoutMs,
+  );
+  return { wells, source: "registry", tiles: 0 };
+}
+
 // --- Legacy aliases (backward compat) ---
 
 /** @deprecated Use getDnrWellsFullCached for area-insights or getDnrWellsBaseCached for wells-nearby. */
@@ -93,10 +135,10 @@ export function getDnrWellsServerCachedForApi(): Promise<WellRecord[]> {
   return getDnrWellsFullCachedForApi();
 }
 
-export function getDnrWellsServerCachedWithTimeout(
-  cachePromise: Promise<WellRecord[]>,
+export function getDnrWellsServerCachedWithTimeout<T>(
+  cachePromise: Promise<T>,
   timeoutMs: number,
-): Promise<WellRecord[]> {
+): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
@@ -117,4 +159,5 @@ export function resetDnrWellsServerCache(): void {
   baseWellsCachePromise = null;
   fullWellsCache = null;
   fullWellsCachePromise = null;
+  resetWellTileCache();
 }

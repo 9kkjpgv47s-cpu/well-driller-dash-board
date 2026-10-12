@@ -19,7 +19,7 @@ const LITHO_CHUNK_PREFIX = "dnr_wells_litho_chunk_";
 const CHUNK_SUFFIX = ".csv.gz";
 const DISCOVERY_BATCH_SIZE = 4;
 
-function viewerDir(): string {
+export function viewerDir(): string {
   return path.join(process.cwd(), "public", "well-viewer");
 }
 
@@ -114,7 +114,7 @@ export async function hasSplitChunks(): Promise<boolean> {
  * copied onto the corresponding base row. Copy-on-write: getLithLayers
  * memoizes per-record in a WeakMap, so never mutate lithology_json in place.
  */
-function mergeLithoIntoBase(
+export function mergeLithoIntoBase(
   base: WellRecord[],
   litho: WellRecord[],
 ): WellRecord[] {

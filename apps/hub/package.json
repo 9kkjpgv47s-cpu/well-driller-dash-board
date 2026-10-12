@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "verify:chunks": "python3 ../../scripts/verify-hub-well-chunks.py",
+    "verify:tiles": "python3 ../../scripts/verify-hub-well-tiles.py",
     "verify:lithology-kpi": "python3 ../../scripts/report-lithology-kpi.py",
     "verify:viewer-hub-artifacts": "python3 ../../scripts/verify-viewer-hub-artifacts.py",
     "lithology:export-none": "python3 ../../scripts/export-none-lithology-wells.py --out ../../data/out/lithology-none-wells.csv",
