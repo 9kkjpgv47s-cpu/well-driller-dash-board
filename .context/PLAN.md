@@ -32,11 +32,15 @@ Real parsed: 97.476% (target 90%). Parseable JSON: 100%. See `npm run verify:lit
 
 - Auth + storage + moderation hooks (blocked on Dom policy — confirmed 2026-08-30)
 
-### N6 — API cold start: `/api/wells-nearby` + `/api/area-insights` 503 on prod — NEXT (Dom 2026-10-10: "tackle after mobile fixes")
+### N6 — API cold start: `/api/wells-nearby` + `/api/area-insights` 503 on prod — ✅ DONE 2026-10-12
 
-- Repro 2026-10-10: 6/6 prod requests → 503 `DNR chunk load timed out after 4000ms (serverless cold start)` (one 500). `dnr-wells-server-cache.ts` races the full-registry load against `DNR_WELLS_SERVER_LOAD_TIMEOUT_VERCEL_MS = 4000`; no instance stays warm long enough, so every phone falls back to downloading ~19 MB of base chunks client-side (~35 MB with lithology).
-- Direction: spatially shard the registry (grid cells / tiles under `public/well-viewer/` or a server-side index) so a radius query loads only its cells and cold-starts in < 1 s; keep client-chunk fallback. Must not change viewer marker semantics (pin → 2 mi, "Show wells on map" toggle).
-- Done when: prod `/api/wells-nearby` p95 < 1.5 s cold, 0 × 503 over a 20-request cold/warm sweep, hub mobile first load no longer fetches `dnr_wells_base_chunk_*.csv.gz` when the API succeeds.
+- Was: every cold lambda parsed the full registry against a 4 s budget → 503 (30/30 prod requests failed on 2026-10-12 before the fix).
+- Fix: 0.1° well tiles under `public/well-viewer/tiles/` (hub `505fc5a`); routes read only the bbox tiles. Deployed + verified on prod: 120/120 → 200, 0×5xx, cold p95 698 ms (target < 1.5 s), hub mobile first load downloads no chunks. Evidence in PROGRESS.md (2026-10-12).
+- Open edge: 25 mi API-cap queries over dense areas can still exceed the 4 s budget on a fresh lambda (falls back to client chunks as designed); hub UI radii (≤ 5 mi) are unaffected.
+
+### N7 — Push both repos to GitHub — BLOCKED on credentials
+
+- Hub `design/cj-universal` is 7 commits ahead of origin, standalone viewer 4 ahead. Needs `gh auth login` / git credentials on this Mac; Vercel git integration will then rebuild the same code.
 
 ## Non-work during `/ce`
 

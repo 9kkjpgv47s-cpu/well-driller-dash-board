@@ -1,5 +1,20 @@
 # Progress ledger
 
+## 2026-10-12 — N6: API cold-start 503s fixed with 0.1° well tiles; mobile + dark-chip work deployed
+
+### Fix (hub `505fc5a`)
+- Root cause (repro'd live before the fix: 30/30 requests failed — 27×503 "DNR chunk load timed out after 4000ms", 3×500 `_error` HTML): `/api/wells-nearby` + `/api/area-insights` parsed the whole registry (10 base + 10 litho gz chunks, 414,953 rows) on every cold lambda, racing a 4 s budget it never met.
+- Registry sharded into **0.1° lat/lon tiles** under `apps/hub/public/well-viewer/tiles/` (`scripts/build_well_tiles.py` → 1,056 base + 1,056 litho tiles + `manifest.json`, 36 MB; deterministic bytes, re-run = zero diff). Tile key = `floor(lat/0.1)_floor(lon/0.1)` pinned in both Python and `well-tiles.ts`. A radius query reads only its bbox tiles (`dnr-tile-server.ts`, per-tile single-flight cache, litho merged by id with the same `mergeLithoIntoBase`); `getDnrWellsForRadiusCachedForApi` falls back to the legacy whole-registry caches when tiles are absent. Routes emit `X-Wells-Source: tiles|registry` + `X-Wells-Tiles`. `npm run verify:tiles` checks manifest/tiles against the chunks. NFT traces all 2,113 tile files into both routes without `outputFileTracingIncludes`; `public/well-viewer` 76 → 112 MB.
+- Parity: `TILES_PARITY=1 vitest run src/lib/well-tiles.realdata.test.ts` — 12 centers × radii {0.3, 2, 5, 25}: `queryWellsNearby` deep-equal, `computeAreaInsights` deep-equal, filter-path id sets equal. Only semantic change: with viewer filter params, "source order" is tile-key order (hub UI never sends filters).
+- Gates: lint 0, tsc clean, vitest 187/187 (+23), build clean, local sweep 120/120 → 200 (cold p95 83 ms).
+
+### Deploy (Vercel CLI, clean worktrees; GitHub push still blocked — no credentials)
+- Hub: staged `--prod --skip-domain` build → `vercel promote` (staged URL was SSO-protected, so verification ran on the prod domain). Standalone viewer `6e84b41` → prod. Both serve stamp `2026-10-12-mobile-dark-chips`; dark-chip (`cjDataColorize`, `.cj-dc`) + mobile (`cjInstallGestureHint`, `cjLockBodyScroll`) code confirmed live on both origins.
+- Prod sweep (20 centers × 3 requests, cold + warm pass; `docs/design/qa/api-cold-start/prod-after/`): **120/120 → 200, all `tiles`, 0×5xx**. Genuine first cold request 698 ms. Cold p50/p95/max: wells-nearby r=2 236/698/1229 ms; area-insights r=2 99/229/255 ms; r=0.3 78/118/163 ms. Warm p95 ≤ 87 ms. Baseline for contrast in `prod-before/`.
+- Mobile first load (`apps/hub/scripts/qa/no-chunk-fetch.mjs`, iPhone 14 Pro + Pixel 7, SW blocked): `/api/wells-nearby` 200 `tiles`, `/api/area-insights` 200, **0 `dnr_wells_*` chunk downloads**, markers rendered. Evidence `docs/design/qa/mobile-no-chunk-fetch/`.
+- show-wells-toggle live: 38/38 in-hub, 38/38 standalone (`docs/design/qa/show-wells-toggle/live-2026-10-12/`). Script's expected stamp updated to the new build.
+- Known edge (not a hub UI path): `wells-nearby` at the 25 mi API cap over Indianapolis (88 tiles, ~61k rows with lithology) hit the 4 s budget once on a fresh lambda → 503 → designed client-chunk fallback; `area-insights` r=25 served in 4.8 s. r=5 ≤ 1.3 s cold. Follow-up if ever needed: longer budget or coarser tiles for radii > 5 mi.
+
 ## 2026-10-10 — Dark theme: data chips lose the light "paper" fill (viewer list + modal)
 
 - Problem: in dark, `.cj-data` and the `#modalBody` inline-color rules put locked light-tuned data hexes on a cream chip (`--data-chip #EFE9DF`) — bright rectangles on every well card. Dom: remove them.
@@ -23,7 +38,7 @@
 - `npm run lint` 0 errors, `tsc --noEmit` clean, `vitest` 164/164, `next build` clean; `scripts/sync-cj-design.sh --check` OK; standalone `cj/` byte-identical to `design/cj`.
 - Mobile runner re-run: 494 rows — modal scroll 9/9, input-zoom 50/50, overflow 50/50, map-geometry 40/40 (`touch-action: pan-x pan-y`, no trap), gesture 42/42 (Pixel 7 real CDP one-finger drag scrolls the page 185 px with 0 m map pan; two-finger synthetic pan moves the map 1.7–7 km; desktop mouse drag still pans), toggle-text-tap 8/8, bottom-bar 24/24, tap targets 50/50 incl. 44×44 zoom buttons. Remaining FAILs are the 50 sub-12 px text rows Dom chose to keep + 3 `dnr-report` 404s from the static dev server (serverless route). `show-wells-toggle.mjs` still 38/38. SW: `caches.keys()` = `driller-hub-v2-shell` only. Evidence: `docs/design/qa/mobile-audit/local-fixed/` (curated shots; full set archived in `/tmp/driller-audit/mobile-shots-archive/`).
 - Chromium caveat: Playwright device emulation does not flip `(pointer: coarse)` reliably, so Pixel 7 gesture cells stub `matchMedia` (documented in the runner); WebKit profiles report coarse natively.
-- Not deployed yet (needs Dom's go). GitHub push still blocked (no credentials).
+- Deployed 2026-10-12 together with the dark-chip change and N6 (see top entry). GitHub push still blocked (no credentials).
 
 ## 2026-10-08 — Post-design-migration regression audit: viewer "Show wells on map" toggle restored
 
