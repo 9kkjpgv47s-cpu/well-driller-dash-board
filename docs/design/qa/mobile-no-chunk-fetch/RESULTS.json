@@ -1,0 +1,449 @@
+{
+  "url": "https://driller-hub.vercel.app/?lat=39.6009&lon=-86.5265",
+  "at": "2026-10-12T17:26:39.949Z",
+  "fail": false,
+  "checks": [
+    {
+      "dev": "iphone14p",
+      "check": "/api/wells-nearby 200 + x-wells-source:tiles",
+      "expected": "200 tiles",
+      "actual": "200/tiles",
+      "pass": true
+    },
+    {
+      "dev": "iphone14p",
+      "check": "/api/area-insights 200",
+      "expected": "200",
+      "actual": "200, 200",
+      "pass": true
+    },
+    {
+      "dev": "iphone14p",
+      "check": "no registry chunk fetches",
+      "expected": "0",
+      "actual": "0",
+      "pass": true
+    },
+    {
+      "dev": "iphone14p",
+      "check": "map markers rendered",
+      "expected": ">0",
+      "actual": "markers=15 panes=7",
+      "pass": true
+    },
+    {
+      "dev": "pixel7",
+      "check": "/api/wells-nearby 200 + x-wells-source:tiles",
+      "expected": "200 tiles",
+      "actual": "200/tiles",
+      "pass": true
+    },
+    {
+      "dev": "pixel7",
+      "check": "/api/area-insights 200",
+      "expected": "200",
+      "actual": "200, 200",
+      "pass": true
+    },
+    {
+      "dev": "pixel7",
+      "check": "no registry chunk fetches",
+      "expected": "0",
+      "actual": "0",
+      "pass": true
+    },
+    {
+      "dev": "pixel7",
+      "check": "map markers rendered",
+      "expected": ">0",
+      "actual": "markers=16 panes=7",
+      "pass": true
+    }
+  ],
+  "runs": [
+    {
+      "label": "iphone14p",
+      "requests": [
+        {
+          "url": "https://driller-hub.vercel.app/?lat=39.6009&lon=-86.5265",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/619-ba102abea3e3d0e4.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/webpack-fbe00dbd87626840.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/main-app-d0c453942ef7afd8.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/9cc5b37ab1350db7-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/app/layout-c855db104bce29f9.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/css/9254fc535f4d4f39.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/22a5144ee8d83bca-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/e6099e249fd938cc-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/app/page-81bb2e1fe1f5f178.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/4bd1b696-c023c6e3521b1417.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/255-87552e6e05b8e3aa.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/css/1de76be520b4de19.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/area-insights?lat=39.6009&lon=-86.5265&radius=2",
+          "status": 200,
+          "source": "tiles",
+          "tiles": "4"
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/area-insights?lat=39.6009&lon=-86.5265&radius=0.3",
+          "status": 200,
+          "source": "tiles",
+          "tiles": "2"
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/wells-nearby?lat=39.6009&lon=-86.5265&radius=2&limit=800&lithology=1",
+          "status": 200,
+          "source": "tiles",
+          "tiles": "4"
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/css/7a04e0e42e942455.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/355.a3207acc3e23474d.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/well-viewer/vendor/MarkerCluster.Default.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/well-viewer/vendor/MarkerCluster.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/d0deef33.cac6acee3fffe7af.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/well-viewer/vendor/leaflet.markercluster.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://b.tile.openstreetmap.org/13/2127/3112.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://b.tile.openstreetmap.org/13/2126/3113.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://a.tile.openstreetmap.org/13/2126/3112.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://c.tile.openstreetmap.org/13/2127/3113.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/weather?lat=39.6009&lon=-86.5265&timezone=America%2FIndiana%2FIndianapolis&date=2026-10-12",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        }
+      ],
+      "consoleErrs": []
+    },
+    {
+      "label": "pixel7",
+      "requests": [
+        {
+          "url": "https://driller-hub.vercel.app/?lat=39.6009&lon=-86.5265",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/main-app-d0c453942ef7afd8.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/9cc5b37ab1350db7-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/app/layout-c855db104bce29f9.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/22a5144ee8d83bca-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/255-87552e6e05b8e3aa.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/98e207f02528a563-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/e6099e249fd938cc-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/css/9254fc535f4d4f39.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/app/page-81bb2e1fe1f5f178.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/619-ba102abea3e3d0e4.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/css/1de76be520b4de19.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/media/d3ebbfd689654d3a-s.p.woff2",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/webpack-fbe00dbd87626840.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/4bd1b696-c023c6e3521b1417.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/355.a3207acc3e23474d.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/css/7a04e0e42e942455.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/weather?lat=39.6009&lon=-86.5265&timezone=America%2FIndiana%2FIndianapolis&date=2026-10-12",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/area-insights?lat=39.6009&lon=-86.5265&radius=2",
+          "status": 200,
+          "source": "tiles",
+          "tiles": "4"
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/area-insights?lat=39.6009&lon=-86.5265&radius=0.3",
+          "status": 200,
+          "source": "tiles",
+          "tiles": "2"
+        },
+        {
+          "url": "https://driller-hub.vercel.app/api/wells-nearby?lat=39.6009&lon=-86.5265&radius=2&limit=800&lithology=1",
+          "status": 200,
+          "source": "tiles",
+          "tiles": "4"
+        },
+        {
+          "url": "https://driller-hub.vercel.app/_next/static/chunks/d0deef33.cac6acee3fffe7af.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/well-viewer/vendor/MarkerCluster.Default.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/well-viewer/vendor/MarkerCluster.css",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://driller-hub.vercel.app/well-viewer/vendor/leaflet.markercluster.js",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://b.tile.openstreetmap.org/13/2126/3113.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://b.tile.openstreetmap.org/13/2127/3112.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://c.tile.openstreetmap.org/13/2127/3113.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://c.tile.openstreetmap.org/13/2126/3114.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://a.tile.openstreetmap.org/13/2126/3112.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        },
+        {
+          "url": "https://a.tile.openstreetmap.org/13/2127/3114.png",
+          "status": 200,
+          "source": "",
+          "tiles": ""
+        }
+      ],
+      "consoleErrs": []
+    }
+  ]
+}

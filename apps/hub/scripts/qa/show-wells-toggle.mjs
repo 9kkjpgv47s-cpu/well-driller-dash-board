@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Show-wells-on-map toggle QA (build 2026-10-08-show-wells-toggle).
+ * Show-wells-on-map toggle QA (build 2026-10-12-mobile-dark-chips).
  * Verifies the restored April-2026 marker gating on the vendored static viewer:
  *   - no pin + toggle OFF -> 0 markers (sidebar list NOT gated)
  *   - no pin + toggle ON  -> wells-in-view markers (<=800 cap)
@@ -119,7 +119,7 @@ const meta = { base: BASE, at: new Date().toISOString() };
   const w = await waitWells(pg);
   meta.buildStamp = await pg.evaluate(() => (document.querySelector('meta[name="cj-build"]')||{}).content || "");
   await sleep(3000);
-  rec("A","build stamp","2026-10-08-show-wells-toggle", meta.buildStamp, meta.buildStamp==="2026-10-08-show-wells-toggle");
+  rec("A","build stamp","2026-10-12-mobile-dark-chips", meta.buildStamp, meta.buildStamp==="2026-10-12-mobile-dark-chips");
   rec("A","#showMapWells exists","true", await pg.evaluate(() => !!document.getElementById("showMapWells")), await pg.evaluate(() => !!document.getElementById("showMapWells")));
   const smw = await checked(pg,"showMapWells");
   rec("A","#showMapWells unchecked","false", smw, smw===false);
