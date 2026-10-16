@@ -9,6 +9,15 @@ export const INVALID_LAT_LON_ERROR =
 
 export type LatLon = { lat: number; lon: number };
 
+/**
+ * Numeric query param, `NaN` unless the whole value is a number — unlike
+ * `parseFloat`, which would read `40junk` as `40`.
+ */
+export function parseNumericParam(raw: string | null): number {
+  const trimmed = raw?.trim();
+  return trimmed ? Number(trimmed) : Number.NaN;
+}
+
 export function isValidLatLon(lat: number, lon: number): boolean {
   return (
     Number.isFinite(lat) &&
@@ -35,9 +44,11 @@ export function parseLatLonRadiusParams(
   maxRadiusMiles: number,
   defaultRadiusMiles?: number,
 ): (LatLon & { radiusMiles: number }) | { error: string } {
-  const lat = parseFloat(sp.get("lat") ?? "");
-  const lon = parseFloat(sp.get("lon") ?? "");
-  let radiusMiles = parseFloat(sp.get("radius") ?? sp.get("radiusMiles") ?? "");
+  const lat = parseNumericParam(sp.get("lat"));
+  const lon = parseNumericParam(sp.get("lon"));
+  let radiusMiles = parseNumericParam(
+    sp.get("radius") ?? sp.get("radiusMiles"),
+  );
 
   if (!isValidLatLon(lat, lon)) return { error: INVALID_LAT_LON_ERROR };
   if (!Number.isFinite(radiusMiles) || radiusMiles <= 0) {
