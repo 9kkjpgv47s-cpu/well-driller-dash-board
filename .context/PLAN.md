@@ -42,6 +42,12 @@ Real parsed: 97.476% (target 90%). Parseable JSON: 100%. See `npm run verify:lit
 
 - Hub `design/cj-universal` is 7 commits ahead of origin, standalone viewer 4 ahead. Needs `gh auth login` / git credentials on this Mac; Vercel git integration will then rebuild the same code.
 
+### N8 — MCP plugin (`/api/mcp`) — CODE DONE 2026-10-30, OPERATOR STEPS PENDING
+
+- Commits `54c5ab9` (hosted MCP server, 4 tools, API keys) + `008cd21` (OAuth 2.1 resource server for ChatGPT) on `design/cj-universal`, not pushed.
+- Dom: WorkOS AuthKit tenant (enable CIMD + DCR, Resource Indicator `https://driller-hub.vercel.app/api/mcp`), Vercel env `MCP_OAUTH_ISSUER` / `MCP_OAUTH_JWKS_URL` / `DRILLER_MCP_API_KEYS`, then push + deploy and test the ChatGPT handshake. Checklist in `apps/hub/README.md`.
+- Session handoff: `~/Projects/agent-context/sessions/2026-10-30-driller-mcp-plugin.md`. Follow-ups in OPEN #8.
+
 ## Non-work during `/ce`
 
 - No product feature implementation in this bootstrap  
