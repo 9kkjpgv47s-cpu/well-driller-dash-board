@@ -7,3 +7,4 @@
 5. **Whether 90% lithology is hard ship gate for hub UI** — ✅ RESOLVED 2026-08-18: 97.5% real parsed, target met.
 6. **Hosting production target** — operator-owned; not locked in outline.
 7. **WELL_VIEWER_ROOT path on this machine** — env/runtime, not a repo lock (example path appears in lithology report history only).
+8. **MCP plugin follow-ups** — OAuth for claude.ai/ChatGPT connectors, rate limiting, confirm Indiana DNR data redistribution terms, optimization tool blocked on mock fallback.

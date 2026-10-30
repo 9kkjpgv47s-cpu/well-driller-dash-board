@@ -17,18 +17,23 @@
     "lithology:statewide": "python3 scripts/run-statewide-lithology-plan.py",
     "lithology:iterate-to-target": "python3 scripts/iterate-lithology-to-target.py",
     "test": "vitest run",
-    "test:hub-lithology": "vitest run"
+    "test:hub-lithology": "vitest run",
+    "mcp:smoke": "node scripts/mcp-smoke.mjs"
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "^2.3.1",
     "dnr-report-local": "file:./vendor/dnr-report-local",
     "leaflet": "^1.9.4",
+    "mcp-handler": "^2.3.0",
     "next": "15.5.23",
     "papaparse": "^5.4.1",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@modelcontextprotocol/client": "^2.3.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",

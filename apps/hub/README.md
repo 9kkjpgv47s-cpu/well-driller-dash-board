@@ -23,8 +23,44 @@ Sections are reorderable; radius, view, and ordering persist in `localStorage`.
 | `/api/elevation` | POST DEM ground elevations for a list of locations. |
 | `/api/weather`, `/api/radar` | Forecast + radar proxies for the weather panel. |
 | `/api/dnr-report?refNo=` | Official DNR record HTML parsing for the well detail modal (`vendor/dnr-report-local`). |
+| `/api/mcp` | Hosted MCP server (Streamable HTTP) exposing the same registry to chatbots — bearer key required. |
 
 There is no separate scheduling board, optimization page, or iframe well viewer anymore — those legacy components were removed; git history is the record.
+
+## Connect a chatbot (MCP)
+
+`/api/mcp` is a Streamable HTTP MCP server with four Indiana-only tools:
+`geocode_address`, `area_insights`, `wells_nearby`, `dnr_well_record`.
+
+Auth is a bearer API key from the `DRILLER_MCP_API_KEYS` env var —
+comma-separated `label:key` entries (`acme:dk_abc123,beta:dk_xyz`). Set
+`HUB_PUBLIC_URL` to override the map deep-link base (default
+`https://driller-hub.vercel.app`).
+
+Clients that speak Streamable HTTP directly (Cursor, Claude Code):
+
+```json
+{
+  "driller-hub": {
+    "url": "https://driller-hub.vercel.app/api/mcp",
+    "headers": { "Authorization": "Bearer <key>" }
+  }
+}
+```
+
+Stdio-only clients go through `mcp-remote`:
+
+```json
+{
+  "driller-hub": {
+    "command": "npx",
+    "args": ["-y", "mcp-remote", "https://driller-hub.vercel.app/api/mcp",
+             "--header", "Authorization: Bearer <key>"]
+  }
+}
+```
+
+Local smoke check: `DRILLER_MCP_API_KEY=<key> npm run mcp:smoke -- http://localhost:3000/api/mcp`
 
 ## How well data loads
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsonError } from "@/lib/api/responses";
-import { upstreamJsonHeaders } from "@/lib/http/upstream";
+import { geocodeIndiana } from "@/lib/geocode-server";
 
 /**
  * Server-side forward geocode (Nominatim). Indiana jobsites — no browser CORS.
@@ -12,31 +12,16 @@ export async function GET(req: NextRequest) {
     return jsonError("Query `q` must be 3–200 characters.", 400);
   }
 
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("q", `${q}, Indiana, USA`);
-  url.searchParams.set("format", "json");
-  url.searchParams.set("limit", "5");
-
-  const res = await fetch(url.toString(), {
-    headers: upstreamJsonHeaders(),
-    next: { revalidate: 86400 },
-  });
-
-  if (!res.ok) {
-    return jsonError(`Geocoder returned ${res.status}`, 502);
+  let results;
+  try {
+    results = await geocodeIndiana(q);
+  } catch (e) {
+    // Non-OK Nominatim status → 502 with the same message as before.
+    if (e instanceof Error && e.message.startsWith("Geocoder returned ")) {
+      return jsonError(e.message, 502);
+    }
+    throw e;
   }
-
-  const data = (await res.json()) as {
-    lat: string;
-    lon: string;
-    display_name?: string;
-  }[];
-
-  const results = data.map((r) => ({
-    lat: parseFloat(r.lat),
-    lon: parseFloat(r.lon),
-    label: r.display_name ?? `${r.lat}, ${r.lon}`,
-  }));
 
   return NextResponse.json({ results });
 }

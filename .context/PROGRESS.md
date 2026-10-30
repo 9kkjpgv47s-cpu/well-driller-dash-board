@@ -106,3 +106,11 @@
 
 ### N5 — community notes: STILL BLOCKED
 - Auth + storage + moderation blocked on Dom policy (OPEN #1). No change.
+
+## 2026-10-30 — Hosted MCP server (`/api/mcp`)
+
+- Added Streamable HTTP MCP endpoint at `apps/hub/src/app/api/mcp/route.ts` via `mcp-handler` 2.3.0 + `@modelcontextprotocol/server` 2.3.1 (zod 4.6.7).
+- Bearer API keys from `DRILLER_MCP_API_KEYS` (`label:key` allowlist, constant-time compare); `withMcpAuth` required + `wells:read` scope. No OAuth/well-known/rate limit yet.
+- Four Indiana-only tools: `geocode_address`, `area_insights`, `wells_nearby`, `dnr_well_record` — in-process calls to the same lib functions the JSON routes use; no mock data paths.
+- Extracted `geocodeIndiana` → `src/lib/geocode-server.ts` and the DNR handler shim → `src/lib/dnr-report-server.ts`; routes kept identical responses.
+- Vitest coverage: auth/indiana/tools/route + `scripts/mcp-smoke.mjs` client (`npm run mcp:smoke`). Follow-ups parked in OPEN #8.
