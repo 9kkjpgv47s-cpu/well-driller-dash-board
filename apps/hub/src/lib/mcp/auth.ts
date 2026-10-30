@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import type { AuthInfo } from "@modelcontextprotocol/server";
+import { getEnvOAuthVerifier, type OAuthTokenVerifier } from "./oauth";
 
 /**
  * Bearer API keys for the hosted MCP endpoint, from the
@@ -46,16 +47,50 @@ export function verifyApiKey(
   return clientId ? { clientId } : undefined;
 }
 
-/** `withMcpAuth` token verifier. Never logs the token. */
-export const verifyMcpToken = (
-  _req: Request,
-  bearerToken?: string,
-): Promise<AuthInfo | undefined> => {
-  const verified = verifyApiKey(bearerToken);
-  if (!verified || bearerToken === undefined) return Promise.resolve(undefined);
-  return Promise.resolve({
-    token: bearerToken,
-    clientId: verified.clientId,
-    scopes: ["wells:read"],
-  });
+export type McpTokenVerifierDeps = {
+  /** Raw `DRILLER_MCP_API_KEYS` value; defaults to the env var at call time. */
+  apiKeysRaw?: string;
+  /** OAuth verifier; `null` forces the OAuth path off even when env configures it. */
+  oauthVerifier?: OAuthTokenVerifier | null;
 };
+
+/**
+ * Builds the `withMcpAuth` verifier. API-key allowlist is tried first; when no
+ * key matches, the OAuth verifier (when configured) gets the bearer. A bearer
+ * that fails OAuth verification denies — there is no further fallback.
+ */
+export function createMcpTokenVerifier(
+  deps: McpTokenVerifierDeps = {},
+): (req: Request, bearerToken?: string) => Promise<AuthInfo | undefined> {
+  return async (_req, bearerToken) => {
+    const verified = verifyApiKey(bearerToken, deps.apiKeysRaw);
+    if (verified && bearerToken !== undefined) {
+      return {
+        token: bearerToken,
+        clientId: verified.clientId,
+        scopes: ["wells:read"],
+        extra: { authMethod: "api-key" },
+      };
+    }
+    if (bearerToken === undefined) return undefined;
+    const oauth =
+      deps.oauthVerifier === undefined
+        ? getEnvOAuthVerifier()
+        : (deps.oauthVerifier ?? undefined);
+    if (!oauth) return undefined;
+    return oauth(bearerToken);
+  };
+}
+
+/**
+ * `withMcpAuth` token verifier; env is read per call so route-level env
+ * changes (and tests) take effect without a reload. Never logs the token.
+ */
+export const verifyMcpToken = (
+  req: Request,
+  bearerToken?: string,
+): Promise<AuthInfo | undefined> =>
+  createMcpTokenVerifier({ apiKeysRaw: process.env.DRILLER_MCP_API_KEYS })(
+    req,
+    bearerToken,
+  );

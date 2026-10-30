@@ -259,6 +259,11 @@ export function registerDrillerTools(server: McpServer): void {
       description:
         "Forward-geocode an Indiana street address or place name to coordinates (Nominatim, Indiana-biased). Indiana only. Feed the returned lat/lon into area_insights or wells_nearby.",
       inputSchema: geocodeAddressInputSchema,
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
     },
     async ({ query }) => geocodeAddressTool({ query }),
   );
@@ -270,6 +275,7 @@ export function registerDrillerTools(server: McpServer): void {
       description:
         "Summarize what a water-well driller should expect at an Indiana jobsite: nearby registry well counts, aquifer mix (unconsolidated vs bedrock), gravel/vein signals, depth and yield buckets, with a confidence grade. Indiana only. Use geocode_address first if you only have an address.",
       inputSchema: areaInsightsInputSchema,
+      annotations: { readOnlyHint: true, idempotentHint: true },
     },
     async ({ lat, lon, radius_miles }) =>
       areaInsightsTool({ lat, lon, radius_miles }),
@@ -282,6 +288,7 @@ export function registerDrillerTools(server: McpServer): void {
       description:
         "List Indiana DNR registry wells nearest a point, with distance, depth, static water level, pump rate, and aquifer — the same rows the hub map shows. Indiana only.",
       inputSchema: wellsNearbyInputSchema,
+      annotations: { readOnlyHint: true, idempotentHint: true },
     },
     async ({ lat, lon, radius_miles, limit }) =>
       wellsNearbyTool({ lat, lon, radius_miles, limit }),
@@ -294,6 +301,11 @@ export function registerDrillerTools(server: McpServer): void {
       description:
         "Fetch the official Indiana DNR water well record for a refno (well reference number) — driller's report details parsed from the registry. Indiana only.",
       inputSchema: dnrWellRecordInputSchema,
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
     },
     async ({ ref_no }) => dnrWellRecordTool({ ref_no }),
   );

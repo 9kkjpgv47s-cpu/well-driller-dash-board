@@ -114,3 +114,12 @@
 - Four Indiana-only tools: `geocode_address`, `area_insights`, `wells_nearby`, `dnr_well_record` — in-process calls to the same lib functions the JSON routes use; no mock data paths.
 - Extracted `geocodeIndiana` → `src/lib/geocode-server.ts` and the DNR handler shim → `src/lib/dnr-report-server.ts`; routes kept identical responses.
 - Vitest coverage: auth/indiana/tools/route + `scripts/mcp-smoke.mjs` client (`npm run mcp:smoke`). Follow-ups parked in OPEN #8.
+
+## 2026-10-30 — MCP OAuth 2.1 resource server (ChatGPT-capable)
+
+- `/api/mcp` now accepts both bearer API keys and OAuth JWTs. `MCP_OAUTH_ISSUER` unset ⇒ identical to API-key-only behavior.
+- `src/lib/mcp/oauth.ts` (jose 6.2.13): `createOAuthVerifier` (iss+aud `jwtVerify`, all failures → undefined), RFC 8414 → OIDC JWKS discovery, lazy per-process verifier singleton (`resetOAuthVerifierForTests` for tests).
+- `src/lib/mcp/auth.ts`: `createMcpTokenVerifier` factory — API-key allowlist first (`extra.authMethod: "api-key"`), then injected/env OAuth verifier; failed JWT denies, no fallback.
+- `src/app/.well-known/oauth-protected-resource/route.ts` — hand-written RFC 9728 metadata (deterministic `resource`, 404 when unconfigured) + CORS OPTIONS.
+- Tool `annotations`: readOnly+idempotent on all four, `openWorldHint` on geocode_address/dnr_well_record.
+- Env: `MCP_OAUTH_ISSUER`, `MCP_OAUTH_AUDIENCE` (default = canonical `mcpResourceUrl()`), `MCP_OAUTH_JWKS_URL`. Operator WorkOS setup still pending (Dom) — tracked implicitly under OPEN #8's follow-ups.

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseApiKeys, verifyApiKey } from "./auth";
+import type { AuthInfo } from "@modelcontextprotocol/server";
+import {
+  createMcpTokenVerifier,
+  parseApiKeys,
+  verifyApiKey,
+} from "./auth";
 
 const RAW = "acme:k1, beta:k2 ,bad";
 
@@ -34,5 +39,57 @@ describe("verifyApiKey", () => {
 
   it("denies an undefined bearer", () => {
     expect(verifyApiKey(undefined, RAW)).toBeUndefined();
+  });
+});
+
+describe("createMcpTokenVerifier", () => {
+  const req = new Request("http://localhost/api/mcp");
+
+  const oauthStub = async (token: string): Promise<AuthInfo | undefined> =>
+    token === "valid-jwt"
+      ? {
+          token,
+          clientId: "user_123",
+          scopes: ["wells:read"],
+          extra: { authMethod: "oauth" },
+        }
+      : undefined;
+
+  it("authenticates an allowlisted API key first", async () => {
+    const verify = createMcpTokenVerifier({
+      apiKeysRaw: "acme:k1",
+      oauthVerifier: oauthStub,
+    });
+    const auth = await verify(req, "k1");
+    expect(auth?.clientId).toBe("acme");
+    expect(auth?.extra?.authMethod).toBe("api-key");
+    expect(auth?.scopes).toEqual(["wells:read"]);
+  });
+
+  it("falls through to OAuth for a non-key bearer", async () => {
+    const verify = createMcpTokenVerifier({
+      apiKeysRaw: "acme:k1",
+      oauthVerifier: oauthStub,
+    });
+    const auth = await verify(req, "valid-jwt");
+    expect(auth?.clientId).toBe("user_123");
+    expect(auth?.extra?.authMethod).toBe("oauth");
+  });
+
+  it("denies a bearer that fails OAuth verification", async () => {
+    const verify = createMcpTokenVerifier({
+      apiKeysRaw: "acme:k1",
+      oauthVerifier: oauthStub,
+    });
+    expect(await verify(req, "bad-jwt")).toBeUndefined();
+  });
+
+  it("denies a non-key bearer when OAuth is disabled", async () => {
+    const verify = createMcpTokenVerifier({
+      apiKeysRaw: "acme:k1",
+      oauthVerifier: null,
+    });
+    expect(await verify(req, "valid-jwt")).toBeUndefined();
+    expect(await verify(req, undefined)).toBeUndefined();
   });
 });

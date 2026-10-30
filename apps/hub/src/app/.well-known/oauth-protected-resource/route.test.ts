@@ -1,0 +1,57 @@
+import { afterEach, describe, expect, it } from "vitest";
+import { GET, OPTIONS } from "./route";
+
+const KEYS = [
+  "MCP_OAUTH_ISSUER",
+  "MCP_OAUTH_AUDIENCE",
+  "HUB_PUBLIC_URL",
+] as const;
+
+describe("GET /.well-known/oauth-protected-resource", () => {
+  let saved: Record<string, string | undefined>;
+
+  function stash() {
+    saved = Object.fromEntries(KEYS.map((k) => [k, process.env[k]]));
+    for (const k of KEYS) delete process.env[k];
+  }
+
+  afterEach(() => {
+    for (const k of KEYS) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  });
+
+  it("404s when OAuth is not configured", async () => {
+    stash();
+    const res = await GET();
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "OAuth not configured" });
+  });
+
+  it("serves the protected-resource metadata when configured", async () => {
+    stash();
+    process.env.MCP_OAUTH_ISSUER = "https://issuer.test/";
+    process.env.HUB_PUBLIC_URL = "https://hub.test";
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      resource: "https://hub.test/api/mcp",
+      authorization_servers: ["https://issuer.test"],
+      bearer_methods_supported: ["header"],
+    });
+    expect(res.headers.get("access-control-allow-origin")).toBe("*");
+  });
+});
+
+describe("OPTIONS /.well-known/oauth-protected-resource", () => {
+  it("204s with CORS headers", async () => {
+    const res = await OPTIONS();
+    expect(res.status).toBe(204);
+    expect(res.headers.get("access-control-allow-origin")).toBe("*");
+    expect(res.headers.get("access-control-allow-methods")).toBe(
+      "GET, OPTIONS",
+    );
+    expect(res.headers.get("access-control-allow-headers")).toBe("*");
+  });
+});

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { resetOAuthVerifierForTests } from "@/lib/mcp/oauth";
 import { POST } from "./route";
 
 const URL = "http://localhost/api/mcp";
@@ -19,7 +20,10 @@ function rpcRequest(
 }
 
 type JsonRpcMessage = {
-  result?: { protocolVersion?: string; tools?: { name: string }[] };
+  result?: {
+    protocolVersion?: string;
+    tools?: { name: string; annotations?: { readOnlyHint?: boolean } }[];
+  };
   error?: unknown;
 };
 
@@ -38,17 +42,28 @@ async function readRpc(res: Response): Promise<JsonRpcMessage> {
   return (await res.json()) as JsonRpcMessage;
 }
 
+const ENV_KEYS = [
+  "DRILLER_MCP_API_KEYS",
+  "MCP_OAUTH_ISSUER",
+  "MCP_OAUTH_AUDIENCE",
+  "HUB_PUBLIC_URL",
+] as const;
+
 describe("POST /api/mcp", () => {
-  let prevKeys: string | undefined;
+  let saved: Record<string, string | undefined>;
 
   beforeEach(() => {
-    prevKeys = process.env.DRILLER_MCP_API_KEYS;
+    saved = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
+    for (const k of ENV_KEYS) delete process.env[k];
     process.env.DRILLER_MCP_API_KEYS = "test:tk1";
   });
 
   afterEach(() => {
-    if (prevKeys === undefined) delete process.env.DRILLER_MCP_API_KEYS;
-    else process.env.DRILLER_MCP_API_KEYS = prevKeys;
+    for (const k of ENV_KEYS) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+    resetOAuthVerifierForTests();
   });
 
   it("returns 401 without an Authorization header", async () => {
@@ -104,5 +119,28 @@ describe("POST /api/mcp", () => {
       "geocode_address",
       "wells_nearby",
     ]);
+    for (const tool of list.result?.tools ?? []) {
+      expect(tool.annotations?.readOnlyHint).toBe(true);
+    }
+  });
+
+  it("challenges with an absolute resource_metadata URL in WWW-Authenticate", async () => {
+    process.env.MCP_OAUTH_ISSUER = "https://issuer.test";
+    const res = await POST(
+      rpcRequest({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: "2025-11-25",
+          capabilities: {},
+          clientInfo: { name: "test", version: "0.0.1" },
+        },
+      }),
+    );
+    expect(res.status).toBe(401);
+    expect(res.headers.get("www-authenticate")).toMatch(
+      /resource_metadata="https?:\/\/[^"]+\/\.well-known\/oauth-protected-resource"/,
+    );
   });
 });

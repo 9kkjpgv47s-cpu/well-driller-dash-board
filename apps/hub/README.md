@@ -37,6 +37,30 @@ comma-separated `label:key` entries (`acme:dk_abc123,beta:dk_xyz`). Set
 `HUB_PUBLIC_URL` to override the map deep-link base (default
 `https://driller-hub.vercel.app`).
 
+OAuth 2.1 (for ChatGPT and other OAuth-only clients) is enabled by setting
+`MCP_OAUTH_ISSUER` — e.g. `https://<tenant>.authkit.app` for WorkOS AuthKit.
+Optional: `MCP_OAUTH_AUDIENCE` (defaults to `https://driller-hub.vercel.app/api/mcp`)
+and `MCP_OAUTH_JWKS_URL` (defaults to RFC 8414 → OIDC discovery). The hub is the
+resource server only; it verifies JWTs and serves
+`/.well-known/oauth-protected-resource`. API keys keep working either way.
+
+**Operator setup (WorkOS AuthKit)**
+
+1. Create a WorkOS environment; note the AuthKit domain → `MCP_OAUTH_ISSUER`.
+   Recommended: also set `MCP_OAUTH_JWKS_URL=https://<tenant>.authkit.app/oauth2/jwks`
+   so verification doesn't depend on discovery.
+2. Connect → Configuration: enable **Client ID Metadata Document** and
+   **Dynamic Client Registration**.
+3. Add a Resource Indicator exactly equal to
+   `https://driller-hub.vercel.app/api/mcp` and set it as the default.
+4. Set the env vars in Vercel and redeploy.
+
+**ChatGPT user** (requires Plus/Pro/Business/Enterprise/Edu): chatgpt.com/plugins
+→ **+** → Add custom MCP server → name + URL
+`https://driller-hub.vercel.app/api/mcp` → Authentication: **OAuth** (leave
+client credentials blank) → accept the risk notice → Create as a plugin. First
+use triggers the AuthKit sign-in; afterwards type `@Driller Hub` in chat.
+
 Clients that speak Streamable HTTP directly (Cursor, Claude Code):
 
 ```json
