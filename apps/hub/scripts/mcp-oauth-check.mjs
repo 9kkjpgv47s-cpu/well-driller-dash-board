@@ -110,7 +110,6 @@ const rootUrl =
   metadataUrl ?? `${parsed.origin}/.well-known/oauth-protected-resource`;
 
 let prm;
-let prmUnconfigured = false;
 try {
   const suffixed = await getJson(suffixedUrl);
   const root =
@@ -119,7 +118,6 @@ try {
   report("INFO", "prm", `root ${root.status} ${rootUrl}`);
 
   if (suffixed.status === 404 && root.status === 404) {
-    prmUnconfigured = true;
     report(
       "INFO",
       "prm",
