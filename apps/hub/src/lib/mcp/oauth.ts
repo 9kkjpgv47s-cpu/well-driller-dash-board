@@ -58,16 +58,43 @@ export type OAuthEnvConfig = {
   issuer: string;
   audience: string;
   jwksUrl?: string;
+  scopes: string[];
 };
+
+/**
+ * Scopes advertised in PRM `scopes_supported` (and therefore requested by
+ * clients like ChatGPT). WorkOS grants dynamically-registered clients only
+ * `openid profile email offline_access` — advertising anything else fails at
+ * the authorize endpoint with `invalid_scope`. `offline_access` is what makes
+ * the IdP issue a refresh token.
+ */
+export const DEFAULT_OAUTH_SCOPES = [
+  "openid",
+  "profile",
+  "email",
+  "offline_access",
+];
+
+/** Comma- and/or whitespace-separated, trimmed, de-duped, order preserved. */
+function parseScopes(raw: string | undefined): string[] {
+  const seen = new Set<string>();
+  for (const part of (raw ?? "").split(/[\s,]+/)) {
+    const scope = part.trim();
+    if (scope) seen.add(scope);
+  }
+  return [...seen];
+}
 
 /** `undefined` when `MCP_OAUTH_ISSUER` is unset — OAuth path disabled. */
 export function getOAuthConfigFromEnv(): OAuthEnvConfig | undefined {
   const issuer = process.env.MCP_OAUTH_ISSUER?.replace(/\/$/, "");
   if (!issuer) return undefined;
+  const scopes = parseScopes(process.env.MCP_OAUTH_SCOPES);
   return {
     issuer,
     audience: process.env.MCP_OAUTH_AUDIENCE || mcpResourceUrl(),
     jwksUrl: process.env.MCP_OAUTH_JWKS_URL || undefined,
+    scopes: scopes.length ? scopes : [...DEFAULT_OAUTH_SCOPES],
   };
 }
 

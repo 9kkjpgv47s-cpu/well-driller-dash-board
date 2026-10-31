@@ -41,8 +41,17 @@ OAuth 2.1 (for ChatGPT and other OAuth-only clients) is enabled by setting
 `MCP_OAUTH_ISSUER` — e.g. `https://<tenant>.authkit.app` for WorkOS AuthKit.
 Optional: `MCP_OAUTH_AUDIENCE` (defaults to `https://driller-hub.vercel.app/api/mcp`)
 and `MCP_OAUTH_JWKS_URL` (defaults to RFC 8414 → OIDC discovery). The hub is the
-resource server only; it verifies JWTs and serves
-`/.well-known/oauth-protected-resource`. API keys keep working either way.
+resource server only; it verifies JWTs and serves RFC 9728 protected-resource
+metadata at both `/.well-known/oauth-protected-resource` and
+`/.well-known/oauth-protected-resource/api/mcp`. API keys keep working either
+way.
+
+**Scopes:** the hub advertises `openid profile email offline_access` in
+`scopes_supported` (override with `MCP_OAUTH_SCOPES`, comma/space separated).
+Do not advertise custom scopes such as `wells:read` — AuthKit's dynamically
+registered clients can't be granted them and the IdP returns `invalid_scope`
+at the authorize endpoint. `offline_access` is what makes AuthKit issue the
+refresh token ChatGPT needs.
 
 **Operator setup (WorkOS AuthKit)**
 
@@ -54,6 +63,8 @@ resource server only; it verifies JWTs and serves
 3. Add a Resource Indicator exactly equal to
    `https://driller-hub.vercel.app/api/mcp` and set it as the default.
 4. Set the env vars in Vercel and redeploy.
+5. Run `npm run mcp:oauth-check` (defaults to prod) and fix any `FAIL` before
+   trying ChatGPT.
 
 **ChatGPT user** (requires Plus/Pro/Business/Enterprise/Edu): chatgpt.com/plugins
 → **+** → Add custom MCP server → name + URL

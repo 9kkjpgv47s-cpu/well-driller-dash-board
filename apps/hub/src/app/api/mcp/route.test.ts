@@ -80,6 +80,7 @@ describe("POST /api/mcp", () => {
       }),
     );
     expect(res.status).toBe(401);
+    expect(res.headers.get("www-authenticate")).not.toMatch(/\bscope=/);
   });
 
   it("serves initialize and tools/list for a valid bearer key", async () => {
@@ -142,5 +143,6 @@ describe("POST /api/mcp", () => {
     expect(res.headers.get("www-authenticate")).toMatch(
       /resource_metadata="https?:\/\/[^"]+\/\.well-known\/oauth-protected-resource"/,
     );
+    expect(res.headers.get("www-authenticate")).not.toMatch(/\bscope=/);
   });
 });

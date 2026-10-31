@@ -13,7 +13,6 @@ const handler = createMcpHandler(registerDrillerTools, {
 
 const authHandler = withMcpAuth(handler, verifyMcpToken, {
   required: true,
-  requiredScopes: ["wells:read"],
 });
 
 export { authHandler as GET, authHandler as POST };

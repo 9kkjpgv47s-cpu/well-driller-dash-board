@@ -18,7 +18,8 @@
     "lithology:iterate-to-target": "python3 scripts/iterate-lithology-to-target.py",
     "test": "vitest run",
     "test:hub-lithology": "vitest run",
-    "mcp:smoke": "node scripts/mcp-smoke.mjs"
+    "mcp:smoke": "node scripts/mcp-smoke.mjs",
+    "mcp:oauth-check": "node scripts/mcp-oauth-check.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.3.1",

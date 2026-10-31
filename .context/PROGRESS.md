@@ -123,3 +123,19 @@
 - `src/app/.well-known/oauth-protected-resource/route.ts` — hand-written RFC 9728 metadata (deterministic `resource`, 404 when unconfigured) + CORS OPTIONS.
 - Tool `annotations`: readOnly+idempotent on all four, `openWorldHint` on geocode_address/dnr_well_record.
 - Env: `MCP_OAUTH_ISSUER`, `MCP_OAUTH_AUDIENCE` (default = canonical `mcpResourceUrl()`), `MCP_OAUTH_JWKS_URL`. Operator WorkOS setup still pending (Dom) — tracked implicitly under OPEN #8's follow-ups.
+
+## 2026-10-30 — MCP live on prod (API-key path), Dom-approved deploy
+
+- Pushed `design/cj-universal` (`796cc1a..4cf15f9`). Push only produced a **preview** build — that branch is not the Vercel production branch; production was created explicitly (`dpl_74JXhsEABJ6HrBEz5m8A1qZR9BgP`, target=production, sha `4cf15f9`) via the Vercel MCP connection after Dom granted team access.
+- Vercel env `DRILLER_MCP_API_KEYS` set (production+preview), one label `dom` = Dom's own test key; local copy in `apps/hub/.env.local` (gitignored). No OAuth vars yet (waiting on Dom's WorkOS AuthKit tenant).
+- Prod evidence: unauth POST → 401 with `WWW-Authenticate … resource_metadata=…/.well-known/oauth-protected-resource`; wrong key → 401; PRM → 404 (OAuth unconfigured, by design); `/` → 200. Smoke `logs/mcp-smoke-prod-20261030-1950.log`: 4 tools, Kokomo 964 wells / confidence high 86, nearby 5 of 65.
+- Next: Dom creates WorkOS staging env (CIMD + DCR on, Resource Indicator `https://driller-hub.vercel.app/api/mcp` default) → set `MCP_OAUTH_ISSUER` + `MCP_OAUTH_JWKS_URL` → redeploy → ChatGPT connector test.
+
+## 2026-10-31 — OAuth discovery hardening for ChatGPT
+
+- Removed `requiredScopes: ["wells:read"]` from `withMcpAuth` on `/api/mcp` — the 401 `WWW-Authenticate` no longer advertises `scope="wells:read"`, which ChatGPT would forward to WorkOS and get `invalid_scope` (AuthKit grants DCR/CIMD clients only `openid profile email offline_access`). `required: true` kept; `scopes: ["wells:read"]` in the AuthInfo builders untouched.
+- PRM JSON now carries `scopes_supported` from `getOAuthConfigFromEnv().scopes` — new `MCP_OAUTH_SCOPES` env (comma/space separated, de-duped) with default `openid profile email offline_access` (`offline_access` ⇒ refresh token).
+- PRM body/CORS moved to `src/lib/mcp/protected-resource.ts`; served at both `/.well-known/oauth-protected-resource` and the path-suffixed `/.well-known/oauth-protected-resource/api/mcp` (spec 2025-11-25 clients try the suffix first; the challenge still points at root).
+- New `npm run mcp:oauth-check` (`scripts/mcp-oauth-check.mjs`, zero deps): challenge → PRM (both URLs) → AS metadata (S256/CIMD+DCR/`none` auth/refresh_token/offline_access/PRM-vs-AS scope cross-check) → JWKS. Logs: `apps/hub/logs/mcp-oauth-check-prod-20261031-1249.log` (challenge PASS, PRM 404 unconfigured as expected) and `mcp-oauth-check-google-20261031-1249.log` (exercises FAIL path).
+- Vitest: 30 files / 236 pass / 1 skip (was 29 / 229). Lint 0 errors; `next build` clean with both well-known routes listed.
+- Still pending: Dom's WorkOS tenant → `MCP_OAUTH_ISSUER` (+ recommended `MCP_OAUTH_JWKS_URL`) in Vercel → redeploy → `npm run mcp:oauth-check` → ChatGPT connector test.

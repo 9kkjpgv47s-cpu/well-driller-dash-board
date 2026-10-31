@@ -4,6 +4,7 @@ import { GET, OPTIONS } from "./route";
 const KEYS = [
   "MCP_OAUTH_ISSUER",
   "MCP_OAUTH_AUDIENCE",
+  "MCP_OAUTH_SCOPES",
   "HUB_PUBLIC_URL",
 ] as const;
 
@@ -39,8 +40,19 @@ describe("GET /.well-known/oauth-protected-resource", () => {
       resource: "https://hub.test/api/mcp",
       authorization_servers: ["https://issuer.test"],
       bearer_methods_supported: ["header"],
+      scopes_supported: ["openid", "profile", "email", "offline_access"],
     });
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
+  });
+
+  it("honors MCP_OAUTH_SCOPES in scopes_supported", async () => {
+    stash();
+    process.env.MCP_OAUTH_ISSUER = "https://issuer.test";
+    process.env.MCP_OAUTH_SCOPES = "openid, offline_access";
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.scopes_supported).toEqual(["openid", "offline_access"]);
   });
 });
 

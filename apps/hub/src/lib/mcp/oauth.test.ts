@@ -98,6 +98,7 @@ describe("getOAuthConfigFromEnv", () => {
     "MCP_OAUTH_ISSUER",
     "MCP_OAUTH_AUDIENCE",
     "MCP_OAUTH_JWKS_URL",
+    "MCP_OAUTH_SCOPES",
     "HUB_PUBLIC_URL",
   ] as const;
   let saved: Record<string, string | undefined>;
@@ -128,6 +129,7 @@ describe("getOAuthConfigFromEnv", () => {
       issuer: "https://issuer.test",
       audience: "https://hub.test/api/mcp",
       jwksUrl: undefined,
+      scopes: ["openid", "profile", "email", "offline_access"],
     });
   });
 
@@ -140,7 +142,37 @@ describe("getOAuthConfigFromEnv", () => {
       issuer: "https://issuer.test",
       audience: "custom-aud",
       jwksUrl: "https://issuer.test/jwks.json",
+      scopes: ["openid", "profile", "email", "offline_access"],
     });
+  });
+
+  it("uses the default scopes when MCP_OAUTH_SCOPES is unset", () => {
+    stash();
+    process.env.MCP_OAUTH_ISSUER = "https://issuer.test";
+    expect(getOAuthConfigFromEnv()?.scopes).toEqual([
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+    ]);
+  });
+
+  it("parses MCP_OAUTH_SCOPES on commas and whitespace", () => {
+    stash();
+    process.env.MCP_OAUTH_ISSUER = "https://issuer.test";
+    process.env.MCP_OAUTH_SCOPES = "openid,  email offline_access,,";
+    expect(getOAuthConfigFromEnv()?.scopes).toEqual([
+      "openid",
+      "email",
+      "offline_access",
+    ]);
+  });
+
+  it("drops duplicate scopes, keeping first-seen order", () => {
+    stash();
+    process.env.MCP_OAUTH_ISSUER = "https://issuer.test";
+    process.env.MCP_OAUTH_SCOPES = "openid openid,email,openid";
+    expect(getOAuthConfigFromEnv()?.scopes).toEqual(["openid", "email"]);
   });
 });
 
