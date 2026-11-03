@@ -29,11 +29,32 @@ There is no separate scheduling board, optimization page, or iframe well viewer 
 
 ## Connect a chatbot (MCP)
 
-`/api/mcp` is a Streamable HTTP MCP server with four Indiana-only tools:
-`geocode_address`, `area_insights`, `wells_nearby`, `dnr_well_record`.
+`/api/mcp` is a Streamable HTTP MCP server with nine Indiana-only tools, all
+read-only and all advertised with an `outputSchema` for structured results:
+
+| Tool | What it returns |
+| --- | --- |
+| `job_brief` | **Primary entry point.** Resolves a jobsite from lat/lon, an address/place name, or pasted dispatch text → field brief: area insights, nearest wells, shared-aquifer drill windows (ft below ground), ground elevation (ft ASL), and a short weather summary. |
+| `parse_dispatch` | Structured fields from a pasted dispatch email (GPS, address, contact, phone, schedule, pump HP, distance off drive); geocodes the address when the paste lacks GPS. |
+| `area_insights` | Registry-backed insight report for a point + radius (well counts, aquifer mix, gravel/vein signals, depth/yield buckets, confidence grade). |
+| `wells_nearby` | Nearest registry wells with distance (mi), depth/static water (ft), pump rate (GPM), aquifer, county. |
+| `ground_layers` | Lithology logs converted to feet ASL; shared water-bearing bands across ≥2 wells with a drill window at the jobsite DEM elevation. |
+| `site_optimization` | Registry-backed site assessment: neighborhood stats, 0–100 scores, checklist. Never returns mock data — errors on cold start instead. |
+| `job_weather` | Day summaries around an anchor date (Open-Meteo GFS/ECMWF + NWS): temps, POP %, precip inches, wind, thunderstorm hours. |
+| `geocode_address` | Indiana-biased Nominatim forward geocode → lat/lon WGS84. |
+| `dnr_well_record` | Official DNR record for a refno, plus a flat `summary` map of top-level scalar fields. |
+
+The server also ships two prompts (`prep-drilling-job`, `compare-sites`) and two
+resources (`driller-hub://glossary`, `driller-hub://data-coverage`) that explain
+the field vocabulary and data coverage.
+
+Units: depths, static water, and drill windows are feet below ground surface;
+fields suffixed `_asl_ft` are feet above sea level; pump rates are GPM;
+distances are miles; lat/lon are WGS84 degrees.
 
 Auth is a bearer API key from the `DRILLER_MCP_API_KEYS` env var —
-comma-separated `label:key` entries (`acme:dk_abc123,beta:dk_xyz`). Set
+comma-separated `label:key` entries (`acme:dk_abc123,beta:dk_xyz`). Requests are
+rate-limited per key (default 120/min; `MCP_RATE_LIMIT_PER_MIN` overrides). Set
 `HUB_PUBLIC_URL` to override the map deep-link base (default
 `https://driller-hub.vercel.app`).
 
@@ -96,6 +117,13 @@ Stdio-only clients go through `mcp-remote`:
 ```
 
 Local smoke check: `DRILLER_MCP_API_KEY=<key> npm run mcp:smoke -- http://localhost:3000/api/mcp`
+
+Golden-task eval (runs the task suite in `scripts/mcp-eval-tasks.json` against a
+live server and writes a pass/fail report):
+
+```bash
+DRILLER_MCP_API_KEY=<key> npm run mcp:eval -- http://localhost:3000/api/mcp --out logs/mcp-eval.json
+```
 
 ## How well data loads
 

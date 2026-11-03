@@ -174,10 +174,33 @@ export function extractScheduleLine(lines: string[]): string | null {
     // M/D with optional time, e.g. "6/3 8:00 AM"
     if (/^\d{1,2}\/\d{1,2}(?:\s|$)/.test(line)) return line;
   }
+  // Labeled schedule lines: "Schedule: Tue 4/8 8:00 AM", "Scheduled - 6/3"
+  for (const line of lines) {
+    if (line.length >= 80) continue;
+    const m =
+      /^(?:schedule|scheduled|appt|appointment|on[\s-]?site|start(?:\s*date)?|arrival|drill\s*date)\s*[:#\-]\s*(.+)$/i.exec(
+        line,
+      );
+    if (m?.[1] && /\d{1,2}\/\d{1,2}/.test(m[1])) return line;
+  }
   return null;
 }
 
 export function extractContactName(lines: string[]): string | null {
+  // Labeled contact lines: "Contact: Megan Despain (765) 555-0132"
+  for (const line of lines) {
+    const m =
+      /^(?:contact|customer|owner|attn|attention|homeowner)\s*[:#\-]?\s*(.+)$/i.exec(
+        line,
+      );
+    if (m?.[1]) {
+      const v = m[1]
+        .replace(/\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}.*$/, "")
+        .replace(/[\s,;–—-]+$/, "")
+        .trim();
+      if (LIKELY_NAME.test(v)) return v;
+    }
+  }
   const scheduleIdx = lines.findIndex(
     (l) => /^\d{1,2}\/\d{1,2}/.test(l) && l.length < 80,
   );

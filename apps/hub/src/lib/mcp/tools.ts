@@ -2,7 +2,6 @@ import { z } from "zod";
 import type { CallToolResult, McpServer } from "@modelcontextprotocol/server";
 import {
   computeAreaInsights,
-  haversineMiles,
   type WellRecord,
 } from "@/lib/area-well-analytics";
 import { fetchDnrReport } from "@/lib/dnr-report-server";
@@ -10,49 +9,129 @@ import { getDnrWellsForRadiusCachedForApi } from "@/lib/dnr-wells-server-cache";
 import { geocodeIndiana } from "@/lib/geocode-server";
 import { getWellSpatialIndex } from "@/lib/well-spatial-index";
 import { MAX_RADIUS_MILES, queryWellsNearby } from "@/lib/wells-nearby";
-import { mapDeepLink } from "./hub-url";
+import {
+  errorResult,
+  geoFooter,
+  nearbyWellLine,
+  nearbyWellOutputSchema,
+  projectNearbyWell,
+  REGISTRY_UNAVAILABLE,
+  SOURCE_LINE,
+} from "./common";
+import { registerDrillerContent } from "./content";
+import { registerParseDispatchTool } from "./dispatch";
+import { registerGroundLayersTool } from "./ground-layers";
 import { isInIndiana, outsideIndianaMessage } from "./indiana";
-
-const SOURCE_LINE =
-  "Source: Indiana DNR water well registry via Driller Hub. Registry data, not a drilling guarantee. Indiana only.";
-
-const REGISTRY_UNAVAILABLE =
-  "Well registry is temporarily unavailable on the server (cold start). Retry in a few seconds.";
+import { registerJobBriefTool } from "./job-brief";
+import { registerJobWeatherTool } from "./job-weather";
+import { registerSiteOptimizationTool } from "./optimization";
+import { withRetry } from "./retry";
 
 const DNR_BODY_TEXT_LIMIT = 12_000;
+const DNR_SUMMARY_FIELD_LIMIT = 40;
 
 export const geocodeAddressInputSchema = z.object({
-  query: z.string().min(3).max(200),
+  query: z
+    .string()
+    .min(3)
+    .max(200)
+    .describe("Indiana street address or place name"),
 });
 
 export const areaInsightsInputSchema = z.object({
-  lat: z.number().min(-90).max(90),
-  lon: z.number().min(-180).max(180),
-  radius_miles: z.number().min(0.1).max(MAX_RADIUS_MILES).default(5),
+  lat: z
+    .number()
+    .min(-90)
+    .max(90)
+    .describe("Latitude in WGS84 decimal degrees"),
+  lon: z
+    .number()
+    .min(-180)
+    .max(180)
+    .describe("Longitude in WGS84 decimal degrees"),
+  radius_miles: z
+    .number()
+    .min(0.1)
+    .max(MAX_RADIUS_MILES)
+    .default(5)
+    .describe("Search radius in miles (default 5)"),
 });
 
 export const wellsNearbyInputSchema = z.object({
-  lat: z.number().min(-90).max(90),
-  lon: z.number().min(-180).max(180),
-  radius_miles: z.number().min(0.1).max(MAX_RADIUS_MILES).default(2),
-  limit: z.number().int().min(1).max(100).default(25),
+  lat: z
+    .number()
+    .min(-90)
+    .max(90)
+    .describe("Latitude in WGS84 decimal degrees"),
+  lon: z
+    .number()
+    .min(-180)
+    .max(180)
+    .describe("Longitude in WGS84 decimal degrees"),
+  radius_miles: z
+    .number()
+    .min(0.1)
+    .max(MAX_RADIUS_MILES)
+    .default(2)
+    .describe("Search radius in miles (default 2)"),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(25)
+    .describe("Max wells returned, nearest-first (default 25)"),
 });
 
 export const dnrWellRecordInputSchema = z.object({
-  ref_no: z.string().min(1).max(32),
+  ref_no: z
+    .string()
+    .min(1)
+    .max(32)
+    .describe("DNR well reference number (refno), e.g. from wells_nearby"),
 });
 
-function errorResult(text: string): CallToolResult {
-  return { content: [{ type: "text", text }], isError: true };
-}
+export const geocodeAddressOutputSchema = z.looseObject({
+  results: z.array(
+    z.looseObject({
+      lat: z.number(),
+      lon: z.number(),
+      label: z.string(),
+    }),
+  ),
+});
 
-function geoFooter(lat: number, lon: number): string {
-  return `Map: ${mapDeepLink(lat, lon)}\n${SOURCE_LINE}`;
-}
+export const areaInsightsOutputSchema = z.looseObject({
+  center: z.looseObject({ lat: z.number(), lon: z.number() }),
+  radiusMiles: z.number(),
+  totalWellsInRadius: z.number(),
+  wellsWithLithology: z.number(),
+  wellsWithGpm: z.number(),
+  insightQuality: z.looseObject({
+    grade: z.enum(["high", "medium", "low"]),
+    score: z.number(),
+    reasons: z.array(z.string()),
+  }),
+  narratives: z.array(
+    z.looseObject({ text: z.string(), scope: z.string() }),
+  ),
+  depthMedianFt: z.number().nullable(),
+  disclaimers: z.array(z.string()),
+});
 
-function isBlank(v: string | number | undefined): boolean {
-  return v == null || String(v).trim() === "";
-}
+export const wellsNearbyOutputSchema = z.looseObject({
+  wells: z.array(nearbyWellOutputSchema),
+  total_in_radius: z.number(),
+  truncated: z.boolean(),
+});
+
+export const dnrWellRecordOutputSchema = z.looseObject({
+  summary: z.record(
+    z.string(),
+    z.union([z.string(), z.number(), z.boolean()]),
+  ),
+  record: z.unknown().optional(),
+});
 
 export async function geocodeAddressTool(args: {
   query: string;
@@ -89,11 +168,12 @@ export async function areaInsightsTool(args: {
 
   let wells: WellRecord[];
   try {
-    const loaded = await getDnrWellsForRadiusCachedForApi(
-      lat,
-      lon,
-      radiusMiles,
-      { lithology: true },
+    const loaded = await withRetry(
+      () =>
+        getDnrWellsForRadiusCachedForApi(lat, lon, radiusMiles, {
+          lithology: true,
+        }),
+      { retries: 2, delayMs: 400 },
     );
     wells = loaded.wells;
   } catch {
@@ -126,62 +206,6 @@ export async function areaInsightsTool(args: {
   };
 }
 
-export type NearbyWellProjection = {
-  refno?: string | number;
-  well_id?: string | number;
-  lat?: number;
-  lon?: number;
-  distance_miles: number;
-  depth?: string | number;
-  static_water?: string | number;
-  pump_rate?: string | number;
-  aquifer?: string | number;
-  county?: string | number;
-  casing_material?: string | number;
-  rock_start_ft?: string | number;
-  depth_bedrock?: string | number;
-  well_use?: string | number;
-};
-
-function projectNearbyWell(
-  w: WellRecord,
-  lat: number,
-  lon: number,
-): NearbyWellProjection {
-  const wlat = Number(w.lat);
-  const wlon = Number(w.lon);
-  const distance =
-    Number.isFinite(wlat) && Number.isFinite(wlon)
-      ? Math.round(haversineMiles(lat, lon, wlat, wlon) * 10) / 10
-      : NaN;
-  const out: NearbyWellProjection = { distance_miles: distance };
-  if (!isBlank(w.refno)) out.refno = w.refno;
-  if (!isBlank(w.well_id)) out.well_id = w.well_id;
-  if (Number.isFinite(wlat)) out.lat = wlat;
-  if (Number.isFinite(wlon)) out.lon = wlon;
-  if (!isBlank(w.depth)) out.depth = w.depth;
-  if (!isBlank(w.static_water)) out.static_water = w.static_water;
-  if (!isBlank(w.pump_rate)) out.pump_rate = w.pump_rate;
-  if (!isBlank(w.aquifer)) out.aquifer = w.aquifer;
-  if (!isBlank(w.county)) out.county = w.county;
-  if (!isBlank(w.casing_material)) out.casing_material = w.casing_material;
-  if (!isBlank(w.rock_start_ft)) out.rock_start_ft = w.rock_start_ft;
-  if (!isBlank(w.depth_bedrock)) out.depth_bedrock = w.depth_bedrock;
-  if (!isBlank(w.well_use)) out.well_use = w.well_use;
-  return out;
-}
-
-function nearbyWellLine(w: NearbyWellProjection): string {
-  const parts = [`#${w.refno ?? w.well_id ?? "?"}`];
-  if (Number.isFinite(w.distance_miles)) parts.push(`${w.distance_miles} mi`);
-  if (w.depth != null) parts.push(`depth ${w.depth} ft`);
-  if (w.static_water != null) parts.push(`static ${w.static_water} ft`);
-  if (w.pump_rate != null) parts.push(`${w.pump_rate} GPM`);
-  if (w.aquifer != null) parts.push(`aquifer ${w.aquifer}`);
-  if (w.county != null) parts.push(`${w.county} Co`);
-  return parts.join(" · ");
-}
-
 export async function wellsNearbyTool(args: {
   lat: number;
   lon: number;
@@ -197,9 +221,13 @@ export async function wellsNearbyTool(args: {
 
   let loaded;
   try {
-    loaded = await getDnrWellsForRadiusCachedForApi(lat, lon, radiusMiles, {
-      lithology: false,
-    });
+    loaded = await withRetry(
+      () =>
+        getDnrWellsForRadiusCachedForApi(lat, lon, radiusMiles, {
+          lithology: false,
+        }),
+      { retries: 2, delayMs: 400 },
+    );
   } catch {
     return errorResult(REGISTRY_UNAVAILABLE);
   }
@@ -231,23 +259,64 @@ export async function wellsNearbyTool(args: {
   };
 }
 
+/** Scalars-only summary of the DNR record's top-level fields (cap 40). */
+function scalarSummary(body: Record<string, unknown>) {
+  const out: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(body)) {
+    if (Object.keys(out).length >= DNR_SUMMARY_FIELD_LIMIT) break;
+    if (
+      typeof v === "string" ||
+      typeof v === "number" ||
+      typeof v === "boolean"
+    ) {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+/**
+ * True when a DNR report body carries real content — guards the baseline bug
+ * where an empty `{}` (or all-blank fields) was reported as a successful
+ * record fetch.
+ */
+function isMeaningfulRecordBody(body: unknown): boolean {
+  if (body == null) return false;
+  if (typeof body !== "object") return body !== "";
+  if (Array.isArray(body)) return body.length > 0;
+  const entries = Object.entries(body as Record<string, unknown>);
+  if (!entries.length) return false;
+  return entries.some(([, v]) => v !== null && v !== undefined && v !== "");
+}
+
 export async function dnrWellRecordTool(args: {
   ref_no: string;
 }): Promise<CallToolResult> {
   const { status, body } = await fetchDnrReport(args.ref_no);
-  if (status >= 400 || body === null) {
+  if (status >= 400 || !isMeaningfulRecordBody(body)) {
     return errorResult(
-      `DNR registry returned status ${status} for ref_no "${args.ref_no}".`,
+      `DNR registry returned status ${status} for ref_no "${args.ref_no}"${
+        status < 400 ? " with an empty record body" : ""
+      }.`,
     );
   }
 
-  let text = JSON.stringify(body, null, 2);
+  const summary =
+    typeof body === "object" && !Array.isArray(body)
+      ? scalarSummary(body as Record<string, unknown>)
+      : {};
+  const structuredContent =
+    typeof body === "object" && !Array.isArray(body)
+      ? { ...(body as Record<string, unknown>), summary }
+      : { summary, record: body };
+
+  let text = JSON.stringify(structuredContent, null, 2);
   if (text.length > DNR_BODY_TEXT_LIMIT) {
     text = `${text.slice(0, DNR_BODY_TEXT_LIMIT)}… (truncated)`;
   }
   return {
     content: [{ type: "text", text: `${text}\n${SOURCE_LINE}` }],
-    structuredContent: body as Record<string, unknown>,
+    structuredContent: structuredContent as Record<string, unknown>,
   };
 }
 
@@ -257,8 +326,9 @@ export function registerDrillerTools(server: McpServer): void {
     {
       title: "Geocode Indiana address",
       description:
-        "Forward-geocode an Indiana street address or place name to coordinates (Nominatim, Indiana-biased). Indiana only. Feed the returned lat/lon into area_insights or wells_nearby.",
+        "Forward-geocode an Indiana street address or place name to coordinates (Nominatim, Indiana-biased). Returns lat/lon in WGS84 decimal degrees — feed them into job_brief, area_insights, or wells_nearby. Indiana only.",
       inputSchema: geocodeAddressInputSchema,
+      outputSchema: geocodeAddressOutputSchema,
       annotations: {
         readOnlyHint: true,
         idempotentHint: true,
@@ -273,8 +343,9 @@ export function registerDrillerTools(server: McpServer): void {
     {
       title: "Indiana drilling area insights",
       description:
-        "Summarize what a water-well driller should expect at an Indiana jobsite: nearby registry well counts, aquifer mix (unconsolidated vs bedrock), gravel/vein signals, depth and yield buckets, with a confidence grade. Indiana only. Use geocode_address first if you only have an address.",
+        "Summarize what a water-well driller should expect at an Indiana jobsite: nearby registry well counts, aquifer mix (unconsolidated vs bedrock), gravel/vein signals, depth buckets (feet below ground) and yield buckets (GPM), with a confidence grade. Indiana only. Use job_brief for a full field brief, or geocode_address first if you only have an address.",
       inputSchema: areaInsightsInputSchema,
+      outputSchema: areaInsightsOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true },
     },
     async ({ lat, lon, radius_miles }) =>
@@ -286,8 +357,9 @@ export function registerDrillerTools(server: McpServer): void {
     {
       title: "Indiana wells nearby",
       description:
-        "List Indiana DNR registry wells nearest a point, with distance, depth, static water level, pump rate, and aquifer — the same rows the hub map shows. Indiana only.",
+        "List Indiana DNR registry wells nearest a point (lat/lon WGS84 degrees), nearest-first: distance in miles, depth and static water in feet below ground surface, pump rate in GPM, aquifer label, county — the same rows the hub map shows. Indiana only.",
       inputSchema: wellsNearbyInputSchema,
+      outputSchema: wellsNearbyOutputSchema,
       annotations: { readOnlyHint: true, idempotentHint: true },
     },
     async ({ lat, lon, radius_miles, limit }) =>
@@ -299,8 +371,9 @@ export function registerDrillerTools(server: McpServer): void {
     {
       title: "Indiana DNR well record",
       description:
-        "Fetch the official Indiana DNR water well record for a refno (well reference number) — driller's report details parsed from the registry. Indiana only.",
+        "Fetch the official Indiana DNR water well record for a refno (well reference number) — the driller's report parsed from the registry, plus a flat `summary` map of its top-level scalar fields (depths in feet, rates in GPM). Indiana only.",
       inputSchema: dnrWellRecordInputSchema,
+      outputSchema: dnrWellRecordOutputSchema,
       annotations: {
         readOnlyHint: true,
         idempotentHint: true,
@@ -309,4 +382,11 @@ export function registerDrillerTools(server: McpServer): void {
     },
     async ({ ref_no }) => dnrWellRecordTool({ ref_no }),
   );
+
+  registerJobBriefTool(server);
+  registerParseDispatchTool(server);
+  registerJobWeatherTool(server);
+  registerGroundLayersTool(server);
+  registerSiteOptimizationTool(server);
+  registerDrillerContent(server);
 }

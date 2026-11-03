@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isValidLatLon } from "@/lib/api/geo-query";
 import { jsonError } from "@/lib/api/responses";
-import { upstreamJsonHeaders } from "@/lib/http/upstream";
+import { lookupElevations, type ElevationLocation } from "@/lib/elevation";
 
 /**
  * DEM ground elevation at lat/lon (meters), same sources as the standalone viewer:
@@ -10,72 +10,6 @@ import { upstreamJsonHeaders } from "@/lib/http/upstream";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-type Loc = { lat: number; lon: number };
-
-function parseOpenTopoData(text: string): number[] | null {
-  try {
-    const data = JSON.parse(text) as {
-      results?: { elevation?: number | null }[];
-      status?: string;
-    };
-    if (!data?.results || !Array.isArray(data.results)) return null;
-    if (data.status && data.status !== "OK") return null;
-    return data.results.map((r) =>
-      r.elevation != null && Number.isFinite(Number(r.elevation))
-        ? Number(r.elevation)
-        : NaN,
-    );
-  } catch {
-    return null;
-  }
-}
-
-async function fetchOpenTopoDataM(locations: Loc[]): Promise<number[] | null> {
-  if (!locations.length) return [];
-  const qs = locations.map((p) => `${p.lat},${p.lon}`).join("|");
-  const url = `https://api.opentopodata.org/v1/srtm90m?locations=${encodeURIComponent(qs)}`;
-  const res = await fetch(url, {
-    headers: upstreamJsonHeaders(),
-    next: { revalidate: 86400 },
-  });
-  const text = await res.text();
-  const arr = parseOpenTopoData(text);
-  if (!arr || arr.length !== locations.length) return null;
-  if (arr.some((n) => Number.isNaN(n))) return null;
-  return arr;
-}
-
-async function fetchOpenElevationM(locations: Loc[]): Promise<(number | null)[]> {
-  if (!locations.length) return [];
-  const res = await fetch("https://api.open-elevation.com/api/v1/lookup", {
-    method: "POST",
-    headers: {
-      ...upstreamJsonHeaders(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      locations: locations.map((p) => ({
-        latitude: p.lat,
-        longitude: p.lon,
-      })),
-    }),
-  });
-  if (!res.ok) return locations.map(() => null);
-  const data = (await res.json()) as {
-    results?: { elevation?: number | null }[];
-  };
-  if (!data?.results || data.results.length !== locations.length) {
-    return locations.map(() => null);
-  }
-  return data.results.map((r) =>
-    r.elevation != null && Number.isFinite(Number(r.elevation))
-      ? Number(r.elevation)
-      : null,
-  );
-}
-
-const M_TO_FT = 3.28084;
-
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -83,14 +17,14 @@ export async function POST(req: NextRequest) {
   } catch {
     return jsonError("Invalid JSON body.", 400);
   }
-  const locations = (body as { locations?: Loc[] }).locations;
+  const locations = (body as { locations?: ElevationLocation[] }).locations;
   if (!Array.isArray(locations) || locations.length === 0) {
     return jsonError("Provide `locations`: [{ lat, lon }, ...].", 400);
   }
   if (locations.length > 50) {
     return jsonError("At most 50 locations per request.", 400);
   }
-  const normalized: Loc[] = [];
+  const normalized: ElevationLocation[] = [];
   for (const p of locations) {
     const lat = Number(p.lat);
     const lon = Number(p.lon);
@@ -103,21 +37,7 @@ export async function POST(req: NextRequest) {
     normalized.push({ lat, lon });
   }
 
-  let elevationsM: (number | null)[] | null = null;
-  try {
-    const ot = await fetchOpenTopoDataM(normalized);
-    if (ot) elevationsM = ot;
-  } catch {
-    elevationsM = null;
-  }
-
-  if (!elevationsM) {
-    elevationsM = await fetchOpenElevationM(normalized);
-  }
-
-  const elevationsFt = elevationsM.map((m) =>
-    m != null && Number.isFinite(m) ? Math.round(m * M_TO_FT) : null,
-  );
+  const { elevationsFt, elevationsM } = await lookupElevations(normalized);
 
   return NextResponse.json({ elevationsFt, elevationsM });
 }

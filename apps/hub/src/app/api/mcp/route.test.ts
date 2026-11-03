@@ -22,7 +22,13 @@ function rpcRequest(
 type JsonRpcMessage = {
   result?: {
     protocolVersion?: string;
-    tools?: { name: string; annotations?: { readOnlyHint?: boolean } }[];
+    tools?: {
+      name: string;
+      annotations?: { readOnlyHint?: boolean };
+      outputSchema?: unknown;
+    }[];
+    prompts?: { name: string }[];
+    resources?: { uri: string }[];
   };
   error?: unknown;
 };
@@ -118,11 +124,63 @@ describe("POST /api/mcp", () => {
       "area_insights",
       "dnr_well_record",
       "geocode_address",
+      "ground_layers",
+      "job_brief",
+      "job_weather",
+      "parse_dispatch",
+      "site_optimization",
       "wells_nearby",
     ]);
     for (const tool of list.result?.tools ?? []) {
       expect(tool.annotations?.readOnlyHint).toBe(true);
+      expect(tool.outputSchema).toBeTruthy();
     }
+  });
+
+  it("lists prompts and resources for a valid bearer key", async () => {
+    const auth = { Authorization: "Bearer tk1" };
+    const initRes = await POST(
+      rpcRequest(
+        {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2025-11-25",
+            capabilities: {},
+            clientInfo: { name: "test", version: "0.0.1" },
+          },
+        },
+        auth,
+      ),
+    );
+    const init = await readRpc(initRes);
+    const pv = init.result?.protocolVersion ?? "2025-11-25";
+    const headers = { ...auth, "MCP-Protocol-Version": pv };
+
+    const promptsRes = await POST(
+      rpcRequest(
+        { jsonrpc: "2.0", id: 2, method: "prompts/list", params: {} },
+        headers,
+      ),
+    );
+    const prompts = (await readRpc(promptsRes)).result?.prompts ?? [];
+    expect(prompts.map((p) => p.name).sort()).toEqual([
+      "compare-sites",
+      "prep-drilling-job",
+    ]);
+
+    const resRes = await POST(
+      rpcRequest(
+        { jsonrpc: "2.0", id: 3, method: "resources/list", params: {} },
+        headers,
+      ),
+    );
+    const uris = (await readRpc(resRes)).result?.resources?.map((r) => r.uri);
+    expect(uris?.sort()).toEqual([
+      "driller-hub://data-coverage",
+      "driller-hub://glossary",
+    ]);
   });
 
   it("challenges with an absolute resource_metadata URL in WWW-Authenticate", async () => {

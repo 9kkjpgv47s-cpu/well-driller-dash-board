@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CallToolResult } from "@modelcontextprotocol/server";
+import { McpServer } from "@modelcontextprotocol/server";
 import type { WellRecord } from "@/lib/area-well-analytics";
+import * as dnrReportServer from "@/lib/dnr-report-server";
 import * as wellCache from "@/lib/dnr-wells-server-cache";
 import {
   areaInsightsTool,
+  dnrWellRecordTool,
   geocodeAddressTool,
+  registerDrillerTools,
   wellsNearbyTool,
 } from "./tools";
 
@@ -175,5 +179,110 @@ describe("geocodeAddressTool", () => {
     const res = await geocodeAddressTool({ query: "Nowhere" });
     expect(res.isError).toBe(true);
     expect(textOf(res)).toContain('No Indiana match for "Nowhere"');
+  });
+});
+
+describe("dnrWellRecordTool", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("returns isError when the record body is null", async () => {
+    vi.spyOn(dnrReportServer, "fetchDnrReport").mockResolvedValue({
+      status: 204,
+      body: null,
+    });
+    const res = await dnrWellRecordTool({ ref_no: "999" });
+    expect(res.isError).toBe(true);
+  });
+
+  it("returns isError when the record body is an empty object", async () => {
+    vi.spyOn(dnrReportServer, "fetchDnrReport").mockResolvedValue({
+      status: 200,
+      body: {},
+    });
+    const res = await dnrWellRecordTool({ ref_no: "999" });
+    expect(res.isError).toBe(true);
+    expect(textOf(res)).toContain("empty record body");
+  });
+
+  it("returns isError when all top-level fields are blank", async () => {
+    vi.spyOn(dnrReportServer, "fetchDnrReport").mockResolvedValue({
+      status: 200,
+      body: { refno: "", depth: null },
+    });
+    const res = await dnrWellRecordTool({ ref_no: "999" });
+    expect(res.isError).toBe(true);
+  });
+
+  it("keeps the raw body and adds a scalar summary map", async () => {
+    vi.spyOn(dnrReportServer, "fetchDnrReport").mockResolvedValue({
+      status: 200,
+      body: {
+        refno: "100001",
+        depth: 120,
+        lithology: [{ from: 0, to: 40, formation: "Sand" }],
+        plugged: false,
+      },
+    });
+    const res = await dnrWellRecordTool({ ref_no: "100001" });
+    expect(res.isError).not.toBe(true);
+    const sc = res.structuredContent as Record<string, unknown>;
+    expect(sc.refno).toBe("100001");
+    expect(sc.depth).toBe(120);
+    const summary = sc.summary as Record<string, unknown>;
+    expect(summary).toEqual({ refno: "100001", depth: 120, plugged: false });
+    expect(textOf(res)).toContain("Source: Indiana DNR");
+  });
+});
+
+describe("registerDrillerTools", () => {
+  it("registers every tool with an outputSchema and readOnlyHint", () => {
+    const server = new McpServer({ name: "test", version: "0" });
+    registerDrillerTools(server);
+    const tools = (
+      server as unknown as {
+        _registeredTools: Record<
+          string,
+          { outputSchema?: unknown; annotations?: { readOnlyHint?: boolean } }
+        >;
+      }
+    )._registeredTools;
+    const names = Object.keys(tools).sort();
+    expect(names).toEqual([
+      "area_insights",
+      "dnr_well_record",
+      "geocode_address",
+      "ground_layers",
+      "job_brief",
+      "job_weather",
+      "parse_dispatch",
+      "site_optimization",
+      "wells_nearby",
+    ]);
+    for (const name of names) {
+      expect(tools[name]?.outputSchema, name).toBeTruthy();
+      expect(tools[name]?.annotations?.readOnlyHint, name).toBe(true);
+    }
+  });
+
+  it("registers prompts and resources", () => {
+    const server = new McpServer({ name: "test", version: "0" });
+    registerDrillerTools(server);
+    const prompts = Object.keys(
+      (
+        server as unknown as {
+          _registeredPrompts: Record<string, unknown>;
+        }
+      )._registeredPrompts,
+    ).sort();
+    expect(prompts).toEqual(["compare-sites", "prep-drilling-job"]);
+    const resources = (
+      server as unknown as {
+        _registeredResources: Record<string, { uri?: unknown }>;
+      }
+    )._registeredResources;
+    expect(Object.keys(resources).sort()).toEqual([
+      "driller-hub://data-coverage",
+      "driller-hub://glossary",
+    ]);
   });
 });

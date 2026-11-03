@@ -9,6 +9,7 @@ import {
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   createOAuthVerifier,
+  DEFAULT_OAUTH_SCOPES,
   discoverJwks,
   getEnvOAuthVerifier,
   getOAuthConfigFromEnv,
@@ -204,6 +205,7 @@ const resWith = (status: number): Response =>
 const CFG = {
   issuer: ISS,
   audience: AUD,
+  scopes: [...DEFAULT_OAUTH_SCOPES],
 };
 
 describe("discoverJwks", () => {
@@ -249,6 +251,7 @@ describe("discoverJwks", () => {
     const jwks = await discoverJwks({
       issuer: "https://tenant.authkit.app",
       audience: AUD,
+      scopes: [...DEFAULT_OAUTH_SCOPES],
     });
     expect(jwks).toBeDefined();
     expect(spy).toHaveBeenCalledTimes(2);
