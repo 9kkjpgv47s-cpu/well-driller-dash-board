@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect Driller Hub to ChatGPT — Step-by-Step Guide</title>
+<style>
+  :root{--ink:#1d2430;--muted:#5b6575;--line:#dfe3ea;--bg:#f6f7f9;--card:#fff;--accent:#1f5fbf;--accent-soft:#e8f0fc;--ok:#1d7a46;--ok-soft:#e6f5ec;--warn:#9a5b00;--warn-soft:#fff4e0;--bad:#b3261e;--bad-soft:#fdeceb;}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 18px 64px}
+  header.hero{background:linear-gradient(135deg,#123a75,#1f5fbf);color:#fff;border-radius:14px;padding:28px 26px;margin-bottom:22px}
+  header.hero h1{margin:0 0 6px;font-size:1.75rem;line-height:1.25}
+  header.hero p{margin:6px 0 0;opacity:.92}
+  h2{font-size:1.35rem;margin:38px 0 10px;padding-top:8px;border-top:1px solid var(--line)}
+  h3{font-size:1.08rem;margin:20px 0 6px}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:#eef1f5;padding:1px 6px;border-radius:5px;word-break:break-all}
+  a{color:var(--accent)}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 20px;margin-bottom:10px}
+  nav.toc strong{display:block;margin-bottom:4px}
+  nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:28px}
+  nav.toc li{break-inside:avoid;margin:2px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+  .step{position:relative;padding-left:66px}
+  .step .num{position:absolute;left:18px;top:18px;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .step h3{margin-top:2px}
+  .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px}
+  .callout{border-radius:10px;padding:12px 16px;margin:12px 0;border-left:5px solid}
+  .info{background:var(--accent-soft);border-color:var(--accent)}
+  .warn{background:var(--warn-soft);border-color:var(--warn)}
+  .ok{background:var(--ok-soft);border-color:var(--ok)}
+  .bad{background:var(--bad-soft);border-color:var(--bad)}
+  .callout b:first-child{display:block;margin-bottom:2px}
+  .urlbox{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin:8px 0}
+  .urlbox input{flex:1 1 280px;font:600 15px ui-monospace,Menlo,monospace;padding:10px 12px;border:2px solid var(--accent);border-radius:8px;background:#fff;color:var(--ink)}
+  button.copy{font:600 14px inherit;padding:10px 16px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
+  button.copy.done{background:var(--ok)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.95rem}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#eef1f5}
+  /* mock screens */
+  .mock{border:1px solid #c9d0db;border-radius:10px;overflow:hidden;margin:12px 0;background:#fff;font-size:.88rem;box-shadow:0 2px 8px rgba(20,30,50,.06)}
+  .mock .bar{background:#e9edf2;padding:6px 10px;display:flex;gap:6px;align-items:center;border-bottom:1px solid #c9d0db}
+  .mock .dot{width:10px;height:10px;border-radius:50%;background:#c3c9d3}
+  .mock .addr{margin-left:8px;flex:1;background:#fff;border:1px solid #c9d0db;border-radius:6px;padding:2px 8px;font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:#333}
+  .mock .body{display:flex;min-height:150px}
+  .mock .side{width:30%;min-width:110px;background:#f7f7f8;border-right:1px solid #e3e6eb;padding:10px;display:flex;flex-direction:column;justify-content:space-between}
+  .mock .main{flex:1;padding:14px;position:relative}
+  .mock .pill{display:inline-block;border:1px solid #c9d0db;border-radius:999px;padding:3px 10px;margin:2px;background:#fff}
+  .mock .hl{outline:3px solid #f0a500;outline-offset:2px;border-radius:8px;background:#fff8e6}
+  .mock .field{border:1px solid #c9d0db;border-radius:6px;padding:6px 8px;margin:4px 0 8px;background:#fff}
+  .mock .flabel{font-size:.76rem;color:var(--muted);font-weight:600}
+  .mock .btn{display:inline-block;background:#111;color:#fff;border-radius:999px;padding:5px 14px;font-weight:600}
+  .mock .btn.light{background:#fff;color:#111;border:1px solid #c9d0db}
+  .mock .cap{font-size:.78rem;color:var(--muted);padding:6px 12px;border-top:1px solid #e3e6eb;background:#fafbfc}
+  .arrow{color:#d48a00;font-weight:700}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;background:#eef1f5;color:var(--muted);margin-left:6px;vertical-align:middle}
+  dl.gloss dt{font-weight:700;margin-top:10px}
+  dl.gloss dd{margin:2px 0 0 0;color:#333}
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+  details summary{cursor:pointer;font-weight:600}
+  footer{margin-top:40px;color:var(--muted);font-size:.9rem;text-align:center}
+  .check li{list-style:none;margin:4px 0}
+  .check li::before{content:"\2610  ";font-size:1.05em}
+  @media (max-width:600px){nav.toc ol{columns:1}.step{padding-left:20px;padding-top:62px}.step .num{left:20px}.mock .side{display:none}header.hero h1{font-size:1.4rem}}
+  @media print{body{background:#fff}.copy{display:none}header.hero{background:#fff;color:#000;border:2px solid #000}.card,.mock,details{break-inside:avoid}details{display:block}a{color:#000}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Connect Driller Hub to ChatGPT</h1>
+  <p>A complete, click-by-click guide for adding the Driller Hub (Indiana water-well registry lookups) to your own ChatGPT account.</p>
+  <p><strong>Time needed:</strong> about 5 minutes. <strong>Difficulty:</strong> no technical knowledge required.</p>
+</header>
+
+<nav class="toc" aria-label="Table of contents">
+  <strong>On this page</strong>
+  <ol>
+    <li><a href="#overview">What this does (big picture)</a></li>
+    <li><a href="#before">Before you start: checklist</a></li>
+    <li><a href="#step1">Step 1 — Sign in to ChatGPT on the web</a></li>
+    <li><a href="#step2">Step 2 — Open the plugins / connectors page</a></li>
+    <li><a href="#step3">Step 3 — Start “Add custom MCP server”</a></li>
+    <li><a href="#step4">Step 4 — Fill in the form</a></li>
+    <li><a href="#step5">Step 5 — Sign in to Driller Hub</a></li>
+    <li><a href="#step6">Step 6 — Use it in a chat</a></li>
+    <li><a href="#tools">What the 4 tools do</a></li>
+    <li><a href="#manage">Disconnect / reconnect</a></li>
+    <li><a href="#trouble">Troubleshooting</a></li>
+    <li><a href="#privacy">Privacy &amp; safety</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ol>
+</nav>
+
+<h2 id="overview">1. What this does (big picture)</h2>
+<p>ChatGPT on its own does not know anything about Indiana’s Department of Natural Resources (DNR) water-well records. The <strong>Driller Hub</strong> does. By “connecting” the two, you let ChatGPT ask the Driller Hub questions on your behalf — for example, “how many wells are near this address and how deep are they?” — and get real answers from the state registry instead of guesses.</p>
+<p>The connection uses an open standard called <strong>MCP</strong> (Model Context Protocol). Think of it as a phone line between ChatGPT and the Driller Hub. You set up the line once; after that, ChatGPT can call the hub whenever your question needs well data.</p>
+<div class="card">
+  <span class="label">How the pieces fit together</span>
+  <table>
+    <tr><th>Piece</th><th>What it is</th><th>Do you need an account?</th></tr>
+    <tr><td><strong>ChatGPT</strong> (chatgpt.com)</td><td>The chat app you talk to.</td><td>Yes — a paid <strong>Plus</strong> or <strong>Pro</strong> plan (see checklist).</td></tr>
+    <tr><td><strong>Driller Hub</strong></td><td>The service that holds the Indiana well data and answers questions.</td><td>You create a free login during Step 5. Nothing to do in advance.</td></tr>
+    <tr><td><strong>Sign-in page</strong> (address ends in <code>.authkit.app</code>)</td><td>The secure login screen Driller Hub uses (run by a company called WorkOS). It proves to the hub that it’s really you.</td><td>No separate account — it’s the same login as the Driller Hub.</td></tr>
+  </table>
+</div>
+<div class="callout info"><b>Read-only by design</b>Every Driller Hub tool only <em>reads</em> data. ChatGPT cannot create, change, or delete anything through this connection.</div>
+
+<h2 id="before">2. Before you start: checklist</h2>
+<div class="card">
+  <ul class="check">
+    <li><strong>A paid ChatGPT plan: Plus or Pro.</strong> The free plan cannot add custom connectors. Business/Enterprise/Edu plans also work, but are <em>not</em> required — they only matter for tools that write data, and Driller Hub has none.</li>
+    <li><strong>A computer with a web browser</strong> (Chrome, Safari, Edge, Firefox). The setup must be done on the <em>website</em> chatgpt.com — the iPhone/Android app does not have the setup screen. Once set up, you can use it elsewhere.</li>
+    <li><strong>An email address you can check</strong> — you may receive a verification code when you create your Driller Hub login.</li>
+    <li><strong>Pop-ups allowed</strong> for chatgpt.com (the sign-in screen sometimes opens in a pop-up window).</li>
+    <li><strong>The server address</strong> (copy it now, you’ll paste it in Step 4):</li>
+  </ul>
+  <div class="urlbox">
+    <input id="mcpurl" readonly value="https://driller-hub.vercel.app/api/mcp" aria-label="Driller Hub MCP server URL">
+    <button class="copy" type="button" data-copy="mcpurl">Copy address</button>
+  </div>
+  <p style="margin:4px 0 0;color:var(--muted);font-size:.9rem">Must be exactly this — starting with <code>https://</code> and ending with <code>/api/mcp</code>. No spaces before or after.</p>
+</div>
+
+<h2 id="steps">Setup steps</h2>
+
+<section class="card step" id="step1">
+  <div class="num">1</div>
+  <h3>Sign in to ChatGPT on the web</h3>
+  <span class="label">What to do</span>
+  <p>Open your web browser, go to <a href="https://chatgpt.com" target="_blank" rel="noopener">chatgpt.com</a>, and sign in with the account that has your Plus or Pro plan.</p>
+  <span class="label">Where it is</span>
+  <p>If you’re not signed in, the <strong>Log in</strong> button is in the <strong>top-right</strong> corner. Once signed in, your name/profile picture appears in the <strong>bottom-left</strong> corner of the left sidebar.</p>
+  <span class="label">Why</span>
+  <p>The connector is attached to <em>your</em> ChatGPT account, so you must be signed in to the right one.</p>
+  <span class="label">How to confirm your plan</span>
+  <p>Click your profile picture (bottom-left) → <strong>Settings</strong> → <strong>Account</strong>. It should say <strong>Plus</strong> or <strong>Pro</strong>. If it says Free, upgrade first (bottom-left → <strong>Upgrade plan</strong>).</p>
+  <div class="callout ok"><b>You’ll know it worked when…</b>You see the normal ChatGPT chat screen with your conversation list on the left.</div>
+</section>
+
+<section class="card step" id="step2">
+  <div class="num">2</div>
+  <h3>Open the plugins / connectors page</h3>
+  <span class="label">What to do — main route</span>
+  <p>Click in the browser’s <strong>address bar</strong> at the very top of the window, type <code>chatgpt.com/plugins</code>, and press <strong>Enter</strong>.</p>
+
+  <div class="mock" aria-hidden="true">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="addr hl">chatgpt.com/plugins</span></div>
+    <div class="body">
+      <div class="side"><div><div class="pill">New chat</div><div class="pill">Search</div></div><div class="pill">👤 Your name</div></div>
+      <div class="main"><strong>Plugins</strong> <span class="pill hl" style="float:right">＋</span><br><br><span class="pill">Installed</span> <span class="pill">Browse</span><p style="color:#777">List of apps / plugins appears here…</p></div>
+    </div>
+    <div class="cap">Illustration — the address bar (highlighted) is at the very top; the <strong>＋</strong> button is near the top-right of the page.</div>
+  </div>
+
+  <span class="label">If that page doesn’t show a “+” or custom server option — backup route</span>
+  <ol>
+    <li>Click your <strong>profile picture/name</strong> in the <strong>bottom-left</strong> corner.</li>
+    <li>Click <strong>Settings</strong>.</li>
+    <li>In the Settings window’s left-hand list, click <strong>Apps &amp; Connectors</strong> (may also be labeled <strong>Apps</strong> or <strong>Connectors</strong>).</li>
+    <li>Scroll to the bottom and click <strong>Advanced settings</strong>.</li>
+    <li>Turn on <strong>Developer mode</strong> (a toggle switch). Read and accept the notice.</li>
+    <li>Go back to <strong>Apps &amp; Connectors</strong>; a <strong>Create</strong> (or <strong>Add</strong>/<strong>＋</strong>) button now appears near the top-right of that panel.</li>
+  </ol>
+  <div class="callout warn"><b>Labels change</b>OpenAI renames these menus every so often. If a word doesn’t match exactly, pick the closest one — “Plugins”, “Apps”, “Connectors”, and “Developer mode” all refer to this same feature area.</div>
+  <span class="label">Why</span>
+  <p>This is the part of ChatGPT where outside services are added. Custom ones (like Driller Hub) are added here rather than found in a public store.</p>
+  <div class="callout ok"><b>You’ll know it worked when…</b>You see a page or panel listing apps/connectors, with a <strong>＋</strong> or <strong>Create</strong> button.</div>
+</section>
+
+<section class="card step" id="step3">
+  <div class="num">3</div>
+  <h3>Start “Add custom MCP server”</h3>
+  <span class="label">What to do</span>
+  <p>Click the <strong>＋</strong> button (or <strong>Create</strong>). From the menu that appears, choose <strong>Add custom MCP server</strong> (wording may be “Custom connector” or “Add MCP server”).</p>
+  <span class="label">Where it is</span>
+  <p>The <strong>＋</strong> is in the <strong>upper-right area</strong> of the plugins page. The menu opens right below it.</p>
+  <span class="label">Why</span>
+  <p>“MCP server” is the technical name for the Driller Hub’s connection point. “Custom” means you are adding it yourself by address.</p>
+  <div class="callout ok"><b>You’ll know it worked when…</b>A form opens asking for a name, a URL, and an authentication type.</div>
+</section>
+
+<section class="card step" id="step4">
+  <div class="num">4</div>
+  <h3>Fill in the form</h3>
+  <p>Fill in each field exactly as shown below, top to bottom.</p>
+
+  <div class="mock" aria-hidden="true">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="addr">chatgpt.com/plugins</span></div>
+    <div class="main">
+      <strong>New MCP server</strong>
+      <div class="flabel" style="margin-top:8px">Name</div><div class="field hl">Driller Hub</div>
+      <div class="flabel">Description (optional)</div><div class="field">Indiana DNR water-well registry lookups</div>
+      <div class="flabel">MCP Server URL</div><div class="field hl mono">https://driller-hub.vercel.app/api/mcp</div>
+      <div class="flabel">Authentication</div><div class="field hl">OAuth ▾</div>
+      <div class="flabel">Client ID / Client Secret (advanced)</div><div class="field" style="color:#aaa">— leave blank —</div>
+      <div style="margin:6px 0">☑ I understand and trust this application</div>
+      <span class="btn light">Cancel</span> <span class="btn hl">Create</span>
+    </div>
+    <div class="cap">Illustration — highlighted fields are the ones you must fill. Exact layout may differ slightly.</div>
+  </div>
+
+  <table>
+    <tr><th style="width:28%">Field</th><th style="width:34%">Enter</th><th>Why / notes</th></tr>
+    <tr><td><strong>Name</strong></td><td><code>Driller Hub</code></td><td>This is what you’ll type after “@” to call it in chat. Any name works, but using this one matches this guide.</td></tr>
+    <tr><td><strong>Description</strong> <span class="tag">optional</span></td><td><code>Indiana DNR water-well registry lookups</code></td><td>Helps ChatGPT know when this tool is useful.</td></tr>
+    <tr><td><strong>MCP Server URL</strong></td><td><code>https://driller-hub.vercel.app/api/mcp</code></td><td>Paste the address you copied in the checklist. This tells ChatGPT where the hub lives.</td></tr>
+    <tr><td><strong>Authentication</strong></td><td><strong>OAuth</strong></td><td>Choose OAuth from the dropdown (not “No authentication”, not “API key”). OAuth means you sign in with your own login, and ChatGPT gets a secure pass for <em>you</em>.</td></tr>
+    <tr><td><strong>Client ID / Client Secret</strong></td><td><em>Leave both blank</em></td><td>Driller Hub registers ChatGPT automatically. Typing anything here can break the sign-in.</td></tr>
+    <tr><td><strong>Trust checkbox</strong></td><td>Tick it if shown</td><td>ChatGPT warns that custom servers aren’t reviewed by OpenAI. That’s normal for any custom connector.</td></tr>
+  </table>
+  <p>Then click <strong>Create</strong> (it may say <strong>Create as a plugin</strong> or <strong>Add</strong>) at the bottom-right of the form.</p>
+  <div class="callout ok"><b>You’ll know it worked when…</b>ChatGPT shows a short “connecting” message and then either opens the Driller Hub sign-in screen (Step 5) or shows Driller Hub in your list with a <strong>Connect</strong> button — click it.</div>
+</section>
+
+<section class="card step" id="step5">
+  <div class="num">5</div>
+  <h3>Sign in to Driller Hub</h3>
+  <span class="label">What happens</span>
+  <p>A new window, pop-up, or tab opens with the <strong>Driller Hub sign-in page</strong>. Its web address will end in <code>.authkit.app</code> (currently <code>plucky-enchantment-78-staging.authkit.app</code>). That is expected and legitimate — it’s the secure login service the Driller Hub uses.</p>
+  <span class="label">What to do</span>
+  <ol>
+    <li><strong>First time?</strong> Click <strong>Sign up</strong> (usually a link under the sign-in box) and enter your email. Otherwise enter your email and click <strong>Continue</strong>.</li>
+    <li>Follow the prompt — enter a password, or check your email for a <strong>verification code</strong> and type it in.</li>
+    <li>If you see a screen asking to <strong>allow ChatGPT access</strong> to Driller Hub, click <strong>Allow</strong> / <strong>Approve</strong>.</li>
+    <li>The window closes (or redirects) back to ChatGPT automatically.</li>
+  </ol>
+  <span class="label">Why</span>
+  <p>This proves to the Driller Hub who is asking. ChatGPT never sees your password — it only receives a time-limited pass (“token”) that works for the Driller Hub alone. ChatGPT renews it quietly in the background.</p>
+  <div class="callout ok"><b>You’ll know it worked when…</b>Back in ChatGPT, Driller Hub shows as <strong>Connected</strong> (or enabled), and you may see the list of its 4 tools.</div>
+  <div class="callout warn"><b>Nothing opened?</b>Your browser probably blocked the pop-up. Look for a blocked-pop-up icon at the right end of the address bar, choose “Always allow pop-ups from chatgpt.com”, and click <strong>Connect</strong> again.</div>
+</section>
+
+<section class="card step" id="step6">
+  <div class="num">6</div>
+  <h3>Use it in a chat</h3>
+  <span class="label">What to do</span>
+  <ol>
+    <li>Click <strong>New chat</strong> (top of the left sidebar).</li>
+    <li>In the message box at the bottom, type <code>@Driller Hub</code> and select it from the pop-up list. (Alternatively, click the <strong>＋</strong> / tools button at the left end of the message box and pick Driller Hub.)</li>
+    <li>Type your question and press <strong>Enter</strong>.</li>
+  </ol>
+
+  <div class="mock" aria-hidden="true">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="addr">chatgpt.com</span></div>
+    <div class="body">
+      <div class="side"><div><div class="pill hl">New chat</div></div><div class="pill">👤 Your name</div></div>
+      <div class="main" style="display:flex;flex-direction:column;justify-content:flex-end">
+        <div class="field hl"><span class="pill" style="background:#e8f0fc">@Driller Hub</span> How many water wells are within 3 miles of Kokomo, Indiana?</div>
+      </div>
+    </div>
+    <div class="cap">Illustration — the message box is at the bottom of the chat screen.</div>
+  </div>
+
+  <span class="label">Example questions to try</span>
+  <ul>
+    <li>“How many water wells are within 3 miles of Kokomo, Indiana?”</li>
+    <li>“Show the 5 closest DNR wells to 123 Main St, Lafayette, IN and their depths.”</li>
+    <li>“What’s the typical well depth and static water level near Carmel, IN?”</li>
+    <li>“Look up DNR well record <em>[well ID number]</em>.”</li>
+  </ul>
+  <span class="label">Approval prompts</span>
+  <p>The first time (and sometimes every time) ChatGPT wants to use a tool, it shows a small card asking permission, e.g. “Driller Hub wants to run <em>area_insights</em>”. Click <strong>Allow</strong> / <strong>Confirm</strong>. Where offered, “Always allow” skips future prompts.</p>
+  <div class="callout ok"><b>You’ll know it worked when…</b>ChatGPT shows that it called Driller Hub (often a small “Used Driller Hub” label you can expand) and answers with specific numbers — well counts, depths, record IDs — for the Indiana location you asked about.</div>
+</section>
+
+<h2 id="tools">What the 4 tools do</h2>
+<p>You don’t have to call these by name — ChatGPT picks the right one based on your question. They’re listed so you know what’s possible.</p>
+<table>
+  <tr><th>Tool</th><th>Plain-English meaning</th><th>Example question that uses it</th></tr>
+  <tr><td><code>geocode_address</code></td><td>Turns an Indiana street address or place name into map coordinates so the other tools know where to look.</td><td>“Where exactly is 500 W Washington St, Indianapolis?”</td></tr>
+  <tr><td><code>area_insights</code></td><td>Summary of all registered wells around a spot: how many, typical depths, water levels, and a confidence score showing how much data backs the numbers.</td><td>“What should I expect drilling a well near Kokomo?”</td></tr>
+  <tr><td><code>wells_nearby</code></td><td>A list of the nearest individual registered wells with their details (distance, depth, etc.).</td><td>“List the 10 closest wells to this address.”</td></tr>
+  <tr><td><code>dnr_well_record</code></td><td>The full official record for one specific DNR well, looked up by its ID.</td><td>“Pull up the full record for well 123456.”</td></tr>
+</table>
+<div class="callout info"><b>Indiana only</b>The data covers Indiana DNR’s water-well registry. Questions about other states will come back empty — that’s expected, not an error.</div>
+
+<h2 id="manage">Disconnect, reconnect, or remove</h2>
+<ul>
+  <li><strong>Disconnect / remove:</strong> profile picture (bottom-left) → <strong>Settings</strong> → <strong>Apps &amp; Connectors</strong> → click <strong>Driller Hub</strong> → <strong>Disconnect</strong> or <strong>Delete</strong>. (Or from <code>chatgpt.com/plugins</code> → Driller Hub → menu “⋯”.)</li>
+  <li><strong>Reconnect:</strong> same place → <strong>Connect</strong>, then sign in again (Step 5).</li>
+  <li><strong>Signed out unexpectedly?</strong> If your login expires or was reset, ChatGPT will show a “Reconnect”/“Sign in” prompt the next time it tries to use Driller Hub. Click it and repeat Step 5.</li>
+  <li><strong>Turn it off for one chat:</strong> just don’t mention <code>@Driller Hub</code>, or deselect it in the composer’s tools menu.</li>
+</ul>
+
+<h2 id="trouble">Troubleshooting</h2>
+<p>Click a problem to see the cause and fix.</p>
+
+<details><summary>I don’t see “Add custom MCP server”, “＋”, or “Create”.</summary>
+<p><strong>Likely causes:</strong> (1) you’re on the Free plan, (2) you’re in the phone app, or (3) Developer mode is off.</p>
+<p><strong>Fix:</strong> confirm Plus/Pro in Settings → Account; use chatgpt.com in a desktop browser; follow the <a href="#step2">backup route in Step 2</a> to turn on Developer mode. If your ChatGPT is managed by an employer (Business/Enterprise), an admin may have disabled custom connectors — ask them.</p></details>
+
+<details><summary>Error mentioning “invalid_scope”, “OAuth”, “authorization failed”, or “unable to connect”.</summary>
+<p><strong>Fix:</strong> first check that Client ID and Client Secret are <em>blank</em> and the URL is exact. Delete the connector and add it again. If it still fails, take a <strong>screenshot of the exact error message</strong> (including any small text) and send it to Dom — the precise wording tells us exactly which part to fix.</p></details>
+
+<details><summary>The sign-in window is blank, loops back to itself, or never returns to ChatGPT.</summary>
+<p><strong>Fix:</strong> allow pop-ups for chatgpt.com; allow cookies for <code>chatgpt.com</code> and <code>*.authkit.app</code> (strict privacy extensions or Safari “Prevent cross-site tracking” can interfere); try a private/incognito window or a different browser (Chrome works well).</p></details>
+
+<details><summary>“No tools found”, “couldn’t reach server”, or the connector shows an error.</summary>
+<p><strong>Fix:</strong> re-check the URL character by character: <code>https://driller-hub.vercel.app/api/mcp</code>. Common mistakes: missing <code>/api/mcp</code>, an extra space, <code>http</code> instead of <code>https</code>, or a trailing slash. Then click Connect/refresh. If it worked before and suddenly stopped, the hub may be briefly down — try again in a few minutes.</p></details>
+
+<details><summary>ChatGPT answers without using Driller Hub.</summary>
+<p><strong>Fix:</strong> start your message with <code>@Driller Hub</code>, or say “use Driller Hub to…”. Make sure the location is in Indiana.</p></details>
+
+<details><summary>It asks for permission every single time.</summary>
+<p>That’s ChatGPT’s normal safety behavior for custom connectors. Choose “Always allow” if the option appears; otherwise just click Allow.</p></details>
+
+<details><summary>Results are empty.</summary>
+<p>Either the location is outside Indiana, the address couldn’t be matched (try a city name or nearby intersection), or there genuinely are few registered wells in that spot — try a larger radius (“within 5 miles”).</p></details>
+
+<h2 id="privacy">Privacy &amp; safety</h2>
+<ul>
+  <li><strong>What Driller Hub knows about you:</strong> the email you sign in with. That’s all.</li>
+  <li><strong>What ChatGPT sends the hub:</strong> only the details needed for the lookup — e.g. the address, city, radius, or well ID in your question. Not your other chats.</li>
+  <li><strong>Your password</strong> is entered only on the Driller Hub sign-in page; ChatGPT never sees it.</li>
+  <li><strong>The data</strong> comes from Indiana DNR’s public water-well registry.</li>
+  <li><strong>Read-only:</strong> nothing can be changed or deleted through this connection.</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+<details><summary>Does this cost me anything beyond my ChatGPT plan?</summary><p>No. Your Plus/Pro subscription is the only cost.</p></details>
+<details><summary>Can several people connect?</summary><p>Yes. Each person adds Driller Hub in their own ChatGPT account and signs in as themselves. Nothing is shared between users.</p></details>
+<details><summary>Can I use it on my phone?</summary><p>The one-time setup must be done on chatgpt.com in a computer browser. After that, the connector is tied to your account and may be usable from the ChatGPT app as OpenAI enables connectors there.</p></details>
+<details><summary>Does it work with Claude or other AI apps?</summary><p>Any app that supports MCP servers with OAuth sign-in can use the same address. For apps that need an API key instead, ask Dom for a personal key.</p></details>
+<details><summary>Do I need a WorkOS account?</summary><p>No. WorkOS just runs the sign-in page behind the scenes. You only create a Driller Hub login in Step 5.</p></details>
+
+<h2 id="glossary">Glossary</h2>
+<dl class="gloss">
+  <dt>MCP (Model Context Protocol)</dt><dd>An open standard that lets AI chat apps talk to outside services. The Driller Hub speaks MCP.</dd>
+  <dt>MCP server</dt><dd>The service on the other end of the line — here, the Driller Hub at <code>https://driller-hub.vercel.app/api/mcp</code>.</dd>
+  <dt>Connector / Plugin / App</dt><dd>ChatGPT’s names for an outside service you’ve added. They mean the same thing in this guide.</dd>
+  <dt>OAuth</dt><dd>A secure sign-in method: you log in on the service’s own page, and the app receives a limited pass instead of your password.</dd>
+  <dt>Token</dt><dd>That limited, expiring pass. ChatGPT renews it automatically.</dd>
+  <dt>AuthKit / WorkOS</dt><dd>The company and product that host the Driller Hub sign-in page (the <code>.authkit.app</code> address).</dd>
+  <dt>Tool</dt><dd>One specific action the hub can do, like “find wells nearby”. ChatGPT chooses which tool to use.</dd>
+  <dt>Developer mode</dt><dd>A ChatGPT setting that unlocks adding custom connectors on some accounts.</dd>
+  <dt>DNR</dt><dd>Indiana Department of Natural Resources, which maintains the state water-well registry.</dd>
+</dl>
+
+<footer>
+  Questions or stuck? Contact Dom with a screenshot of what you see.<br>
+  Last updated 2026-11-02.
+</footer>
+</div>
+<script>
+document.querySelectorAll('button.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var el=document.getElementById(b.dataset.copy),v=el.value;
+    var done=function(){b.textContent='Copied!';b.classList.add('done');setTimeout(function(){b.textContent='Copy address';b.classList.remove('done')},1800)};
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(v).then(done,function(){el.select();document.execCommand('copy');done()})}
+    else{el.select();document.execCommand('copy');done()}
+  });
+});
+</script>
+</body>
+</html>
