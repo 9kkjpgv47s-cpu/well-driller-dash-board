@@ -180,6 +180,54 @@ describe("geocodeAddressTool", () => {
     expect(res.isError).toBe(true);
     expect(textOf(res)).toContain('No Indiana match for "Nowhere"');
   });
+
+  it("returns isError when the geocoder only matches out of state", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => [
+          {
+            lat: "41.8781",
+            lon: "-87.6298",
+            display_name: "Chicago, Illinois, USA",
+          },
+        ],
+      })),
+    );
+    const res = await geocodeAddressTool({ query: "Chicago, Illinois" });
+    expect(res.isError).toBe(true);
+    expect(textOf(res)).toContain('No Indiana match for "Chicago, Illinois"');
+  });
+
+  it("keeps only the Indiana rows from a mixed geocoder result", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => [
+          {
+            lat: "41.8781",
+            lon: "-87.6298",
+            display_name: "Chicago, Illinois, USA",
+          },
+          {
+            lat: "40.4865",
+            lon: "-86.1336",
+            display_name: "Kokomo, Howard County, Indiana, USA",
+          },
+        ],
+      })),
+    );
+    const res = await geocodeAddressTool({ query: "Kokomo" });
+    expect(res.isError).not.toBe(true);
+    const sc = res.structuredContent as {
+      results: { lat: number; label: string }[];
+    };
+    expect(sc.results).toHaveLength(1);
+    expect(sc.results[0]?.label).toContain("Kokomo");
+    expect(textOf(res)).not.toContain("Chicago");
+  });
 });
 
 describe("dnrWellRecordTool", () => {

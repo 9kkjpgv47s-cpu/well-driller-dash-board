@@ -6,6 +6,7 @@ import {
 } from "@/lib/dispatch-parse";
 import { geocodeIndiana } from "@/lib/geocode-server";
 import { geoFooter, SOURCE_LINE } from "./common";
+import { isInIndiana, queryScopesOutOfIndiana } from "./indiana";
 
 export const parseDispatchInputSchema = z.object({
   text: z
@@ -42,19 +43,19 @@ export type GeocodedResult = { label: string; lat: number; lon: number };
 /**
  * Resolve coordinates for a parsed dispatch when the paste itself lacked GPS.
  * `address_only`/`stub`/`none` produce placeholder coords from the parser —
- * try the Indiana geocoder on the address (or a text slice) instead.
+ * try the Indiana geocoder on the extracted address only. Never forward the
+ * raw paste: it can carry names, phone numbers, and other PII that has no
+ * business leaving the hub.
  */
 export async function geocodeForDispatch(
   parsed: DispatchParseResult,
-  text: string,
 ): Promise<GeocodedResult | null> {
   if (parsed.locationSource === "coordinates") return null;
-  const query = parsed.address ?? text.slice(0, 160);
-  if (!query.trim()) return null;
+  const query = parsed.address?.trim();
+  if (!query || queryScopesOutOfIndiana(query)) return null;
   try {
     const results = await geocodeIndiana(query);
-    const top = results[0];
-    return top ?? null;
+    return results.find((r) => isInIndiana(r.lat, r.lon)) ?? null;
   } catch {
     return null;
   }
@@ -92,7 +93,7 @@ export async function parseDispatchTool(args: {
   text: string;
 }): Promise<CallToolResult> {
   const parsed = parseDispatchEmail(args.text);
-  const geocoded = await geocodeForDispatch(parsed, args.text);
+  const geocoded = await geocodeForDispatch(parsed);
 
   const lines = [
     "Dispatch parse:",

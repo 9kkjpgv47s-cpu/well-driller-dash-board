@@ -55,6 +55,9 @@ export type SharedAquiferBandRow = {
   well_count: number;
   window_start_ft: number | null;
   window_end_ft: number | null;
+  /** True when the band top sits above this site's ground — drillable, but
+   * only because neighboring wells were drilled on higher ground. */
+  above_site_ground: boolean;
   advice: string;
 };
 
@@ -134,11 +137,12 @@ export function computeSharedAquiferBandRows(
         // band bottom. Entirely above ground → not reachable; omit numbers.
         window_start_ft: win == null || aboveSurface ? null : Math.max(0, win.startDepthFt),
         window_end_ft: win == null || aboveSurface ? null : win.endDepthFt,
+        above_site_ground: outcrops,
         advice:
           ground == null
             ? `${b.wellCount} wells share an aquifer band centered near ${b.centerAslFt} ft ASL — supply a jobsite ground elevation to get a drill window.`
             : outcrops
-              ? `This aquifer band reaches the surface — expect water from 0–${win!.endDepthFt} ft below ground.`
+              ? `Shared band (~${b.centerAslFt} ft ASL, ${b.wellCount} wells) tops out above this site's estimated ground (${ground} ft ASL) — it was logged by neighboring wells on higher ground. Expect it within roughly the top ${win!.endDepthFt} ft here; verify site elevation before relying on it.`
               : aboveSurface
                 ? `${b.wellCount} wells share a band ~${b.centerAslFt} ft ASL that sits above the estimated ${ground} ft ASL ground — verify the site elevation.`
                 : formatSharedAquiferDrillAdvice(b, ground),
@@ -205,7 +209,7 @@ export async function groundLayersTool(args: {
               b.window_start_ft != null
                 ? ` · drill ${b.window_start_ft}–${b.window_end_ft} ft`
                 : ""
-            } — ${b.advice}`,
+            }${b.above_site_ground ? " (near surface — verify)" : ""} — ${b.advice}`,
         )
       : [
           "No shared aquifer bands found — nearby well logs do not overlap in elevation, or lithology coverage is thin here.",

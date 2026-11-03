@@ -36,6 +36,7 @@ async function fetchOpenTopoDataM(
   const url = `https://api.opentopodata.org/v1/srtm90m?locations=${encodeURIComponent(qs)}`;
   const res = await fetch(url, {
     headers: upstreamJsonHeaders(),
+    signal: AbortSignal.timeout(5000),
     next: { revalidate: 86400 },
   });
   const text = await res.text();
@@ -51,6 +52,7 @@ async function fetchOpenElevationM(
   if (!locations.length) return [];
   const res = await fetch("https://api.open-elevation.com/api/v1/lookup", {
     method: "POST",
+    signal: AbortSignal.timeout(5000),
     headers: {
       ...upstreamJsonHeaders(),
       "Content-Type": "application/json",
@@ -92,7 +94,11 @@ export async function lookupElevations(
   }
 
   if (!elevationsM) {
-    elevationsM = await fetchOpenElevationM(locations);
+    try {
+      elevationsM = await fetchOpenElevationM(locations);
+    } catch {
+      elevationsM = locations.map(() => null);
+    }
   }
 
   const elevationsFt = elevationsM.map((m) =>

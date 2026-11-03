@@ -14,6 +14,24 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Resolves `p`, or `fallback` after `ms` — an outer cap for upstream calls
+ * whose own timeout is longer than the caller's budget. The underlying
+ * promise keeps running after the race; callers that need cancellation should
+ * abort at the fetch level.
+ */
+export function withDeadline<T>(
+  p: Promise<T>,
+  ms: number,
+  fallback: T,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), ms);
+  });
+  return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
+}
+
 export async function withRetry<T>(
   fn: () => Promise<T>,
   options: RetryOptions = {},

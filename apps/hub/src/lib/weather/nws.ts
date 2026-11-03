@@ -43,14 +43,18 @@ export async function fetchNwsHourly(
   try {
     const pt = await fetch(
       `https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`,
-      { headers, next: { revalidate: 3600 } },
+      { headers, signal: AbortSignal.timeout(8000), next: { revalidate: 3600 } },
     );
     if (!pt.ok) return null;
     const pj = (await pt.json()) as PointsResponse;
     const hourlyUrl = pj.properties?.forecastHourly;
     if (!hourlyUrl || !isWeatherGovUrl(hourlyUrl)) return null;
 
-    const fh = await fetch(hourlyUrl, { headers, next: { revalidate: 900 } });
+    const fh = await fetch(hourlyUrl, {
+      headers,
+      signal: AbortSignal.timeout(8000),
+      next: { revalidate: 900 },
+    });
     if (!fh.ok) return null;
     const fj = (await fh.json()) as ForecastHourlyResponse;
     const periods = fj.properties?.periods;

@@ -81,6 +81,18 @@ function evalAssert(a, ctx) {
         const tol = a.tol ?? 0.001;
         return { ok: typeof v === "number" && Math.abs(v - a.near) <= tol, detail: `${a.path}=${v} want ~${a.near}±${tol}` };
       }
+      if (a.everyItem) {
+        // every element of array at path: element[field] (null allowed if allowNull) satisfies gte/lte
+        if (!Array.isArray(v)) return { ok: false, detail: `${a.path} not array` };
+        const { field, gte, lte, allowNull } = a.everyItem;
+        const bad = v.filter((el) => {
+          const x = field ? el?.[field] : el;
+          if (x == null) return !allowNull;
+          if (typeof x !== "number" || !Number.isFinite(x)) return true;
+          return (gte !== undefined && x < gte) || (lte !== undefined && x > lte);
+        });
+        return { ok: bad.length === 0, detail: bad.length ? `${bad.length}/${v.length} items fail ${field} ${JSON.stringify({ gte, lte })}: ${JSON.stringify(bad.map((b) => (field ? b?.[field] : b)).slice(0, 5))}` : undefined };
+      }
       if (a.anyKey) return { ok: v != null && a.anyKey.some((k) => v[k] !== undefined && v[k] !== null && v[k] !== ""), detail: `${a.path} keys` };
       if (a.arrayLenMin !== undefined || a.arrayLenMax !== undefined) {
         const n = Array.isArray(v) ? v.length : -1;

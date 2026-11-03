@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "Driller Hub MCP golden tasks",
-    "notes": "Assertions run against callTool results. Paths resolve against the result object; 'sc.' prefix is sugar for 'structuredContent.'. $taskId.path references pull values from earlier task results (chaining). Expected-failures on the 4-tool baseline are tagged 'new-tool' or 'new-capability'."
+    "notes": "Assertions run against callTool results. Paths resolve against the result object; 'sc.' prefix is sugar for 'structuredContent.'. $taskId.path references pull values from earlier task results (chaining). Expected-failures on the 4-tool baseline are tagged 'new-tool' or 'new-capability'. Correctness/privacy-tagged asserts added 2026-11-03 after audit: the original shape-only asserts passed while drill windows were negative and while geocode-outside was vacuous. OAuth path is not exercised here (API key only) — covered by mcp:oauth-check."
   },
   "tasks": [
     {
@@ -9,10 +9,35 @@
       "desc": "tools/list exposes every agent tool with readOnlyHint + outputSchema",
       "kind": "tools-list",
       "assert": [
-        { "type": "toolsInclude", "names": ["geocode_address", "area_insights", "wells_nearby", "dnr_well_record"], "tag": "baseline" },
-        { "type": "toolsInclude", "names": ["job_brief", "parse_dispatch", "job_weather", "ground_layers", "site_optimization"], "tag": "new-tool" },
-        { "type": "allReadOnly", "tag": "baseline" },
-        { "type": "allHaveOutputSchema", "tag": "new-capability" }
+        {
+          "type": "toolsInclude",
+          "names": [
+            "geocode_address",
+            "area_insights",
+            "wells_nearby",
+            "dnr_well_record"
+          ],
+          "tag": "baseline"
+        },
+        {
+          "type": "toolsInclude",
+          "names": [
+            "job_brief",
+            "parse_dispatch",
+            "job_weather",
+            "ground_layers",
+            "site_optimization"
+          ],
+          "tag": "new-tool"
+        },
+        {
+          "type": "allReadOnly",
+          "tag": "baseline"
+        },
+        {
+          "type": "allHaveOutputSchema",
+          "tag": "new-capability"
+        }
       ]
     },
     {
@@ -20,74 +45,238 @@
       "desc": "server exposes prompts (job prep) and resources (glossary/coverage)",
       "kind": "prompts-resources",
       "assert": [
-        { "type": "promptsInclude", "names": ["prep-drilling-job"], "tag": "new-capability" },
-        { "type": "resourcesInclude", "uris": ["driller-hub://glossary", "driller-hub://data-coverage"], "tag": "new-capability" }
+        {
+          "type": "promptsInclude",
+          "names": [
+            "prep-drilling-job"
+          ],
+          "tag": "new-capability"
+        },
+        {
+          "type": "resourcesInclude",
+          "uris": [
+            "driller-hub://glossary",
+            "driller-hub://data-coverage"
+          ],
+          "tag": "new-capability"
+        }
       ]
     },
     {
       "id": "geocode-kokomo",
       "desc": "geocode_address resolves 'Kokomo, Indiana' to ~40.486,-86.133",
-      "call": { "tool": "geocode_address", "args": { "query": "Kokomo, Indiana" } },
+      "call": {
+        "tool": "geocode_address",
+        "args": {
+          "query": "Kokomo, Indiana"
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.results.0.lat", "near": 40.486, "tol": 0.08, "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.results.0.lon", "near": -86.133, "tol": 0.08, "tag": "baseline" },
-        { "type": "textMatch", "pattern": "Source: Indiana DNR", "tag": "baseline" }
+        {
+          "type": "notError",
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.results.0.lat",
+          "near": 40.486,
+          "tol": 0.08,
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.results.0.lon",
+          "near": -86.133,
+          "tol": 0.08,
+          "tag": "baseline"
+        },
+        {
+          "type": "textMatch",
+          "pattern": "Source: Indiana DNR",
+          "tag": "baseline"
+        }
       ]
     },
     {
       "id": "geocode-street",
       "desc": "geocode_address resolves a street address in Lafayette",
-      "call": { "tool": "geocode_address", "args": { "query": "123 Main St, Lafayette, Indiana" } },
+      "call": {
+        "tool": "geocode_address",
+        "args": {
+          "query": "123 Main St, Lafayette, Indiana"
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.results.0.lat", "near": 40.41, "tol": 0.15, "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.results.0.lon", "near": -86.89, "tol": 0.15, "tag": "baseline" }
+        {
+          "type": "notError",
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.results.0.lat",
+          "near": 40.41,
+          "tol": 0.15,
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.results.0.lon",
+          "near": -86.89,
+          "tol": 0.15,
+          "tag": "baseline"
+        }
       ]
     },
     {
       "id": "geocode-outside",
-      "desc": "geocode_address rejects/empties a non-Indiana query",
-      "call": { "tool": "geocode_address", "args": { "query": "Chicago, Illinois" } },
+      "desc": "geocode_address returns an error (not out-of-state results) for a non-Indiana query",
+      "call": {
+        "tool": "geocode_address",
+        "args": {
+          "query": "Chicago, Illinois"
+        }
+      },
       "assert": [
-        { "type": "or", "of": [{ "type": "isError" }, { "type": "textMatch", "pattern": "[Ii]ndiana|No .* match" }], "tag": "baseline" }
+        {
+          "type": "isError",
+          "tag": "correctness"
+        }
       ]
     },
     {
       "id": "insights-kokomo",
       "desc": "area_insights at Kokomo r=3mi returns wells + confidence grade",
-      "call": { "tool": "area_insights", "args": { "lat": 40.4865, "lon": -86.1336, "radius_miles": 3 } },
+      "call": {
+        "tool": "area_insights",
+        "args": {
+          "lat": 40.4865,
+          "lon": -86.1336,
+          "radius_miles": 3
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.totalWellsInRadius", "gt": 100, "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.insightQuality.grade", "oneOf": ["high", "medium", "low"], "tag": "baseline" }
+        {
+          "type": "notError",
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.totalWellsInRadius",
+          "gt": 100,
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.insightQuality.grade",
+          "oneOf": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.insightQuality.score",
+          "gt": -1,
+          "tag": "correctness"
+        }
       ]
     },
     {
       "id": "insights-outside",
       "desc": "area_insights outside Indiana errors cleanly",
-      "call": { "tool": "area_insights", "args": { "lat": 41.8781, "lon": -87.6298, "radius_miles": 2 } },
-      "assert": [{ "type": "isError", "tag": "baseline" }]
+      "call": {
+        "tool": "area_insights",
+        "args": {
+          "lat": 41.8781,
+          "lon": -87.6298,
+          "radius_miles": 2
+        }
+      },
+      "assert": [
+        {
+          "type": "isError",
+          "tag": "baseline"
+        }
+      ]
     },
     {
       "id": "nearby-kokomo",
       "desc": "wells_nearby returns ≤5 wells each with distance + refno/well_id",
-      "call": { "tool": "wells_nearby", "args": { "lat": 40.4865, "lon": -86.1336, "radius_miles": 1, "limit": 5 } },
+      "call": {
+        "tool": "wells_nearby",
+        "args": {
+          "lat": 40.4865,
+          "lon": -86.1336,
+          "radius_miles": 1,
+          "limit": 5
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.wells", "arrayLenMax": 5, "arrayLenMin": 1, "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.wells.0.distance_miles", "isType": "number", "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc.wells.0", "anyKey": ["refno", "well_id"], "tag": "baseline" }
+        {
+          "type": "notError",
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.wells",
+          "arrayLenMax": 5,
+          "arrayLenMin": 1,
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.wells.0.distance_miles",
+          "isType": "number",
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.wells.0",
+          "anyKey": [
+            "refno",
+            "well_id"
+          ],
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.wells",
+          "everyItem": {
+            "field": "distance_miles",
+            "gte": 0,
+            "lte": 1.05
+          },
+          "tag": "correctness"
+        }
       ]
     },
     {
       "id": "record-chained",
       "desc": "dnr_well_record fetches the record for the first nearby well's refno",
-      "call": { "tool": "dnr_well_record", "args": { "ref_no": "$nearby-kokomo.sc.wells.0.refno" } },
+      "call": {
+        "tool": "dnr_well_record",
+        "args": {
+          "ref_no": "$nearby-kokomo.sc.wells.0.refno"
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "baseline" },
-        { "type": "jsonPath", "path": "sc", "nonEmpty": true, "tag": "baseline" },
-        { "type": "textMatch", "pattern": "Source: Indiana DNR", "tag": "baseline" }
+        {
+          "type": "notError",
+          "tag": "baseline"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc",
+          "nonEmpty": true,
+          "tag": "baseline"
+        },
+        {
+          "type": "textMatch",
+          "pattern": "Source: Indiana DNR",
+          "tag": "baseline"
+        }
       ]
     },
     {
@@ -101,24 +290,122 @@
         }
       },
       "assert": [
-        { "type": "notError", "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.parsed.phone", "exists": true, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.parsed.scheduleLine", "exists": true, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.parsed.lat", "near": 40.558, "tol": 0.01, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.parsed.locationSource", "eq": "coordinates", "tag": "new-tool" }
+        {
+          "type": "notError",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.parsed.phone",
+          "exists": true,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.parsed.scheduleLine",
+          "exists": true,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.parsed.lat",
+          "near": 40.558,
+          "tol": 0.01,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.parsed.locationSource",
+          "eq": "coordinates",
+          "tag": "new-tool"
+        }
       ]
     },
     {
       "id": "job-brief-address",
       "desc": "job_brief on an address returns location + area + wells (+ aquifer/weather when available)",
       "newTool": true,
-      "call": { "tool": "job_brief", "args": { "query": "Kokomo, Indiana", "radius_miles": 3 } },
+      "call": {
+        "tool": "job_brief",
+        "args": {
+          "query": "Kokomo, Indiana",
+          "radius_miles": 3
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.location.lat", "near": 40.486, "tol": 0.1, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.area.wells_in_radius", "gt": 50, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.nearest_wells", "arrayLenMin": 1, "tag": "new-tool" },
-        { "type": "textMatch", "pattern": "Source: Indiana DNR", "tag": "new-tool" }
+        {
+          "type": "notError",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.location.lat",
+          "near": 40.486,
+          "tol": 0.1,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.area.wells_in_radius",
+          "gt": 50,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.nearest_wells",
+          "arrayLenMin": 1,
+          "tag": "new-tool"
+        },
+        {
+          "type": "textMatch",
+          "pattern": "Source: Indiana DNR",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.shared_aquifer.bands",
+          "everyItem": {
+            "field": "window_start_ft",
+            "gte": 0,
+            "allowNull": true
+          },
+          "tag": "correctness"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.shared_aquifer.bands",
+          "everyItem": {
+            "field": "window_end_ft",
+            "gte": 0,
+            "allowNull": true
+          },
+          "tag": "correctness"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.elevation_ft",
+          "isType": "number",
+          "tag": "correctness"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.elevation_source",
+          "oneOf": [
+            "well_median",
+            "dem"
+          ],
+          "tag": "correctness"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.nearest_wells",
+          "everyItem": {
+            "field": "distance_miles",
+            "gte": 0,
+            "lte": 3.05
+          },
+          "tag": "correctness"
+        }
       ]
     },
     {
@@ -127,45 +414,233 @@
       "newTool": true,
       "call": {
         "tool": "job_brief",
-        "args": { "query": "New well for Despain\n4620 E 550 S, Marion IN\nGPS: 40.558, -85.659", "radius_miles": 3 }
+        "args": {
+          "query": "New well for Despain\n4620 E 550 S, Marion IN\nGPS: 40.558, -85.659",
+          "radius_miles": 3
+        }
       },
       "assert": [
-        { "type": "notError", "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.location.lat", "near": 40.558, "tol": 0.05, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.dispatch.locationSource", "eq": "coordinates", "tag": "new-tool" }
+        {
+          "type": "notError",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.location.lat",
+          "near": 40.558,
+          "tol": 0.05,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.dispatch.locationSource",
+          "eq": "coordinates",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.shared_aquifer.bands",
+          "everyItem": {
+            "field": "window_start_ft",
+            "gte": 0,
+            "allowNull": true
+          },
+          "tag": "correctness"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.shared_aquifer.bands",
+          "everyItem": {
+            "field": "window_end_ft",
+            "gte": 0,
+            "allowNull": true
+          },
+          "tag": "correctness"
+        }
       ]
     },
     {
       "id": "job-weather",
       "desc": "job_weather returns day summaries for the jobsite",
       "newTool": true,
-      "call": { "tool": "job_weather", "args": { "lat": 40.4865, "lon": -86.1336 } },
+      "call": {
+        "tool": "job_weather",
+        "args": {
+          "lat": 40.4865,
+          "lon": -86.1336
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.day_summaries", "arrayLenMin": 1, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.day_summaries.0.date", "exists": true, "tag": "new-tool" }
+        {
+          "type": "notError",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.day_summaries",
+          "arrayLenMin": 1,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.day_summaries.0.date",
+          "exists": true,
+          "tag": "new-tool"
+        }
       ]
     },
     {
       "id": "ground-layers",
       "desc": "ground_layers returns ASL stratigraphy / shared-aquifer bands",
       "newTool": true,
-      "call": { "tool": "ground_layers", "args": { "lat": 40.4865, "lon": -86.1336, "radius_miles": 3 } },
+      "call": {
+        "tool": "ground_layers",
+        "args": {
+          "lat": 40.4865,
+          "lon": -86.1336,
+          "radius_miles": 3
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.wells_with_lithology", "gt": 0, "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.shared_aquifer_bands", "isType": "array", "tag": "new-tool" }
+        {
+          "type": "notError",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.wells_with_lithology",
+          "gt": 0,
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.shared_aquifer_bands",
+          "isType": "array",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.shared_aquifer_bands",
+          "everyItem": {
+            "field": "window_start_ft",
+            "gte": 0,
+            "allowNull": true
+          },
+          "tag": "correctness"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.shared_aquifer_bands",
+          "everyItem": {
+            "field": "window_end_ft",
+            "gte": 0,
+            "allowNull": true
+          },
+          "tag": "correctness"
+        }
       ]
     },
     {
       "id": "site-optimization",
       "desc": "site_optimization is registry-backed (never mock)",
       "newTool": true,
-      "call": { "tool": "site_optimization", "args": { "lat": 40.4865, "lon": -86.1336, "radius_miles": 5, "priority": "balanced" } },
+      "call": {
+        "tool": "site_optimization",
+        "args": {
+          "lat": 40.4865,
+          "lon": -86.1336,
+          "radius_miles": 5,
+          "priority": "balanced"
+        }
+      },
       "assert": [
-        { "type": "notError", "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.data_source", "eq": "registry", "tag": "new-tool" },
-        { "type": "jsonPath", "path": "sc.neighborhood.median_depth_ft", "gt": 0, "tag": "new-tool" }
+        {
+          "type": "notError",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.data_source",
+          "eq": "registry",
+          "tag": "new-tool"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.neighborhood.median_depth_ft",
+          "gt": 0,
+          "tag": "new-tool"
+        }
+      ]
+    },
+    {
+      "id": "job-brief-pii-only",
+      "desc": "job_brief on PII-only text (name+phone, no address/GPS) errors without geocoding the raw text",
+      "newTool": true,
+      "call": {
+        "tool": "job_brief",
+        "args": {
+          "query": "Call Megan Despain at 765-555-0132 about new well near the old Hensley farm"
+        }
+      },
+      "assert": [
+        {
+          "type": "isError",
+          "tag": "privacy"
+        },
+        {
+          "type": "textMatch",
+          "pattern": "address|GPS|coordinates",
+          "tag": "privacy"
+        }
+      ]
+    },
+    {
+      "id": "job-brief-outside",
+      "desc": "job_brief for an out-of-state place errors",
+      "newTool": true,
+      "call": {
+        "tool": "job_brief",
+        "args": {
+          "lat": 41.8781,
+          "lon": -87.6298
+        }
+      },
+      "assert": [
+        {
+          "type": "isError",
+          "tag": "correctness"
+        }
+      ]
+    },
+    {
+      "id": "optimization-weights",
+      "desc": "site_optimization scores stay within 0–100",
+      "newTool": true,
+      "call": {
+        "tool": "site_optimization",
+        "args": {
+          "lat": 40.4865,
+          "lon": -86.1336,
+          "radius_miles": 5,
+          "priority": "yield"
+        }
+      },
+      "assert": [
+        {
+          "type": "notError"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.scores.setup_readiness",
+          "gt": -1,
+          "tag": "correctness"
+        },
+        {
+          "type": "jsonPath",
+          "path": "sc.scores.setup_readiness",
+          "lt": 101,
+          "tag": "correctness"
+        }
       ]
     }
   ]

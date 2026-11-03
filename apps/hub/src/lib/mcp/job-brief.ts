@@ -5,6 +5,7 @@ import {
   type WellRecord,
 } from "@/lib/area-well-analytics";
 import {
+  extractPhone,
   parseDispatchEmail,
   type DispatchParseResult,
 } from "@/lib/dispatch-parse";
@@ -32,13 +33,17 @@ import {
   type GeocodedResult,
 } from "./dispatch";
 import { computeSharedAquiferBandRows } from "./ground-layers";
-import { isInIndiana, outsideIndianaMessage } from "./indiana";
+import {
+  isInIndiana,
+  outsideIndianaMessage,
+  queryScopesOutOfIndiana,
+} from "./indiana";
 import {
   jobWeatherOutputSchema,
   summarizeWeatherBundle,
   weatherDayLine,
 } from "./job-weather";
-import { withRetry } from "./retry";
+import { withDeadline, withRetry } from "./retry";
 
 export const jobBriefInputSchema = z.object({
   query: z
@@ -94,6 +99,8 @@ export const jobBriefOutputSchema = z.looseObject({
     .looseObject({ bands: z.array(sharedAquiferBandOutputSchema) })
     .nullable(),
   elevation_ft: z.number().optional(),
+  elevation_source: z.enum(["well_median", "dem"]).optional(),
+  dem_elevation_ft: z.number().optional(),
   weather: jobWeatherOutputSchema.optional(),
 });
 
@@ -121,6 +128,8 @@ export type JobBriefDeps = {
     date?: string | null,
   ) => Promise<WeatherBundleResult>;
   groundElevationFt: (lat: number, lon: number) => Promise<number | null>;
+  /** Overall cap (ms) on the parallel weather+elevation stage. Default 10s. */
+  deadlineMs?: number;
 };
 
 /** Resolved per call so `vi.spyOn` on the source modules still intercepts. */
@@ -131,6 +140,7 @@ function withDefaults(deps: Partial<JobBriefDeps>): JobBriefDeps {
     loadWells: deps.loadWells ?? getDnrWellsForRadiusCachedForApi,
     weather: deps.weather ?? getWeatherBundle,
     groundElevationFt: deps.groundElevationFt ?? getGroundElevationFt,
+    deadlineMs: deps.deadlineMs,
   };
 }
 
@@ -150,6 +160,27 @@ export type ResolvedBriefLocation = {
   /** Dispatch parse worth echoing back (omitted for plain place-name queries). */
   parsed?: DispatchParseResult;
 };
+
+const LOCATE_ERROR =
+  "Couldn't locate the job in Indiana — include a street address with town, a place name, or GPS coordinates (lat, lon).";
+
+/**
+ * The raw-query geocode fallback sends the query to Nominatim — only worth it
+ * when the text plausibly IS a place: one short line with no phone number and
+ * no email. Pasted dispatch text carries PII that must not leave the hub.
+ */
+function looksLikePlaceQuery(query: string): boolean {
+  if (query.includes("\n") || query.length > 120) return false;
+  if (extractPhone(query)) return false;
+  if (/\S+@\S+/.test(query)) return false;
+  if (queryScopesOutOfIndiana(query)) return false;
+  return true;
+}
+
+/** First geocoder hit inside Indiana — Nominatim's Indiana bias is a hint, not a guarantee. */
+function firstInIndiana(results: GeocodedResult[]): GeocodedResult | undefined {
+  return results.find((r) => isInIndiana(r.lat, r.lon));
+}
 
 /**
  * Location resolution order: explicit lat/lon → dispatch-extracted GPS →
@@ -200,15 +231,15 @@ export async function resolveBriefLocation(
     };
   }
 
-  if (parsed.address) {
+  if (parsed.address && !queryScopesOutOfIndiana(parsed.address)) {
     try {
-      const results = await deps.geocode(parsed.address);
-      if (results[0]) {
+      const hit = firstInIndiana(await deps.geocode(parsed.address));
+      if (hit) {
         return {
           location: {
-            lat: results[0].lat,
-            lon: results[0].lon,
-            label: results[0].label,
+            lat: hit.lat,
+            lon: hit.lon,
+            label: hit.label,
             source: "geocode",
           },
           parsed: echoParsed,
@@ -219,26 +250,26 @@ export async function resolveBriefLocation(
     }
   }
 
-  try {
-    const results = await deps.geocode(query);
-    if (results[0]) {
-      return {
-        location: {
-          lat: results[0].lat,
-          lon: results[0].lon,
-          label: results[0].label,
-          source: "geocode",
-        },
-        parsed: echoParsed,
-      };
+  if (looksLikePlaceQuery(query)) {
+    try {
+      const hit = firstInIndiana(await deps.geocode(query));
+      if (hit) {
+        return {
+          location: {
+            lat: hit.lat,
+            lon: hit.lon,
+            label: hit.label,
+            source: "geocode",
+          },
+          parsed: echoParsed,
+        };
+      }
+    } catch {
+      // fall through to the locate error
     }
-  } catch {
-    // fall through to the locate error
   }
 
-  return {
-    error: `Couldn't locate "${query.slice(0, 80)}" in Indiana — try a street address with town, a place name, or paste the dispatch email.`,
-  };
+  return { error: LOCATE_ERROR };
 }
 
 export async function jobBriefTool(
@@ -288,15 +319,33 @@ export async function jobBriefTool(
     .slice(0, 10)
     .map((w) => projectNearbyWell(w, lat, lon));
 
+  const stageDeadlineMs = deps.deadlineMs ?? 10_000;
   const [demGroundFt, weatherResult] = await Promise.all([
-    deps.groundElevationFt(lat, lon).catch(() => null),
-    deps
-      .weather(lat, lon, undefined, args.date)
-      .catch((): WeatherBundleResult | null => null),
+    withDeadline(
+      deps.groundElevationFt(lat, lon).catch(() => null),
+      stageDeadlineMs,
+      null,
+    ),
+    withDeadline(
+      deps
+        .weather(lat, lon, undefined, args.date)
+        .catch((): WeatherBundleResult | null => null),
+      stageDeadlineMs,
+      null,
+    ),
   ]);
 
   const aquifer = computeSharedAquiferBandRows(inRadius, lat, lon, demGroundFt);
-  const groundFt = demGroundFt ?? aquifer.referenceGroundAslFt;
+  // The windows were drilled against the wells' median ground when available —
+  // report that same reference, not the DEM, so the number stays consistent.
+  const groundFt = aquifer.referenceGroundAslFt ?? demGroundFt;
+  const elevationSource =
+    aquifer.referenceGroundAslFt != null
+      ? aquifer.groundSource
+      : demGroundFt != null
+        ? ("dem" as const)
+        : null;
+  const demFt = demGroundFt != null ? Math.round(demGroundFt) : null;
   const weather =
     weatherResult && weatherResult.ok
       ? summarizeWeatherBundle(weatherResult.response, 3, 0)
@@ -331,13 +380,21 @@ export async function jobBriefTool(
           }
         : null,
     ...(groundFt != null ? { elevation_ft: groundFt } : {}),
+    ...(elevationSource ? { elevation_source: elevationSource } : {}),
+    ...(demFt != null ? { dem_elevation_ft: demFt } : {}),
     ...(weather ? { weather } : {}),
   };
 
   const lines: string[] = [
     `Field brief — ${location.label ?? `${lat},${lon}`} (${location.source})`,
     `Location: ${lat},${lon} · ${radiusMiles} mi radius${
-      groundFt != null ? ` · ground ~${groundFt} ft ASL` : ""
+      groundFt != null
+        ? ` · ground ~${groundFt} ft ASL (${
+            elevationSource === "well_median"
+              ? `nearby wells' median${demFt != null ? `; DEM ${demFt}` : ""}`
+              : "DEM"
+          })`
+        : ""
     }`,
     `Expected: ${report.totalWellsInRadius} registry wells in radius · confidence ${report.insightQuality.grade} (${report.insightQuality.score})${
       report.depthMedianFt != null
@@ -369,7 +426,7 @@ export async function jobBriefTool(
           b.window_start_ft != null
             ? ` · drill ${b.window_start_ft}–${b.window_end_ft} ft`
             : ""
-        }`,
+        }${b.above_site_ground ? " (near surface — verify)" : ""}`,
       );
     }
   }

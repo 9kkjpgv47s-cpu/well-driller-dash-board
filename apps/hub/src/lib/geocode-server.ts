@@ -23,6 +23,7 @@ export async function geocodeIndiana(
 
   const res = await fetch(url.toString(), {
     headers: upstreamJsonHeaders(),
+    signal: AbortSignal.timeout(8000),
     next: { revalidate: 86400 },
   });
 

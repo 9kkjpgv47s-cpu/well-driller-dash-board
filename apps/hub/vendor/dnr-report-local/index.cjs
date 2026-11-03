@@ -161,6 +161,7 @@ async function handler(req, res) {
         'Accept-Language': 'en-US,en;q=0.9',
       },
       redirect: 'follow',
+      signal: AbortSignal.timeout(10000),
     });
     if (!r.ok) {
       res.status(502).json({ error: 'DNR returned ' + r.status, lithology: [], testRateGpm: '', bailTestRateGpm: '' });

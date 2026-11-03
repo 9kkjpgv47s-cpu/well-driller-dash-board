@@ -124,5 +124,6 @@ export const sharedAquiferBandOutputSchema = z.looseObject({
   well_count: z.number(),
   window_start_ft: z.number().nullable(),
   window_end_ft: z.number().nullable(),
+  above_site_ground: z.boolean().optional(),
   advice: z.string(),
 });

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CallToolResult } from "@modelcontextprotocol/server";
 import type { WellRecord } from "@/lib/area-well-analytics";
 import * as elevation from "@/lib/elevation";
+import * as geocodeServer from "@/lib/geocode-server";
 import * as wellCache from "@/lib/dnr-wells-server-cache";
 import { parseDispatchEmail } from "@/lib/dispatch-parse";
 import { parseDispatchTool } from "./dispatch";
@@ -12,7 +13,7 @@ import {
   type JobBriefDeps,
 } from "./job-brief";
 import { siteOptimizationTool } from "./optimization";
-import { withRetry } from "./retry";
+import { withDeadline, withRetry } from "./retry";
 
 const CENTER = { lat: 40.48, lon: -86.13 };
 
@@ -160,6 +161,16 @@ describe("parseDispatchTool", () => {
     expect(sc.geocoded?.lat).toBeCloseTo(40.5585, 3);
     expect(sc.geocoded?.label).toContain("Marion");
   });
+
+  it("never forwards a paste with no usable address to the geocoder", async () => {
+    const spy = vi.spyOn(geocodeServer, "geocodeIndiana");
+    const res = await parseDispatchTool({
+      text: "Call Megan Despain at (765) 555-0132 about the Tuesday job",
+    });
+    expect(spy).not.toHaveBeenCalled();
+    const sc = res.structuredContent as { geocoded?: unknown };
+    expect(sc.geocoded).toBeUndefined();
+  });
 });
 
 describe("resolveBriefLocation", () => {
@@ -222,6 +233,37 @@ describe("resolveBriefLocation", () => {
     }
   });
 
+  it("geocodes a plain place name with state", async () => {
+    const geocode = vi
+      .fn()
+      .mockResolvedValue([
+        { label: "Kokomo, Indiana", lat: 40.486, lon: -86.134 },
+      ]);
+    const out = await resolveBriefLocation(
+      { query: "Kokomo, Indiana" },
+      stubDeps({ geocode }),
+    );
+    expect("error" in out).toBe(false);
+    expect(geocode).toHaveBeenCalledWith("Kokomo, Indiana");
+  });
+
+  it("never forwards a PII-laden query to the geocoder", async () => {
+    const geocode = vi.fn();
+    const out = await resolveBriefLocation(
+      {
+        query:
+          "Call Megan Despain at 765-555-0132 about new well near the old Hensley farm",
+      },
+      stubDeps({ geocode }),
+    );
+    expect("error" in out).toBe(true);
+    expect(geocode).not.toHaveBeenCalled();
+    if ("error" in out) {
+      expect(out.error).not.toContain("Megan");
+      expect(out.error).not.toContain("765");
+    }
+  });
+
   it("errors when nothing resolves", async () => {
     const out = await resolveBriefLocation(
       { query: "Nowhereville" },
@@ -252,6 +294,8 @@ describe("jobBriefTool", () => {
       nearest_wells: { refno?: string | number; distance_miles: number }[];
       shared_aquifer: { bands: unknown[] } | null;
       elevation_ft?: number;
+      elevation_source?: string;
+      dem_elevation_ft?: number;
       weather?: unknown;
     };
     expect(sc.location.source).toBe("geocode");
@@ -261,9 +305,13 @@ describe("jobBriefTool", () => {
     // nearest to the stub geocode (40.486,-86.134) is the 40.483,-86.135 well
     expect(sc.nearest_wells[0]?.refno).toBe("100003");
     expect(sc.nearest_wells[0]?.distance_miles).toBeTypeOf("number");
+    // no plotted wells → the DEM estimate is the reference
     expect(sc.elevation_ft).toBe(810);
+    expect(sc.elevation_source).toBe("dem");
+    expect(sc.dem_elevation_ft).toBe(810);
     expect(sc.weather).toBeUndefined();
     expect(textOf(res)).toContain("Field brief");
+    expect(textOf(res)).toContain("(DEM)");
     expect(textOf(res)).toContain("Source: Indiana DNR");
   });
 
@@ -288,16 +336,65 @@ describe("jobBriefTool", () => {
       shared_aquifer: {
         bands: { window_start_ft: number | null; window_end_ft: number | null }[];
       } | null;
+      elevation_ft?: number;
+      elevation_source?: string;
+      dem_elevation_ft?: number;
     };
     expect(sc.location.source).toBe("dispatch");
     expect(sc.location.lat).toBeCloseTo(40.482, 3);
     expect(sc.dispatch?.locationSource).toBe("coordinates");
     expect(sc.shared_aquifer).not.toBeNull();
     expect(sc.shared_aquifer!.bands.length).toBe(1);
-    // DEM failed → window uses the nearest plotted well's ground ASL (825 ft):
-    // drill 825−755=70 to 825−730=95 ft below ground.
+    // No DEM → windows and elevation use the wells' median reported ground
+    // (825 ft): drill 825−755=70 to 825−730=95 ft below ground.
     expect(sc.shared_aquifer!.bands[0]?.window_start_ft).toBe(70);
     expect(sc.shared_aquifer!.bands[0]?.window_end_ft).toBe(95);
+    expect(sc.elevation_ft).toBe(825);
+    expect(sc.elevation_source).toBe("well_median");
+    expect(sc.dem_elevation_ft).toBeUndefined();
+  });
+
+  it("reports the wells' median ground over a disagreeing DEM", async () => {
+    const res = await jobBriefTool(
+      { query: "Job\nGPS: 40.482, -86.133", radius_miles: 3 },
+      stubDeps({
+        loadWells: async () => ({
+          wells: LITHO_ROWS,
+          source: "registry",
+          tiles: 0,
+        }),
+        groundElevationFt: async () => 810,
+      }),
+    );
+    const sc = res.structuredContent as {
+      elevation_ft?: number;
+      elevation_source?: string;
+      dem_elevation_ft?: number;
+    };
+    // The drill windows were computed against the wells' ground — report that
+    // reference as elevation_ft, with the DEM kept alongside for comparison.
+    expect(sc.elevation_ft).toBe(825);
+    expect(sc.elevation_source).toBe("well_median");
+    expect(sc.dem_elevation_ft).toBe(810);
+    expect(textOf(res)).toContain("nearby wells' median; DEM 810");
+  });
+
+  it("returns a brief without weather when the weather stage stalls", async () => {
+    const res = await jobBriefTool(
+      { query: "Kokomo", radius_miles: 3 },
+      stubDeps({
+        weather: () => new Promise<never>(() => {}),
+        deadlineMs: 20,
+      }),
+    );
+    expect(res.isError).not.toBe(true);
+    const sc = res.structuredContent as {
+      weather?: unknown;
+      elevation_ft?: number;
+    };
+    expect(sc.weather).toBeUndefined();
+    expect(sc.elevation_ft).toBe(810);
+    expect(textOf(res)).not.toContain("Weather (");
   });
 
   it("errors outside Indiana without loading wells", async () => {
@@ -419,13 +516,16 @@ describe("groundLayersTool", () => {
       shared_aquifer_bands: {
         window_start_ft: number | null;
         window_end_ft: number | null;
+        above_site_ground?: boolean;
         advice: string;
       }[];
     };
     const band = sc.shared_aquifer_bands[0]!;
     expect(band.window_start_ft).toBe(0);
     expect(band.window_end_ft).toBe(25);
-    expect(band.advice).toContain("surface");
+    expect(band.above_site_ground).toBe(true);
+    expect(band.advice).toContain("verify site elevation");
+    expect(textOf(res)).toContain("near surface — verify");
   });
 
   it("returns an empty band list when no wells have lithology", async () => {
@@ -477,6 +577,22 @@ describe("siteOptimizationTool", () => {
     expect(textOf(res)).toContain("temporarily unavailable");
     // withRetry: 1 initial try + 2 retries
     expect(spy).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("withDeadline", () => {
+  it("resolves the fallback when the promise never settles", async () => {
+    const out = await withDeadline(
+      new Promise<string>(() => {}),
+      10,
+      "fallback",
+    );
+    expect(out).toBe("fallback");
+  });
+
+  it("resolves the value when the promise beats the deadline", async () => {
+    const out = await withDeadline(Promise.resolve("fast"), 1000, "fallback");
+    expect(out).toBe("fast");
   });
 });
 

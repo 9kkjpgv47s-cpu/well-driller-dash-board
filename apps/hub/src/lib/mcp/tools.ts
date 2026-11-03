@@ -21,7 +21,11 @@ import {
 import { registerDrillerContent } from "./content";
 import { registerParseDispatchTool } from "./dispatch";
 import { registerGroundLayersTool } from "./ground-layers";
-import { isInIndiana, outsideIndianaMessage } from "./indiana";
+import {
+  isInIndiana,
+  outsideIndianaMessage,
+  queryScopesOutOfIndiana,
+} from "./indiana";
 import { registerJobBriefTool } from "./job-brief";
 import { registerJobWeatherTool } from "./job-weather";
 import { registerSiteOptimizationTool } from "./optimization";
@@ -136,7 +140,11 @@ export const dnrWellRecordOutputSchema = z.looseObject({
 export async function geocodeAddressTool(args: {
   query: string;
 }): Promise<CallToolResult> {
-  const results = await geocodeIndiana(args.query);
+  const results = queryScopesOutOfIndiana(args.query)
+    ? []
+    : (await geocodeIndiana(args.query)).filter((r) =>
+        isInIndiana(r.lat, r.lon),
+      );
   if (results.length === 0) {
     return errorResult(
       `No Indiana match for "${args.query}". Try adding the town or county.`,
@@ -292,7 +300,13 @@ function isMeaningfulRecordBody(body: unknown): boolean {
 export async function dnrWellRecordTool(args: {
   ref_no: string;
 }): Promise<CallToolResult> {
-  const { status, body } = await fetchDnrReport(args.ref_no);
+  let status: number;
+  let body: unknown;
+  try {
+    ({ status, body } = await fetchDnrReport(args.ref_no));
+  } catch {
+    return errorResult("DNR well record fetch failed — try again shortly.");
+  }
   if (status >= 400 || !isMeaningfulRecordBody(body)) {
     return errorResult(
       `DNR registry returned status ${status} for ref_no "${args.ref_no}"${
