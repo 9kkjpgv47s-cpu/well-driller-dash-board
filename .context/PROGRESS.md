@@ -139,3 +139,11 @@
 - New `npm run mcp:oauth-check` (`scripts/mcp-oauth-check.mjs`, zero deps): challenge → PRM (both URLs) → AS metadata (S256/CIMD+DCR/`none` auth/refresh_token/offline_access/PRM-vs-AS scope cross-check) → JWKS. Logs: `apps/hub/logs/mcp-oauth-check-prod-20261031-1249.log` (challenge PASS, PRM 404 unconfigured as expected) and `mcp-oauth-check-google-20261031-1249.log` (exercises FAIL path).
 - Vitest: 30 files / 236 pass / 1 skip (was 29 / 229). Lint 0 errors; `next build` clean with both well-known routes listed.
 - Still pending: Dom's WorkOS tenant → `MCP_OAUTH_ISSUER` (+ recommended `MCP_OAUTH_JWKS_URL`) in Vercel → redeploy → `npm run mcp:oauth-check` → ChatGPT connector test.
+
+## 2026-11-02 — OAuth configured + live on prod; chain verified end-to-end
+
+- WorkOS AuthKit staging env online: issuer `https://plucky-enchantment-78-staging.authkit.app`. Dom enabled **CIMD + DCR** (Connect → Configuration); Resource Indicator `https://driller-hub.vercel.app/api/mcp` created + set default via WorkOS API (`authkit_oauth_resource_01M6DWAVNJMH6WF6NMXJJM1C5J`).
+- Vercel env (production+preview, type plain): `MCP_OAUTH_ISSUER`, `MCP_OAUTH_JWKS_URL` (`<authkit>/oauth2/jwks`).
+- Pushed `7648ea7` + `f2db004` → preview `dpl_Fbc9SwfSXLe3V2ECFhwrjNzgPjma` READY (previews are SSO-walled, `ssoProtection: all_except_custom_domains` — curl can't verify there). `request_promote` = 422 (promote is Pro/Ent); production cutover done via `create_deployment` redeploy + `target: production` → `dpl_8poLFyiHxwoz1BT3yiEQbGH2ZRyo` (Dom-approved).
+- Prod verification: `logs/mcp-oauth-check-prod-<ts>.log` — **11 PASS / 0 FAIL** (challenge, both PRM URLs 200 w/ issuer+scopes, AS metadata issuer-exact/S256/DCR+CIMD/`none`/refresh_token/offline_access/scope cross-check, JWKS). API-key path unaffected (`logs/mcp-smoke-prod-<ts>.log`, Kokomo 964 wells). Home 200.
+- Remaining: live ChatGPT connector test (Dom at chatgpt.com/plugins → Add custom MCP server → OAuth). WorkOS prod env still unprovisioned — needed only before non-Dom users connect.
